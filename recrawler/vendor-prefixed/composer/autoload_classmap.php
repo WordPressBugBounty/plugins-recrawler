@@ -436,6 +436,7 @@ return array(
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PKCS1' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PKCS1.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PKCS8' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PKCS8.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PuTTY' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PuTTY.php',
+    'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\XML' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/XML.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\libsodium' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/libsodium.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Signature\\ASN1' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Signature/ASN1.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Signature\\Raw' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Signature/Raw.php',
@@ -642,5 +643,4 @@ return array(
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Agent' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Agent.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Agent\\Identity' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Agent/Identity.php',
     'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Common\\Traits\\ReadBytes' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Common/Traits/ReadBytes.php',
-    'phpseclib3\\Crypt\\EC\\Formats\\Keys\\XML' => $baseDir . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/XML.php',
 );

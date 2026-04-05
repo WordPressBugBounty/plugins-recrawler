@@ -20,14 +20,14 @@ class ComposerStaticInitfafa1f55d811c61c8dcdcce830822768
     );
 
     public static $prefixLengthsPsr4 = array (
-        'M' => 
+        'M' =>
         array (
             'Mihdan\\ReCrawler\\' => 17,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Mihdan\\ReCrawler\\' => 
+        'Mihdan\\ReCrawler\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
@@ -464,6 +464,7 @@ class ComposerStaticInitfafa1f55d811c61c8dcdcce830822768
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PKCS1' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PKCS1.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PKCS8' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PKCS8.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\PuTTY' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/PuTTY.php',
+        'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\XML' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/XML.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Keys\\libsodium' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/libsodium.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Signature\\ASN1' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Signature/ASN1.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\EC\\Formats\\Signature\\Raw' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Signature/Raw.php',
@@ -670,7 +671,6 @@ class ComposerStaticInitfafa1f55d811c61c8dcdcce830822768
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Agent' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Agent.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Agent\\Identity' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Agent/Identity.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\System\\SSH\\Common\\Traits\\ReadBytes' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/System/SSH/Common/Traits/ReadBytes.php',
-        'phpseclib3\\Crypt\\EC\\Formats\\Keys\\XML' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/EC/Formats/Keys/XML.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
