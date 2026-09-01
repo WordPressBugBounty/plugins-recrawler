@@ -18,8 +18,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -27,15 +25,13 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves;
 
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField\Integer as PrimeInteger;
 /**
  * Curves over a*x^2 + y^2 = 1 + d*x^2*y^2
  *
- * @package Prime
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 class TwistedEdwards extends Base
 {
@@ -122,7 +118,7 @@ class TwistedEdwards extends Base
     /**
      * Returns the a coefficient
      *
-     * @return \phpseclib3\Math\PrimeField\Integer
+     * @return PrimeInteger
      */
     public function getA()
     {
@@ -131,7 +127,7 @@ class TwistedEdwards extends Base
     /**
      * Returns the a coefficient
      *
-     * @return \phpseclib3\Math\PrimeField\Integer
+     * @return PrimeInteger
      */
     public function getD()
     {
@@ -157,7 +153,7 @@ class TwistedEdwards extends Base
     /**
      * Returns the affine point
      *
-     * @return \phpseclib3\Math\PrimeField\Integer[]
+     * @return PrimeInteger[]
      */
     public function convertToAffine(array $p)
     {
@@ -171,7 +167,7 @@ class TwistedEdwards extends Base
     /**
      * Returns the modulo
      *
-     * @return \phpseclib3\Math\BigInteger
+     * @return BigInteger
      */
     public function getModulo()
     {

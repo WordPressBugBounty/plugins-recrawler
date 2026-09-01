@@ -22,7 +22,9 @@ class PublishUrlNotificationResponse extends \Mihdan\ReCrawler\Dependencies\Goog
     protected $urlNotificationMetadataType = UrlNotificationMetadata::class;
     protected $urlNotificationMetadataDataType = '';
     /**
-     * @param UrlNotificationMetadata
+     * Description of the notification events received for this URL.
+     *
+     * @param UrlNotificationMetadata $urlNotificationMetadata
      */
     public function setUrlNotificationMetadata(UrlNotificationMetadata $urlNotificationMetadata)
     {

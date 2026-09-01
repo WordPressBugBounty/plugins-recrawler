@@ -20,8 +20,6 @@
  * ?>
  * </code>
  *
- * @category  Math
- * @package   BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -29,32 +27,25 @@
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Math;
 
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadConfigurationException;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines\Engine;
 /**
  * Pure-PHP arbitrary precision integer arithmetic library. Supports base-2, base-10, base-16, and base-256
  * numbers.
  *
- * @package BigInteger
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
-class BigInteger
+class BigInteger implements \JsonSerializable
 {
     /**
      * Main Engine
      *
-     * @var string
+     * @var class-string<Engine>
      */
     private static $mainEngine;
     /**
-     * Modular Exponentiation Engine
-     *
-     * @var string
-     */
-    private static $modexpEngine;
-    /**
      * Selected Engines
      *
-     * @var array
+     * @var list<string>
      */
     private static $engines;
     /**
@@ -85,9 +76,10 @@ class BigInteger
      * Throws an exception if the type is invalid
      *
      * @param string $main
-     * @param array $modexps optional
+     * @param list<string> $modexps optional
+     * @return void
      */
-    public static function setEngine($main, $modexps = ['DefaultEngine'])
+    public static function setEngine($main, array $modexps = ['DefaultEngine'])
     {
         self::$engines = [];
         $fqmain = 'phpseclib3\\Math\\BigInteger\\Engines\\' . $main;
@@ -97,10 +89,8 @@ class BigInteger
         if (!$fqmain::isValidEngine()) {
             throw new BadConfigurationException("{$main} is not setup correctly on this system");
         }
+        /** @var class-string<Engine> $fqmain */
         self::$mainEngine = $fqmain;
-        if (!\in_array('Default', $modexps)) {
-            $modexps[] = 'DefaultEngine';
-        }
         $found = \false;
         foreach ($modexps as $modexp) {
             try {
@@ -113,7 +103,6 @@ class BigInteger
         if (!$found) {
             throw new BadConfigurationException("No valid modular exponentiation engine found for {$main}");
         }
-        self::$modexpEngine = $modexp;
         self::$engines = [$main, $modexp];
     }
     /**
@@ -132,14 +121,20 @@ class BigInteger
     private static function initialize_static_variables()
     {
         if (!isset(self::$mainEngine)) {
-            $engines = [['GMP'], ['PHP64', ['OpenSSL']], ['BCMath', ['OpenSSL']], ['PHP32', ['OpenSSL']]];
+            $engines = [['GMP', ['DefaultEngine']], ['PHP64', ['OpenSSL']], ['BCMath', ['OpenSSL']], ['PHP32', ['OpenSSL']], ['PHP64', ['DefaultEngine']], ['PHP32', ['DefaultEngine']]];
+            // per https://phpseclib.com/docs/speed PHP 8.4.0+ _significantly_ sped up BCMath
+            if (\version_compare(\PHP_VERSION, '8.4.0') >= 0) {
+                $engines[1][0] = 'BCMath';
+                $engines[2][0] = 'PHP64';
+            }
             foreach ($engines as $engine) {
                 try {
-                    self::setEngine($engine[0], isset($engine[1]) ? $engine[1] : []);
-                    break;
+                    self::setEngine($engine[0], $engine[1]);
+                    return;
                 } catch (\Exception $e) {
                 }
             }
+            throw new \UnexpectedValueException('No valid BigInteger found. This is only possible when JIT is enabled on Windows and neither the GMP or BCMath extensions are available so either disable JIT or install GMP / BCMath');
         }
     }
     /**
@@ -148,16 +143,15 @@ class BigInteger
      * If the second parameter - $base - is negative, then it will be assumed that the number's are encoded using
      * two's compliment.  The sole exception to this is -10, which is treated the same as 10 is.
      *
-     * @param string|int|BigInteger\Engines\Engine $x Base-10 number or base-$base number if $base set.
+     * @param string|int|Engine $x Base-10 number or base-$base number if $base set.
      * @param int $base
-     * @return BigInteger
      */
     public function __construct($x = 0, $base = 10)
     {
         self::initialize_static_variables();
         if ($x instanceof self::$mainEngine) {
             $this->value = clone $x;
-        } elseif ($x instanceof BigInteger\Engines\Engine) {
+        } elseif ($x instanceof Engine) {
             $this->value = new static("{$x}");
             $this->value->setPrecision($x->getPrecision());
         } else {
@@ -218,7 +212,7 @@ class BigInteger
      * @param bool $twos_compliment
      * @return string
      */
-    function toBits($twos_compliment = \false)
+    public function toBits($twos_compliment = \false)
     {
         return $this->value->toBits($twos_compliment);
     }
@@ -238,7 +232,7 @@ class BigInteger
      * @param BigInteger $y
      * @return BigInteger
      */
-    function subtract(BigInteger $y)
+    public function subtract(BigInteger $y)
     {
         return new static($this->value->subtract($y->value));
     }
@@ -286,8 +280,9 @@ class BigInteger
      * Calculates modular inverses.
      *
      * Say you have (30 mod 17 * x mod 17) mod 17 == 1.  x can be found using modular inverses.
-     * @return BigInteger
+     *
      * @param BigInteger $n
+     * @return BigInteger
      */
     public function modInverse(BigInteger $n)
     {
@@ -297,17 +292,16 @@ class BigInteger
      * Calculates modular inverses.
      *
      * Say you have (30 mod 17 * x mod 17) mod 17 == 1.  x can be found using modular inverses.
-     * @return BigInteger[]
+     *
      * @param BigInteger $n
+     * @return BigInteger[]
      */
     public function extendedGCD(BigInteger $n)
     {
-        \extract($this->value->extendedGCD($n->value));
-        /**
-         * @var BigInteger $gcd
-         * @var BigInteger $x
-         * @var BigInteger $y
-         */
+        $extended = $this->value->extendedGCD($n->value);
+        $gcd = $extended['gcd'];
+        $x = $extended['x'];
+        $y = $extended['y'];
         return ['gcd' => new static($gcd), 'x' => new static($x), 'y' => new static($y)];
     }
     /**
@@ -326,7 +320,6 @@ class BigInteger
      * Absolute value.
      *
      * @return BigInteger
-     * @access public
      */
     public function abs()
     {
@@ -360,7 +353,7 @@ class BigInteger
      *
      * Will be called, automatically, when serialize() is called on a BigInteger object.
      *
-     * __sleep() / __wakeup() have been around since PHP 4.0
+     * __sleep() / __wakeup() have been around since PHP 4.0 but were deprecated in PHP 8.5
      *
      * \Serializable was introduced in PHP 5.1 and deprecated in PHP 8.1:
      * https://wiki.php.net/rfc/phase_out_serializable
@@ -368,7 +361,7 @@ class BigInteger
      * __serialize() / __unserialize() were introduced in PHP 7.4:
      * https://wiki.php.net/rfc/custom_object_serialization
      *
-     * @return string
+     * @return array
      */
     public function __sleep()
     {
@@ -392,6 +385,52 @@ class BigInteger
             // recalculate $this->bitmask
             $this->setPrecision($this->precision);
         }
+    }
+    /**
+     *  __serialize() magic method
+     *
+     * @see self::__unserialize()
+     * @return array
+     * @access public
+     */
+    public function __serialize()
+    {
+        $result = ['hex' => $this->toHex(\true)];
+        if ($this->getPrecision() > 0) {
+            $result['precision'] = $this->getPrecision();
+        }
+        return $result;
+    }
+    /**
+     *  __unserialize() magic method
+     *
+     * @see self::__serialize()
+     * @access public
+     */
+    public function __unserialize(array $data)
+    {
+        $temp = new static($data['hex'], -16);
+        $this->value = $temp->value;
+        if (isset($data['precision']) && $data['precision'] > 0) {
+            // recalculate $this->bitmask
+            $this->setPrecision($data['precision']);
+        }
+    }
+    /**
+     * JSON Serialize
+     *
+     * Will be called, automatically, when json_encode() is called on a BigInteger object.
+     *
+     * @return array{hex: string, precision?: int]
+     */
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        $result = ['hex' => $this->toHex(\true)];
+        if ($this->precision > 0) {
+            $result['precision'] = $this->getPrecision();
+        }
+        return $result;
     }
     /**
      * Performs modular exponentiation.
@@ -418,8 +457,8 @@ class BigInteger
     /**
      * Compares two numbers.
      *
-     * Although one might think !$x->compare($y) means $x != $y, it, in fact, means the opposite.  The reason for this is
-     * demonstrated thusly:
+     * Although one might think !$x->compare($y) means $x != $y, it, in fact, means the opposite.  The reason for this
+     * is demonstrated thusly:
      *
      * $x  > $y: $x->compare($y)  > 0
      * $x  < $y: $x->compare($y)  < 0
@@ -431,7 +470,6 @@ class BigInteger
      *
      * @param BigInteger $y
      * @return int in case < 0 if $this is less than $y; > 0 if $this is greater than $y, and 0 if they are equal.
-     * @access public
      * @see self::equals()
      */
     public function compare(BigInteger $y)
@@ -547,10 +585,9 @@ class BigInteger
     {
         self::initialize_static_variables();
         $class = self::$mainEngine;
-        \extract($class::minMaxBits($bits));
-        /** @var BigInteger $min
-         *  @var BigInteger $max
-         */
+        $minMax = $class::minMaxBits($bits);
+        $min = $minMax['min'];
+        $max = $minMax['max'];
         return ['min' => new static($min), 'max' => new static($max)];
     }
     /**
@@ -716,7 +753,7 @@ class BigInteger
     /**
      * Is Odd?
      *
-     * @return boolean
+     * @return bool
      */
     public function isOdd()
     {
@@ -726,7 +763,7 @@ class BigInteger
      * Tests if a bit is set
      *
      * @param int $x
-     * @return boolean
+     * @return bool
      */
     public function testBit($x)
     {
@@ -735,7 +772,7 @@ class BigInteger
     /**
      * Is Negative?
      *
-     * @return boolean
+     * @return bool
      */
     public function isNegative()
     {
@@ -786,7 +823,7 @@ class BigInteger
      * Splits BigInteger's into chunks of $split bits
      *
      * @param int $split
-     * @return \phpseclib3\Math\BigInteger[]
+     * @return BigInteger[]
      */
     public function bitwise_split($split)
     {

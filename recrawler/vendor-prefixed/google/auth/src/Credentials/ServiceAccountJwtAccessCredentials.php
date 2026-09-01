@@ -36,6 +36,12 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
 {
     use ServiceAccountSignerTrait;
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'jwt';
+    /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
@@ -43,14 +49,20 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
     protected $auth;
     /**
      * The quota project associated with the JSON credentials
+     *
+     * @var string
      */
     protected $quotaProject;
     /**
+     * @var string
+     */
+    public $projectId;
+    /**
      * Create a new ServiceAccountJwtAccessCredentials.
      *
-     * @param string|array $jsonKey JSON credential file path or JSON credentials
+     * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
      *   as an associative array
-     * @param string|array $scope the scope of the access request, expressed
+     * @param string|string[] $scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      */
     public function __construct($jsonKey, $scope = null)
@@ -60,7 +72,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
                 throw new \InvalidArgumentException('file does not exist');
             }
             $jsonKeyStream = \file_get_contents($jsonKey);
-            if (!($jsonKey = \json_decode($jsonKeyStream, \true))) {
+            if (!($jsonKey = \json_decode((string) $jsonKeyStream, \true))) {
                 throw new \LogicException('invalid json for auth config');
             }
         }
@@ -74,17 +86,17 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
             $this->quotaProject = (string) $jsonKey['quota_project_id'];
         }
         $this->auth = new OAuth2(['issuer' => $jsonKey['client_email'], 'sub' => $jsonKey['client_email'], 'signingAlgorithm' => 'RS256', 'signingKey' => $jsonKey['private_key'], 'scope' => $scope]);
-        $this->projectId = isset($jsonKey['project_id']) ? $jsonKey['project_id'] : null;
+        $this->projectId = $jsonKey['project_id'] ?? null;
     }
     /**
      * Updates metadata with the authorization token.
      *
-     * @param array $metadata metadata hashmap
+     * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @return array updated metadata hashmap
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
      */
-    public function updateMetadata($metadata, $authUri = null, callable $httpHandler = null)
+    public function updateMetadata($metadata, $authUri = null, ?callable $httpHandler = null)
     {
         $scope = $this->auth->getScope();
         if (empty($authUri) && empty($scope)) {
@@ -96,13 +108,11 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
     /**
      * Implements FetchAuthTokenInterface#fetchAuthToken.
      *
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
      *
-     * @return array|void A set of auth related metadata, containing the
-     * following keys:
-     *   - access_token (string)
+     * @return null|array{access_token:string} A set of auth related metadata
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         $audience = $this->auth->getAudience();
         $scope = $this->auth->getScope();
@@ -115,17 +125,26 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
         $access_token = $this->auth->toJwt();
         // Set the self-signed access token in OAuth2 for getLastReceivedToken
         $this->auth->setAccessToken($access_token);
-        return array('access_token' => $access_token);
+        return ['access_token' => $access_token, 'expires_in' => $this->auth->getExpiry(), 'token_type' => 'Bearer'];
     }
     /**
+     * Return the cache key for the credentials.
+     * The format for the Cache Key one of the following:
+     * ClientEmail.Scope
+     * ClientEmail.Audience
+     *
      * @return string
      */
     public function getCacheKey()
     {
-        return $this->auth->getCacheKey();
+        $scopeOrAudience = $this->auth->getScope();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getAudience();
+        }
+        return $this->auth->getIssuer() . '.' . $scopeOrAudience;
     }
     /**
-     * @return array
+     * @return array<mixed>
      */
     public function getLastReceivedToken()
     {
@@ -136,10 +155,10 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
      *
      * Returns null if the project ID does not exist in the keyfile.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable|null $httpHandler Not used by this credentials type.
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(?callable $httpHandler = null)
     {
         return $this->projectId;
     }
@@ -148,12 +167,23 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
      *
      * In this case, it returns the keyfile's client_email key.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable|null $httpHandler Not used by this credentials type.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(?callable $httpHandler = null)
     {
         return $this->auth->getIssuer();
+    }
+    /**
+     * Get the private key from the keyfile.
+     *
+     * In this case, it returns the keyfile's private_key key, needed for JWT signing.
+     *
+     * @return string
+     */
+    public function getPrivateKey()
+    {
+        return $this->auth->getSigningKey();
     }
     /**
      * Get the quota project used for this API request
@@ -163,5 +193,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Ge
     public function getQuotaProject()
     {
         return $this->quotaProject;
+    }
+    protected function getCredType() : string
+    {
+        return self::CRED_TYPE;
     }
 }

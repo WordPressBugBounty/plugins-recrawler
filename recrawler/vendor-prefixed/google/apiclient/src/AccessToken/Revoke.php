@@ -36,7 +36,7 @@ class Revoke
      * Instantiates the class, but does not initiate the login flow, leaving it
      * to the discretion of the caller.
      */
-    public function __construct(ClientInterface $http = null)
+    public function __construct(?ClientInterface $http = null)
     {
         $this->http = $http;
     }
@@ -56,7 +56,7 @@ class Revoke
                 $token = $token['access_token'];
             }
         }
-        $body = Psr7\Utils::streamFor(\http_build_query(array('token' => $token)));
+        $body = Psr7\Utils::streamFor(\http_build_query(['token' => $token]));
         $request = new Request('POST', Client::OAUTH2_REVOKE_URI, ['Cache-Control' => 'no-store', 'Content-Type' => 'application/x-www-form-urlencoded'], $body);
         $httpHandler = HttpHandlerFactory::build($this->http);
         $response = $httpHandler($request);

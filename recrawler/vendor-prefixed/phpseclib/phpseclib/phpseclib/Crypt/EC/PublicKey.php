@@ -3,8 +3,6 @@
 /**
  * EC Public Key
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2015 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -12,32 +10,29 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC;
 
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Common;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Hash;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Formats\Signature\ASN1 as ASN1Signature;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\TwistedEdwards as TwistedEdwardsCurve;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\Montgomery as MontgomeryCurve;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\TwistedEdwards as TwistedEdwardsCurve;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Curves\Ed25519;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Formats\Keys\PKCS1;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Common;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Formats\Signature\ASN1 as ASN1Signature;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Hash;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\UnsupportedOperationException;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 /**
  * EC Public Key
  *
- * @package EC
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
-class PublicKey extends EC implements Common\PublicKey
+final class PublicKey extends EC implements Common\PublicKey
 {
     use Common\Traits\Fingerprint;
     /**
      * Verify a signature
      *
      * @see self::verify()
-     * @access public
      * @param string $message
      * @param string $signature
      * @return mixed
@@ -100,7 +95,8 @@ class PublicKey extends EC implements Common\PublicKey
         if ($params === \false || \count($params) != 2) {
             return \false;
         }
-        \extract($params);
+        $r = $params['r'];
+        $s = $params['s'];
         if (self::$engines['OpenSSL'] && \in_array($this->hash->getHash(), \openssl_get_md_methods())) {
             $sig = $format != 'ASN1' ? ASN1Signature::save($r, $s) : $signature;
             $result = \openssl_verify($message, $sig, $this->toString('PKCS8', ['namedCurve' => \false]), $this->hash->getHash());

@@ -11,8 +11,6 @@
  * -----BEGIN PRIVATE KEY-----
  * -----BEGIN PUBLIC KEY-----
  *
- * @category  Crypt
- * @package   DH
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2015 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -20,17 +18,14 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\DH\Formats\Keys;
 
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Common\Formats\Keys\PKCS8 as Progenitor;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\File\ASN1;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\File\ASN1\Maps;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 /**
  * PKCS#8 Formatted DH Key Handler
  *
- * @package DH
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class PKCS8 extends Progenitor
 {
@@ -38,45 +33,31 @@ abstract class PKCS8 extends Progenitor
      * OID Name
      *
      * @var string
-     * @access private
      */
     const OID_NAME = 'dhKeyAgreement';
     /**
      * OID Value
      *
      * @var string
-     * @access private
      */
     const OID_VALUE = '1.2.840.113549.1.3.1';
     /**
      * Child OIDs loaded
      *
      * @var bool
-     * @access private
      */
     protected static $childOIDsLoaded = \false;
     /**
      * Break a public or private key down into its constituent components
      *
-     * @access public
      * @param string $key
      * @param string $password optional
      * @return array
      */
     public static function load($key, $password = '')
     {
-        if (!Strings::is_stringable($key)) {
-            throw new \UnexpectedValueException('Key should be a string - not a ' . \gettype($key));
-        }
-        $isPublic = \strpos($key, 'PUBLIC') !== \false;
         $key = parent::load($key, $password);
         $type = isset($key['privateKey']) ? 'privateKey' : 'publicKey';
-        switch (\true) {
-            case !$isPublic && $type == 'publicKey':
-                throw new \UnexpectedValueException('Human readable string claims non-public key but DER encoded string claims public key');
-            case $isPublic && $type == 'privateKey':
-                throw new \UnexpectedValueException('Human readable string claims public key but DER encoded string claims private key');
-        }
         $decoded = ASN1::decodeBER($key[$type . 'Algorithm']['parameters']->element);
         if (empty($decoded)) {
             throw new \RuntimeException('Unable to decode BER of parameters');
@@ -87,8 +68,7 @@ abstract class PKCS8 extends Progenitor
         }
         $decoded = ASN1::decodeBER($key[$type]);
         switch (\true) {
-            case empty($decoded):
-            case !\is_array($decoded):
+            case !isset($decoded):
             case !isset($decoded[0]['content']):
             case !$decoded[0]['content'] instanceof BigInteger:
                 throw new \RuntimeException('Unable to decode BER of parameters');
@@ -99,11 +79,10 @@ abstract class PKCS8 extends Progenitor
     /**
      * Convert a private key to the appropriate format.
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $prime
-     * @param \phpseclib3\Math\BigInteger $base
-     * @param \phpseclib3\Math\BigInteger $privateKey
-     * @param \phpseclib3\Math\BigInteger $publicKey
+     * @param BigInteger $prime
+     * @param BigInteger $base
+     * @param BigInteger $privateKey
+     * @param BigInteger $publicKey
      * @param string $password optional
      * @param array $options optional
      * @return string
@@ -114,15 +93,14 @@ abstract class PKCS8 extends Progenitor
         $params = ASN1::encodeDER($params, Maps\DHParameter::MAP);
         $params = new ASN1\Element($params);
         $key = ASN1::encodeDER($privateKey, ['type' => ASN1::TYPE_INTEGER]);
-        return self::wrapPrivateKey($key, [], $params, $password, $options);
+        return self::wrapPrivateKey($key, [], $params, $password, null, '', $options);
     }
     /**
      * Convert a public key to the appropriate format
      *
-     * @access public
-     * @param \phpseclib3\Math\BigInteger $prime
-     * @param \phpseclib3\Math\BigInteger $base
-     * @param \phpseclib3\Math\BigInteger $publicKey
+     * @param BigInteger $prime
+     * @param BigInteger $base
+     * @param BigInteger $publicKey
      * @param array $options optional
      * @return string
      */
@@ -132,6 +110,6 @@ abstract class PKCS8 extends Progenitor
         $params = ASN1::encodeDER($params, Maps\DHParameter::MAP);
         $params = new ASN1\Element($params);
         $key = ASN1::encodeDER($publicKey, ['type' => ASN1::TYPE_INTEGER]);
-        return self::wrapPublicKey($key, $params);
+        return self::wrapPublicKey($key, $params, null, $options);
     }
 }

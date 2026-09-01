@@ -4,41 +4,37 @@ namespace Mihdan\ReCrawler\Dependencies\Firebase\JWT;
 
 use InvalidArgumentException;
 use OpenSSLAsymmetricKey;
+use OpenSSLCertificate;
+use TypeError;
 class Key
 {
-    /** @var string $algorithm */
-    private $algorithm;
-    /** @var string|resource|OpenSSLAsymmetricKey $keyMaterial */
-    private $keyMaterial;
     /**
-     * @param string|resource|OpenSSLAsymmetricKey $keyMaterial
+     * @param string|OpenSSLAsymmetricKey|OpenSSLCertificate $keyMaterial
      * @param string $algorithm
      */
-    public function __construct($keyMaterial, $algorithm)
+    public function __construct(#[\SensitiveParameter] private $keyMaterial, private string $algorithm)
     {
-        if (!\is_string($keyMaterial) && !\is_resource($keyMaterial) && !$keyMaterial instanceof OpenSSLAsymmetricKey) {
-            throw new InvalidArgumentException('Type error: $keyMaterial must be a string, resource, or OpenSSLAsymmetricKey');
+        if (!\is_string($keyMaterial) && !$keyMaterial instanceof OpenSSLAsymmetricKey && !$keyMaterial instanceof OpenSSLCertificate) {
+            throw new TypeError('Key material must be a string, OpenSSLCertificate, or OpenSSLAsymmetricKey');
         }
         if (empty($keyMaterial)) {
-            throw new InvalidArgumentException('Type error: $keyMaterial must not be empty');
+            throw new InvalidArgumentException('Key material must not be empty');
         }
-        if (!\is_string($algorithm) || empty($keyMaterial)) {
-            throw new InvalidArgumentException('Type error: $algorithm must be a string');
+        if (empty($algorithm)) {
+            throw new InvalidArgumentException('Algorithm must not be empty');
         }
-        $this->keyMaterial = $keyMaterial;
-        $this->algorithm = $algorithm;
     }
     /**
      * Return the algorithm valid for this key
      *
      * @return string
      */
-    public function getAlgorithm()
+    public function getAlgorithm() : string
     {
         return $this->algorithm;
     }
     /**
-     * @return string|resource|OpenSSLAsymmetricKey
+     * @return string|OpenSSLAsymmetricKey|OpenSSLCertificate
      */
     public function getKeyMaterial()
     {

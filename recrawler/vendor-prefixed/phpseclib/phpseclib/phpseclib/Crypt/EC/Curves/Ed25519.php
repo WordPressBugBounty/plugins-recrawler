@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -14,9 +12,9 @@
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Curves;
 
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\TwistedEdwards;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Hash;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Random;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 class Ed25519 extends TwistedEdwards
 {
     const HASH = 'sha512';
@@ -148,7 +146,7 @@ class Ed25519 extends TwistedEdwards
      * Used by the various key handlers
      *
      * @param string $str
-     * @return \phpseclib3\Math\PrimeField\Integer
+     * @return array
      */
     public function extractSecret($str)
     {
@@ -170,8 +168,7 @@ class Ed25519 extends TwistedEdwards
         // 3.  Interpret the buffer as the little-endian integer, forming a
         //     secret scalar s.
         $dA = new BigInteger($h, 256);
-        $dA->secret = $str;
-        return $dA;
+        return ['dA' => $dA, 'secret' => $str];
     }
     /**
      * Encode a point as a string
@@ -197,7 +194,7 @@ class Ed25519 extends TwistedEdwards
      */
     public function createRandomMultiplier()
     {
-        return $this->extractSecret(Random::string(32));
+        return $this->extractSecret(Random::string(32))['dA'];
     }
     /**
      * Converts an affine point to an extended homogeneous coordinate

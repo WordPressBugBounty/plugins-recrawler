@@ -16,8 +16,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2019 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -25,24 +23,21 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves;
 
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Curves\Curve25519;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\PrimeField\Integer as PrimeInteger;
 /**
  * Curves over y^2 = x^3 + a*x + x
  *
- * @package EC
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 class Montgomery extends Base
 {
     /**
      * Prime Field Integer factory
      *
-     * @var \phpseclib3\Math\PrimeField
+     * @var PrimeField
      */
     protected $factory;
     /**
@@ -198,7 +193,7 @@ class Montgomery extends Base
     public function multiplyPoint(array $p, BigInteger $d)
     {
         $p1 = [$this->one, $this->zero];
-        $alreadyInternal = isset($x[1]);
+        $alreadyInternal = isset($p[1]);
         $p2 = $this->convertToInternal($p);
         $x = $p[0];
         $b = $d->toBits();
@@ -222,7 +217,7 @@ class Montgomery extends Base
      *
      *   x=X/Z
      *
-     * @return \phpseclib3\Math\PrimeField\Integer[]
+     * @return PrimeInteger[]
      */
     public function convertToInternal(array $p)
     {
@@ -238,7 +233,7 @@ class Montgomery extends Base
     /**
      * Returns the affine point
      *
-     * @return \phpseclib3\Math\PrimeField\Integer[]
+     * @return PrimeInteger[]
      */
     public function convertToAffine(array $p)
     {

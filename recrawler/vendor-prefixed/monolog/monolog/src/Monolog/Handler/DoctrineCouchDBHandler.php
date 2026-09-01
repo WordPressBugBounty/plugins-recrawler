@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 /*
  * This file is part of the Monolog package.
  *
@@ -10,9 +11,11 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\Monolog\Handler;
 
-use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
+use Mihdan\ReCrawler\Dependencies\Monolog\Level;
 use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\NormalizerFormatter;
+use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\FormatterInterface;
 use Mihdan\ReCrawler\Dependencies\Doctrine\CouchDB\CouchDBClient;
+use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 /**
  * CouchDB handler for Doctrine CouchDB ODM
  *
@@ -20,20 +23,20 @@ use Mihdan\ReCrawler\Dependencies\Doctrine\CouchDB\CouchDBClient;
  */
 class DoctrineCouchDBHandler extends AbstractProcessingHandler
 {
-    private $client;
-    public function __construct(CouchDBClient $client, $level = Logger::DEBUG, $bubble = \true)
+    private CouchDBClient $client;
+    public function __construct(CouchDBClient $client, int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
         $this->client = $client;
         parent::__construct($level, $bubble);
     }
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    protected function write(array $record)
+    protected function write(LogRecord $record) : void
     {
-        $this->client->postDocument($record['formatted']);
+        $this->client->postDocument($record->formatted);
     }
-    protected function getDefaultFormatter()
+    protected function getDefaultFormatter() : FormatterInterface
     {
         return new NormalizerFormatter();
     }

@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Math
- * @package   BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -14,24 +12,53 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines;
 
-use Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime\Hex;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadConfigurationException;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Random;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Random;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadConfigurationException;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 /**
  * Base Engine.
  *
- * @package Engine
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
-abstract class Engine
+abstract class Engine implements \JsonSerializable
 {
+    /* final protected */
+    const PRIMES = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
+    /**
+     * BigInteger(0)
+     *
+     * @var array<class-string<static>, static>
+     */
+    protected static $zero = [];
+    /**
+     * BigInteger(1)
+     *
+     * @var array<class-string<static>, static>
+     */
+    protected static $one = [];
+    /**
+     * BigInteger(2)
+     *
+     * @var array<class-string<static>, static>
+     */
+    protected static $two = [];
+    /**
+     * Modular Exponentiation Engine
+     *
+     * @var array<class-string<static>, class-string<static>>
+     */
+    protected static $modexpEngine;
+    /**
+     * Engine Validity Flag
+     *
+     * @var array<class-string<static>, bool>
+     */
+    protected static $isValidEngine;
     /**
      * Holds the BigInteger's value
      *
-     * @var mixed
+     * @var \GMP|string|array|int
      */
     protected $value;
     /**
@@ -44,12 +71,14 @@ abstract class Engine
      * Precision
      *
      * @see static::setPrecision()
+     * @var int
      */
     protected $precision = -1;
     /**
      * Precision Bitmask
      *
      * @see static::setPrecision()
+     * @var static|false
      */
     protected $bitmask = \false;
     /**
@@ -69,16 +98,17 @@ abstract class Engine
     /**
      * Default constructor
      *
-     * @param mixed $x integer Base-10 number or base-$base number if $base set.
+     * @param int|numeric-string $x integer Base-10 number or base-$base number if $base set.
      * @param int $base
      */
-    public function __construct($x, $base)
+    public function __construct($x = 0, $base = 10)
     {
-        if (!isset(static::$primes)) {
-            static::$primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
-            static::$zero = new static(0);
-            static::$one = new static(1);
-            static::$two = new static(2);
+        if (!\array_key_exists(static::class, static::$zero)) {
+            static::$zero[static::class] = null;
+            // Placeholder to prevent infinite loop.
+            static::$zero[static::class] = new static(0);
+            static::$one[static::class] = new static(1);
+            static::$two[static::class] = new static(2);
         }
         // '0' counts as empty() but when the base is 256 '0' is equal to ord('0') or 48
         // '0' is the only value like this per http://php.net/empty
@@ -95,7 +125,7 @@ abstract class Engine
                     $this->value = $x;
                     $this->is_negative = \false;
                 }
-                static::initialize($base);
+                $this->initialize($base);
                 if ($this->is_negative) {
                     $temp = $this->add(new static('-1'));
                     $this->value = $temp->value;
@@ -107,14 +137,14 @@ abstract class Engine
                     $this->is_negative = \true;
                     $x = \substr($x, 1);
                 }
-                $x = \preg_replace('#^(?:0x)?([A-Fa-f0-9]*).*#', '$1', $x);
+                $x = \preg_replace('#^(?:0x)?([A-Fa-f0-9]*).*#s', '$1', $x);
                 $is_negative = \false;
                 if ($base < 0 && \hexdec($x[0]) >= 8) {
                     $this->is_negative = $is_negative = \true;
-                    $x = Hex::encode(~Hex::decode($x));
+                    $x = Strings::bin2hex(~Strings::hex2bin($x));
                 }
                 $this->value = $x;
-                static::initialize($base);
+                $this->initialize($base);
                 if ($is_negative) {
                     $temp = $this->add(new static('-1'));
                     $this->value = $temp->value;
@@ -125,11 +155,11 @@ abstract class Engine
                 // (?<!^)(?:-).*: find any -'s that aren't at the beginning and then any characters that follow that
                 // (?<=^|-)0*: find any 0's that are preceded by the start of the string or by a - (ie. octals)
                 // [^-0-9].*: find any non-numeric characters and then any characters that follow that
-                $this->value = \preg_replace('#(?<!^)(?:-).*|(?<=^|-)0*|[^-0-9].*#', '', $x);
+                $this->value = \preg_replace('#(?<!^)(?:-).*|(?<=^|-)0*|[^-0-9].*#s', '', $x);
                 if (!\strlen($this->value) || $this->value == '-') {
                     $this->value = '0';
                 }
-                static::initialize($base);
+                $this->initialize($base);
                 break;
             case -2:
             case 2:
@@ -137,7 +167,7 @@ abstract class Engine
                     $this->is_negative = \true;
                     $x = \substr($x, 1);
                 }
-                $x = \preg_replace('#^([01]*).*#', '$1', $x);
+                $x = \preg_replace('#^([01]*).*#s', '$1', $x);
                 $temp = new static(Strings::bits2bin($x), 128 * $base);
                 // ie. either -16 or +16
                 $this->value = $temp->value;
@@ -153,7 +183,7 @@ abstract class Engine
      *
      * Throws an exception if the type is invalid
      *
-     * @param string $engine
+     * @param class-string<Engine> $engine
      */
     public static function setModExpEngine($engine)
     {
@@ -164,7 +194,7 @@ abstract class Engine
         if (!$fqengine::isValidEngine()) {
             throw new BadConfigurationException("{$engine} is not setup correctly on this system");
         }
-        static::$modexpEngine = $fqengine;
+        static::$modexpEngine[static::class] = $fqengine;
     }
     /**
      * Converts a BigInteger to a byte string (eg. base-256).
@@ -198,7 +228,7 @@ abstract class Engine
      */
     public function toHex($twos_compliment = \false)
     {
-        return Hex::encode($this->toBytes($twos_compliment));
+        return Strings::bin2hex($this->toBytes($twos_compliment));
     }
     /**
      * Converts a BigInteger to a bit string (eg. base-2).
@@ -226,35 +256,33 @@ abstract class Engine
      *
      * {@internal See {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=21 HAC 14.64} for more information.}
      *
-     * @param \phpseclib3\Math\BigInteger\Engines\Engine $n
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine|false
+     * @param Engine $n
+     * @return static|false
      */
     protected function modInverseHelper(Engine $n)
     {
         // $x mod -$n == $x mod $n.
         $n = $n->abs();
-        if ($this->compare(static::$zero) < 0) {
+        if ($this->compare(static::$zero[static::class]) < 0) {
             $temp = $this->abs();
             $temp = $temp->modInverse($n);
             return $this->normalize($n->subtract($temp));
         }
-        \extract($this->extendedGCD($n));
-        /**
-         * @var BigInteger $gcd
-         * @var BigInteger $x
-         */
-        if (!$gcd->equals(static::$one)) {
+        $extended = $this->extendedGCD($n);
+        $gcd = $extended['gcd'];
+        $x = $extended['x'];
+        if (!$gcd->equals(static::$one[static::class])) {
             return \false;
         }
-        $x = $x->compare(static::$zero) < 0 ? $x->add($n) : $x;
-        return $this->compare(static::$zero) < 0 ? $this->normalize($n->subtract($x)) : $this->normalize($x);
+        $x = $x->compare(static::$zero[static::class]) < 0 ? $x->add($n) : $x;
+        return $this->compare(static::$zero[static::class]) < 0 ? $this->normalize($n->subtract($x)) : $this->normalize($x);
     }
     /**
      * Serialize
      *
      * Will be called, automatically, when serialize() is called on a BigInteger object.
      *
-     * @return string
+     * @return array
      */
     public function __sleep()
     {
@@ -269,6 +297,8 @@ abstract class Engine
      * Serialize
      *
      * Will be called, automatically, when unserialize() is called on a BigInteger object.
+     *
+     * @return void
      */
     public function __wakeup()
     {
@@ -279,6 +309,58 @@ abstract class Engine
             // recalculate $this->bitmask
             $this->setPrecision($this->precision);
         }
+    }
+    /**
+     *  __serialize() magic method
+     *
+     * __sleep / __wakeup were depreciated in PHP 8.5
+     * Will be called, automatically, when serialize() is called on a Math_BigInteger object.
+     *
+     * @see self::__unserialize()
+     * @access public
+     */
+    public function __serialize()
+    {
+        $result = ['hex' => $this->toHex(\true)];
+        if ($this->precision > 0) {
+            $result['precision'] = $this->precision;
+        }
+        return $result;
+    }
+    /**
+     *  __unserialize() magic method
+     *
+     * __sleep / __wakeup were depreciated in PHP 8.5
+     * Will be called, automatically, when unserialize() is called on a Math_BigInteger object.
+     *
+     * @see self::__serialize()
+     * @access public
+     */
+    public function __unserialize(array $data)
+    {
+        $temp = new static($data['hex'], -16);
+        $this->value = $temp->value;
+        $this->is_negative = $temp->is_negative;
+        if (isset($data['precision']) && $data['precision'] > 0) {
+            // recalculate $this->bitmask
+            $this->setPrecision($data['precision']);
+        }
+    }
+    /**
+     * JSON Serialize
+     *
+     * Will be called, automatically, when json_encode() is called on a BigInteger object.
+     *
+     * @return array{hex: string, precision?: int]
+     */
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        $result = ['hex' => $this->toHex(\true)];
+        if ($this->precision > 0) {
+            $result['precision'] = $this->precision;
+        }
+        return $result;
     }
     /**
      * Converts a BigInteger to a base-10 number.
@@ -293,10 +375,13 @@ abstract class Engine
      *  __debugInfo() magic method
      *
      * Will be called, automatically, when print_r() or var_dump() are called
+     *
+     * @return array
      */
     public function __debugInfo()
     {
-        return ['value' => '0x' . $this->toHex(\true), 'engine' => \basename(static::class)];
+        $result = ['value' => '0x' . $this->toHex(\true), 'engine' => \basename(static::class)];
+        return $this->precision > 0 ? $result + ['precision' => $this->precision] : $result;
     }
     /**
      * Set Precision
@@ -331,7 +416,7 @@ abstract class Engine
     }
     /**
      * Set Bitmask
-     * @return Engine
+     * @return static
      * @param int $bits
      * @see self::setPrecision()
      */
@@ -350,7 +435,7 @@ abstract class Engine
         // (will always result in a smaller number.  ie. ~1 isn't 1111 1110 - it's 0)
         $temp = $this->toBytes();
         if ($temp == '') {
-            return $this->normalize(static::$zero);
+            return $this->normalize(static::$zero[static::class]);
         }
         $pre_msb = \decbin(\ord($temp[0]));
         $temp = ~$temp;
@@ -378,7 +463,7 @@ abstract class Engine
      *
      * @param string $x
      * @param int $shift
-     * @return string
+     * @return void
      */
     protected static function base256_lshift(&$x, $shift)
     {
@@ -392,7 +477,7 @@ abstract class Engine
         $carry = 0;
         for ($i = \strlen($x) - 1; $i >= 0; --$i) {
             $temp = \ord($x[$i]) << $shift | $carry;
-            $x[$i] = \chr($temp);
+            $x[$i] = \chr($temp & 0xff);
             $carry = $temp >> 8;
         }
         $carry = $carry != 0 ? \chr($carry) : '';
@@ -404,7 +489,7 @@ abstract class Engine
      * Instead of the top x bits being dropped they're appended to the shifted bit string.
      *
      * @param int $shift
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     public function bitwise_leftRotate($shift)
     {
@@ -443,7 +528,7 @@ abstract class Engine
      * Instead of the bottom x bits being dropped they're prepended to the shifted bit string.
      *
      * @param int $shift
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     public function bitwise_rightRotate($shift)
     {
@@ -453,7 +538,7 @@ abstract class Engine
      * Returns the smallest and largest n-bit number
      *
      * @param int $bits
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine[]
+     * @return array{min: static, max: static}
      */
     public static function minMaxBits($bits)
     {
@@ -485,14 +570,14 @@ abstract class Engine
      */
     public function getLengthInBytes()
     {
-        return \strlen($this->toBytes());
+        return (int) \ceil($this->getLength() / 8);
     }
     /**
      * Performs some pre-processing for powMod
      *
      * @param Engine $e
      * @param Engine $n
-     * @return bool|Engine
+     * @return static|false
      */
     protected function powModOuter(Engine $e, Engine $n)
     {
@@ -505,6 +590,10 @@ abstract class Engine
             }
             return $this->normalize($temp->powModInner($e, $n));
         }
+        if ($this->compare($n) > 0 || $this->isNegative()) {
+            list(, $temp) = $this->divide($n);
+            return $temp->powModInner($e, $n);
+        }
         return $this->powModInner($e, $n);
     }
     /**
@@ -515,11 +604,12 @@ abstract class Engine
      * however, this function performs a modular reduction after every multiplication and squaring operation.
      * As such, this function has the same preconditions that the reductions being used do.
      *
-     * @param \phpseclib3\Math\BigInteger\Engines\Engine $x
-     * @param \phpseclib3\Math\BigInteger\Engines\Engine $e
-     * @param \phpseclib3\Math\BigInteger\Engines\Engine $n
-     * @param string $class
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @template T of Engine
+     * @param Engine $x
+     * @param Engine $e
+     * @param Engine $n
+     * @param class-string<T> $class
+     * @return T
      */
     protected static function slidingWindow(Engine $x, Engine $e, Engine $n, $class)
     {
@@ -577,15 +667,13 @@ abstract class Engine
      * Bit length is equal to $size
      *
      * @param int $size
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     public static function random($size)
     {
-        \extract(static::minMaxBits($size));
-        /**
-         * @var BigInteger $min
-         * @var BigInteger $max
-         */
+        $minMax = static::minMaxBits($size);
+        $min = $minMax['min'];
+        $max = $minMax['max'];
         return static::randomRange($min, $max);
     }
     /**
@@ -594,15 +682,13 @@ abstract class Engine
      * Bit length is equal to $size
      *
      * @param int $size
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     public static function randomPrime($size)
     {
-        \extract(static::minMaxBits($size));
-        /**
-         * @var BigInteger $min
-         * @var BigInteger $max
-         */
+        $minMax = static::minMaxBits($size);
+        $min = $minMax['min'];
+        $max = $minMax['max'];
         return static::randomRangePrime($min, $max);
     }
     /**
@@ -610,7 +696,7 @@ abstract class Engine
      *
      * @param Engine $min
      * @param Engine $max
-     * @return bool|Engine
+     * @return static|false
      */
     protected static function randomRangePrimeOuter(Engine $min, Engine $max)
     {
@@ -622,6 +708,10 @@ abstract class Engine
             $temp = $max;
             $max = $min;
             $min = $temp;
+        }
+        $length = $max->getLength();
+        if ($length > 8196) {
+            throw new \RuntimeException("Generation of random prime numbers larger than 8196 has been disabled ({$length})");
         }
         $x = static::randomRange($min, $max);
         return static::randomRangePrimeInner($x, $min, $max);
@@ -650,10 +740,10 @@ abstract class Engine
             $max = $min;
             $min = $temp;
         }
-        if (!isset(static::$one)) {
-            static::$one = new static(1);
+        if (!isset(static::$one[static::class])) {
+            static::$one[static::class] = new static(1);
         }
-        $max = $max->subtract($min->subtract(static::$one));
+        $max = $max->subtract($min->subtract(static::$one[static::class]));
         $size = \strlen(\ltrim($max->toBytes(), \chr(0)));
         /*
             doing $random % $max doesn't work because some numbers will be more likely to occur than others.
@@ -692,12 +782,12 @@ abstract class Engine
      * @param Engine $x
      * @param Engine $min
      * @param Engine $max
-     * @return bool|Engine
+     * @return static|false
      */
     protected static function randomRangePrimeInner(Engine $x, Engine $min, Engine $max)
     {
-        if (!isset(static::$two)) {
-            static::$two = new static('2');
+        if (!isset(static::$two[static::class])) {
+            static::$two[static::class] = new static('2');
         }
         $x->make_odd();
         if ($x->compare($max) > 0) {
@@ -713,10 +803,10 @@ abstract class Engine
             if ($x->isPrime()) {
                 return $x;
             }
-            $x = $x->add(static::$two);
+            $x = $x->add(static::$two[static::class]);
             if ($x->compare($max) > 0) {
                 $x = clone $min;
-                if ($x->equals(static::$two)) {
+                if ($x->equals(static::$two[static::class])) {
                     return $x;
                 }
                 $x->make_odd();
@@ -799,17 +889,17 @@ abstract class Engine
             return \false;
         }
         $n = clone $this;
-        $n_1 = $n->subtract(static::$one);
-        $n_2 = $n->subtract(static::$two);
+        $n_1 = $n->subtract(static::$one[static::class]);
+        $n_2 = $n->subtract(static::$two[static::class]);
         $r = clone $n_1;
         $s = static::scan1divide($r);
         for ($i = 0; $i < $t; ++$i) {
-            $a = static::randomRange(static::$two, $n_2);
+            $a = static::randomRange(static::$two[static::class], $n_2);
             $y = $a->modPow($r, $n);
-            if (!$y->equals(static::$one) && !$y->equals($n_1)) {
+            if (!$y->equals(static::$one[static::class]) && !$y->equals($n_1)) {
                 for ($j = 1; $j < $s && !$y->equals($n_1); ++$j) {
-                    $y = $y->modPow(static::$two, $n);
-                    if ($y->equals(static::$one)) {
+                    $y = $y->modPow(static::$two[static::class], $n);
+                    if ($y->equals(static::$one[static::class])) {
                         return \false;
                     }
                 }
@@ -832,6 +922,14 @@ abstract class Engine
      */
     public function isPrime($t = \false)
     {
+        // OpenSSL limits RSA keys to 16384 bits. The length of an RSA key is equal to the length of the modulo, which is
+        // produced by multiplying the primes p and q by one another. The largest number two 8196 bit primes can produce is
+        // a 16384 bit number so, basically, 8196 bit primes are the largest OpenSSL will generate and if that's the largest
+        // that it'll generate it also stands to reason that that's the largest you'll be able to test primality on
+        $length = $this->getLength();
+        if ($length > 8196) {
+            throw new \RuntimeException("Primality testing is not supported for numbers larger than 8196 bits ({$length})");
+        }
         if (!$t) {
             $t = $this->setupIsPrime();
         }
@@ -841,20 +939,20 @@ abstract class Engine
      * Performs a few preliminary checks on root
      *
      * @param int $n
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     protected function rootHelper($n)
     {
         if ($n < 1) {
-            return clone static::$zero;
+            return clone static::$zero[static::class];
         }
         // we want positive exponents
-        if ($this->compare(static::$one) < 0) {
-            return clone static::$zero;
+        if ($this->compare(static::$one[static::class]) < 0) {
+            return clone static::$zero[static::class];
         }
         // we want positive numbers
-        if ($this->compare(static::$two) < 0) {
-            return clone static::$one;
+        if ($this->compare(static::$two[static::class]) < 0) {
+            return clone static::$one[static::class];
         }
         // n-th root of 1 or 2 is 1
         return $this->rootInner($n);
@@ -867,16 +965,16 @@ abstract class Engine
      * {@internal This function is based off of {@link http://mathforum.org/library/drmath/view/52605.html this page} and {@link http://stackoverflow.com/questions/11242920/calculating-nth-root-with-bcmath-in-php this stackoverflow question}.}
      *
      * @param int $n
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine
+     * @return Engine
      */
     protected function rootInner($n)
     {
         $n = new static($n);
         // g is our guess number
-        $g = static::$two;
+        $g = static::$two[static::class];
         // while (g^n < num) g=g*2
         while ($g->pow($n)->compare($this) < 0) {
-            $g = $g->multiply(static::$two);
+            $g = $g->multiply(static::$two[static::class]);
         }
         // if (g^n==num) num is a power of 2, we're lucky, end of job
         // == 0 bccomp(bcpow($g, $n), $n->value)==0
@@ -887,16 +985,16 @@ abstract class Engine
         // if we're here num wasn't a power of 2 :(
         $og = $g;
         // og means original guess and here is our upper bound
-        $g = $g->divide(static::$two)[0];
+        $g = $g->divide(static::$two[static::class])[0];
         // g is set to be our lower bound
-        $step = $og->subtract($g)->divide(static::$two)[0];
+        $step = $og->subtract($g)->divide(static::$two[static::class])[0];
         // step is the half of upper bound - lower bound
         $g = $g->add($step);
         // we start at lower bound + step , basically in the middle of our interval
         // while step>1
-        while ($step->compare(static::$one) == 1) {
+        while ($step->compare(static::$one[static::class]) == 1) {
             $guess = $g->pow($n);
-            $step = $step->divide(static::$two)[0];
+            $step = $step->divide(static::$two[static::class])[0];
             $comp = $guess->compare($this);
             // compare our guess with real number
             switch ($comp) {
@@ -976,7 +1074,7 @@ abstract class Engine
     public function createRecurringModuloFunction()
     {
         $class = static::class;
-        $fqengine = !\method_exists(static::$modexpEngine, 'reduce') ? '\\phpseclib3\\Math\\BigInteger\\Engines\\' . static::ENGINE_DIR . '\\DefaultEngine' : static::$modexpEngine;
+        $fqengine = !\method_exists(static::$modexpEngine[static::class], 'reduce') ? '\\phpseclib3\\Math\\BigInteger\\Engines\\' . static::ENGINE_DIR . '\\DefaultEngine' : static::$modexpEngine[static::class];
         if (\method_exists($fqengine, 'generateCustomReduction')) {
             $func = $fqengine::generateCustomReduction($this, static::class);
             return eval('return function(' . static::class . ' $x) use ($func, $class) {
@@ -996,10 +1094,9 @@ abstract class Engine
      * Calculates the greatest common divisor and Bezout's identity.
      *
      * @param Engine $n
-     * @param Engine $stop (optional)
-     * @return Engine
+     * @return array{gcd: Engine, x: Engine, y: Engine}
      */
-    protected function extendedGCDHelper(Engine $n, Engine $stop = null)
+    protected function extendedGCDHelper(Engine $n)
     {
         $u = clone $this;
         $v = clone $n;
@@ -1029,17 +1126,17 @@ abstract class Engine
      * Splits BigInteger's into chunks of $split bits
      *
      * @param int $split
-     * @return \phpseclib3\Math\BigInteger\Engines\Engine[]
+     * @return Engine[]
      */
     public function bitwise_split($split)
     {
         if ($split < 1) {
             throw new \RuntimeException('Offset must be greater than 1');
         }
-        $mask = static::$one->bitwise_leftShift($split)->subtract(static::$one);
+        $mask = static::$one[static::class]->bitwise_leftShift($split)->subtract(static::$one[static::class]);
         $num = clone $this;
         $vals = [];
-        while (!$num->equals(static::$zero)) {
+        while (!$num->equals(static::$zero[static::class])) {
             $vals[] = $num->bitwise_and($mask);
             $num = $num->bitwise_rightShift($split);
         }

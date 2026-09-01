@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 /*
  * This file is part of the Monolog package.
  *
@@ -10,7 +11,10 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\Monolog\Handler\FingersCrossed;
 
+use Mihdan\ReCrawler\Dependencies\Monolog\Level;
+use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
+use Mihdan\ReCrawler\Dependencies\Psr\Log\LogLevel;
 /**
  * Error level based activation strategy.
  *
@@ -18,13 +22,18 @@ use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
  */
 class ErrorLevelActivationStrategy implements ActivationStrategyInterface
 {
-    private $actionLevel;
-    public function __construct($actionLevel)
+    private Level $actionLevel;
+    /**
+     * @param int|string|Level $actionLevel Level or name or value
+     *
+     * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::* $actionLevel
+     */
+    public function __construct(int|string|Level $actionLevel)
     {
         $this->actionLevel = Logger::toMonologLevel($actionLevel);
     }
-    public function isHandlerActivated(array $record)
+    public function isHandlerActivated(LogRecord $record) : bool
     {
-        return $record['level'] >= $this->actionLevel;
+        return $record->level->value >= $this->actionLevel->value;
     }
 }

@@ -18,8 +18,8 @@
 namespace Mihdan\ReCrawler\Dependencies\Google\AuthHandler;
 
 /**
-* This supports Guzzle 7
-*/
+ * This supports Guzzle 7
+ */
 class Guzzle7AuthHandler extends Guzzle6AuthHandler
 {
 }

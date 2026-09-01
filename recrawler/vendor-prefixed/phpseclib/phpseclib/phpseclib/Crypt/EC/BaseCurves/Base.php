@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -18,24 +16,10 @@ use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 /**
  * Base
  *
- * @package Prime
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class Base
 {
-    /**
-     * Doubles
-     *
-     * @var object[]
-     */
-    protected $doubles;
-    /**
-     * NAF Points
-     *
-     * @var int[]
-     */
-    private $naf;
     /**
      * The Order
      *
@@ -45,7 +29,7 @@ abstract class Base
     /**
      * Finite Field Integer factory
      *
-     * @var \phpseclib3\Math\FiniteField\Integer
+     * @var FiniteField\Integer
      */
     protected $factory;
     /**
@@ -58,7 +42,7 @@ abstract class Base
         return $this->factory->randomInteger();
     }
     /**
-     * Converts a BigInteger to a \phpseclib3\Math\FiniteField\Integer integer
+     * Converts a BigInteger to a FiniteField\Integer integer
      *
      * @return object
      */
@@ -145,7 +129,7 @@ abstract class Base
     /**
      * Returns the Order
      *
-     * @return \phpseclib3\Math\BigInteger
+     * @return BigInteger
      */
     public function getOrder()
     {

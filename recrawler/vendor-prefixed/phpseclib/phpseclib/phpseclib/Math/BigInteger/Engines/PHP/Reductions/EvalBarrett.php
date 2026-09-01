@@ -5,8 +5,6 @@
  *
  * PHP version 5 and 7
  *
- * @category  Math
- * @package   BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2017 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -14,14 +12,12 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines\PHP\Reductions;
 
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines\PHP\Base;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines\PHP;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger\Engines\PHP\Base;
 /**
  * PHP Dynamic Barrett Modular Exponentiation Engine
  *
- * @package PHP
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class EvalBarrett extends Base
 {
@@ -62,7 +58,7 @@ abstract class EvalBarrett extends Base
                 $lhs = new ' . $class . '();
                 $lhs->value = $x;
                 $rhs = new ' . $class . '();
-                $rhs->value = [' . \implode(',', \array_map('self::float2string', $m->value)) . '];
+                $rhs->value = [' . \implode(',', \array_map(self::class . '::float2string', $m->value)) . '];
                 list(, $temp) = $lhs->divide($rhs);
                 return $temp->value;
             ';
@@ -70,6 +66,13 @@ abstract class EvalBarrett extends Base
             self::$custom_reduction = $func;
             //self::$custom_reduction = \Closure::bind($func, $m, $class);
             return $func;
+        }
+        $correctionNeeded = \false;
+        if ($m_length & 1) {
+            $correctionNeeded = \true;
+            $m = clone $m;
+            \array_unshift($m->value, 0);
+            $m_length++;
         }
         $lhs = new $class();
         $lhs_value =& $lhs->value;
@@ -89,12 +92,13 @@ abstract class EvalBarrett extends Base
         $m = $m->value;
         $m1 = $m1->value;
         $cutoff = \count($m) + (\count($m) >> 1);
-        $code = '
+        $code = $correctionNeeded ? 'array_unshift($n, 0);' : '';
+        $code .= '
             if (count($n) > ' . 2 * \count($m) . ') {
                 $lhs = new ' . $class . '();
                 $rhs = new ' . $class . '();
                 $lhs->value = $n;
-                $rhs->value = [' . \implode(',', \array_map('self::float2string', $m)) . '];
+                $rhs->value = [' . \implode(',', \array_map(self::class . '::float2string', $m)) . '];
                 list(, $temp) = $lhs->divide($rhs);
                 return $temp->value;
             }
@@ -120,6 +124,9 @@ abstract class EvalBarrett extends Base
         $subcode = self::generateInlineSubtract1('temp', $m, 'temp2', $class);
         $subcode .= '$temp = $temp2;';
         $code .= self::generateInlineCompare($m, 'temp', $subcode);
+        if ($correctionNeeded) {
+            $code .= 'array_shift($temp);';
+        }
         $code .= 'return $temp;';
         eval('$func = function ($n) { ' . $code . '};');
         self::$custom_reduction = $func;
@@ -231,6 +238,7 @@ abstract class EvalBarrett extends Base
                 $sum = $' . $result . '[$i] + $_' . $y . '[$i] + $carry;
                 $carry = $sum >= ' . self::float2string($class::BASE_FULL) . ';
                 $' . $result . '[$i] = $carry ? $sum - ' . self::float2string($class::BASE_FULL) . ' : $sum;
+                ++$i;
             }
             if ($carry) {
                 for (; $' . $result . '[$i] == ' . $class::MAX_DIGIT . '; ++$i) {
@@ -400,7 +408,7 @@ abstract class EvalBarrett extends Base
     private static function float2string($num)
     {
         if (!\is_float($num)) {
-            return $num;
+            return (string) $num;
         }
         if ($num < 0) {
             return '-' . self::float2string(\abs($num));

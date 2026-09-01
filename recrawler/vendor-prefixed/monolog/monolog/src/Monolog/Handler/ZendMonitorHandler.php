@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 /*
  * This file is part of the Monolog package.
  *
@@ -10,8 +11,10 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\Monolog\Handler;
 
+use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\FormatterInterface;
 use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\NormalizerFormatter;
-use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
+use Mihdan\ReCrawler\Dependencies\Monolog\Level;
+use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 /**
  * Handler sending logs to Zend Monitor
  *
@@ -21,59 +24,54 @@ use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
 class ZendMonitorHandler extends AbstractProcessingHandler
 {
     /**
-     * Monolog level / ZendMonitor Custom Event priority map
-     *
-     * @var array
-     */
-    protected $levelMap = array();
-    /**
-     * Construct
-     *
-     * @param  int                       $level
-     * @param  bool                      $bubble
      * @throws MissingExtensionException
      */
-    public function __construct($level = Logger::DEBUG, $bubble = \true)
+    public function __construct(int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
         if (!\function_exists('Mihdan\\ReCrawler\\Dependencies\\zend_monitor_custom_event')) {
             throw new MissingExtensionException('You must have Zend Server installed with Zend Monitor enabled in order to use this handler');
         }
-        //zend monitor constants are not defined if zend monitor is not enabled.
-        $this->levelMap = array(Logger::DEBUG => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO, Logger::INFO => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO, Logger::NOTICE => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO, Logger::WARNING => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_WARNING, Logger::ERROR => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR, Logger::CRITICAL => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR, Logger::ALERT => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR, Logger::EMERGENCY => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR);
         parent::__construct($level, $bubble);
     }
     /**
-     * {@inheritdoc}
+     * Translates Monolog log levels to ZendMonitor levels.
      */
-    protected function write(array $record)
+    protected function toZendMonitorLevel(Level $level) : int
     {
-        $this->writeZendMonitorCustomEvent(Logger::getLevelName($record['level']), $record['message'], $record['formatted'], $this->levelMap[$record['level']]);
+        return match ($level) {
+            Level::Debug => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO,
+            Level::Info => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO,
+            Level::Notice => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO,
+            Level::Warning => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_WARNING,
+            Level::Error => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR,
+            Level::Critical => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR,
+            Level::Alert => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR,
+            Level::Emergency => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_ERROR,
+        };
+    }
+    /**
+     * @inheritDoc
+     */
+    protected function write(LogRecord $record) : void
+    {
+        $this->writeZendMonitorCustomEvent($record->level->getName(), $record->message, $record->formatted, $this->toZendMonitorLevel($record->level));
     }
     /**
      * Write to Zend Monitor Events
-     * @param string $type Text displayed in "Class Name (custom)" field
-     * @param string $message Text displayed in "Error String"
-     * @param mixed $formatted Displayed in Custom Variables tab
-     * @param int $severity Set the event severity level (-1,0,1)
+     * @param string       $type      Text displayed in "Class Name (custom)" field
+     * @param string       $message   Text displayed in "Error String"
+     * @param array<mixed> $formatted Displayed in Custom Variables tab
+     * @param int          $severity  Set the event severity level (-1,0,1)
      */
-    protected function writeZendMonitorCustomEvent($type, $message, $formatted, $severity)
+    protected function writeZendMonitorCustomEvent(string $type, string $message, array $formatted, int $severity) : void
     {
         zend_monitor_custom_event($type, $message, $formatted, $severity);
     }
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function getDefaultFormatter()
+    public function getDefaultFormatter() : FormatterInterface
     {
         return new NormalizerFormatter();
-    }
-    /**
-     * Get the level map
-     *
-     * @return array
-     */
-    public function getLevelMap()
-    {
-        return $this->levelMap;
     }
 }

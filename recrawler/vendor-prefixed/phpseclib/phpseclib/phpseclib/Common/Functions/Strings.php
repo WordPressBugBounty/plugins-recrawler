@@ -5,8 +5,6 @@
  *
  * PHP version 5
  *
- * @category  Common
- * @package   Functions\Strings
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2016 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -14,12 +12,14 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions;
 
+use Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime\Base64;
+use Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime\Base64UrlSafe;
+use Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime\Hex;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\Common\FiniteField;
 /**
  * Common String Functions
  *
- * @package Functions\Strings
  * @author  Jim Wigginton <terrafrost@php.net>
  */
 abstract class Strings
@@ -31,7 +31,6 @@ abstract class Strings
      *
      * @param string $string
      * @param int $index
-     * @access public
      * @return string
      */
     public static function shift(&$string, $index = 1)
@@ -47,7 +46,6 @@ abstract class Strings
      *
      * @param string $string
      * @param int $index
-     * @access public
      * @return string
      */
     public static function pop(&$string, $index = 1)
@@ -123,7 +121,9 @@ abstract class Strings
                     // 64-bit floats can be used to get larger numbers then 32-bit signed ints would allow
                     // for. sure, you're not gonna get the full precision of 64-bit numbers but just because
                     // you need > 32-bit precision doesn't mean you need the full 64-bit precision
-                    \extract(\unpack('Nupper/Nlower', self::shift($data, 8)));
+                    $unpacked = \unpack('Nupper/Nlower', self::shift($data, 8));
+                    $upper = $unpacked['upper'];
+                    $lower = $unpacked['lower'];
                     $temp = $upper ? 4294967296 * $upper : 0;
                     $temp += $lower < 0 ? ($lower & 0x7ffffffff) + 0x80000000 : $lower;
                     // $temp = hexdec(bin2hex(self::shift($data, 8)));
@@ -151,14 +151,13 @@ abstract class Strings
     /**
      * Create SSH2-style string
      *
+     * @param string $format
      * @param string|int|float|array|bool ...$elements
-     * @access public
      * @return string
      */
-    public static function packSSH2(...$elements)
+    public static function packSSH2($format, ...$elements)
     {
-        $format = self::formatPack($elements[0]);
-        \array_shift($elements);
+        $format = self::formatPack($format);
         if (\strlen($format) != \count($elements)) {
             throw new \InvalidArgumentException('There must be as many arguments as there are characters in the $format string');
         }
@@ -225,7 +224,6 @@ abstract class Strings
      *
      * Converts C5 to CCCCC, for example.
      *
-     * @access private
      * @param string $format
      * @return string
      */
@@ -247,7 +245,6 @@ abstract class Strings
      * of this function, bin refers to base-256 encoded data whilst bits refers
      * to base-2 encoded data
      *
-     * @access public
      * @param string $x
      * @return string
      */
@@ -286,7 +283,6 @@ abstract class Strings
     /**
      * Convert bits to binary data
      *
-     * @access public
      * @param string $x
      * @return string
      */
@@ -321,7 +317,6 @@ abstract class Strings
     /**
      * Switch Endianness Bit Order
      *
-     * @access public
      * @param string $x
      * @return string
      */
@@ -339,7 +334,11 @@ abstract class Strings
                 // from http://graphics.stanford.edu/~seander/bithacks.html#ReverseByteWith32Bits
                 $p1 = $b * 0x802 & 0x22110;
                 $p2 = $b * 0x8020 & 0x88440;
-                $r .= \chr(($p1 | $p2) * 0x10101 >> 16);
+                $temp = ($p1 | $p2) * 0x10101;
+                if (\is_float($temp)) {
+                    $temp = (int) \fmod($temp, 0x7fffffff);
+                }
+                $r .= \chr($temp >> 16 & 0xff);
             }
         }
         return $r;
@@ -349,10 +348,15 @@ abstract class Strings
      *
      * @param string $var
      * @return string
-     * @access public
      */
     public static function increment_str(&$var)
     {
+        if (\function_exists('sodium_increment')) {
+            $var = \strrev($var);
+            \sodium_increment($var);
+            $var = \strrev($var);
+            return $var;
+        }
         for ($i = 4; $i <= \strlen($var); $i += 4) {
             $temp = \substr($var, -$i, 4);
             switch ($temp) {
@@ -380,12 +384,77 @@ abstract class Strings
     /**
      * Find whether the type of a variable is string (or could be converted to one)
      *
-     * @param string|object $var
-     * @return boolean
-     * @access public
+     * @param mixed $var
+     * @return bool
+     * @psalm-assert-if-true string|\Stringable $var
      */
     public static function is_stringable($var)
     {
         return \is_string($var) || \is_object($var) && \method_exists($var, '__toString');
+    }
+    /**
+     * Constant Time Base64-decoding
+     *
+     * ParagoneIE\ConstantTime doesn't use libsodium if it's available so we'll do so
+     * ourselves. see https://github.com/paragonie/constant_time_encoding/issues/39
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function base64_decode($data)
+    {
+        return \function_exists('sodium_base642bin') ? \sodium_base642bin($data, \SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING, '=') : Base64::decode($data);
+    }
+    /**
+     * Constant Time Base64-decoding (URL safe)
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function base64url_decode($data)
+    {
+        // return self::base64_decode(str_replace(['-', '_'], ['+', '/'], $data));
+        return \function_exists('sodium_base642bin') ? \sodium_base642bin($data, \SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING, '=') : Base64UrlSafe::decode($data);
+    }
+    /**
+     * Constant Time Base64-encoding
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function base64_encode($data)
+    {
+        return \function_exists('sodium_bin2base64') ? \sodium_bin2base64($data, \SODIUM_BASE64_VARIANT_ORIGINAL) : Base64::encode($data);
+    }
+    /**
+     * Constant Time Base64-encoding (URL safe)
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function base64url_encode($data)
+    {
+        // return str_replace(['+', '/'], ['-', '_'], self::base64_encode($data));
+        return \function_exists('sodium_bin2base64') ? \sodium_bin2base64($data, \SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING) : Base64UrlSafe::encode($data);
+    }
+    /**
+     * Constant Time Hex Decoder
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function hex2bin($data)
+    {
+        return \function_exists('sodium_hex2bin') ? \sodium_hex2bin($data) : Hex::decode($data);
+    }
+    /**
+     * Constant Time Hex Encoder
+     *
+     * @param string $data
+     * @return string
+     */
+    public static function bin2hex($data)
+    {
+        return \function_exists('sodium_bin2hex') ? \sodium_bin2hex($data) : Hex::encode($data);
     }
 }

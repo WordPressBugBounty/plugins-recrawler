@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 /*
  * This file is part of the Monolog package.
  *
@@ -12,9 +13,11 @@ namespace Mihdan\ReCrawler\Dependencies\Monolog\Handler;
 
 use Mihdan\ReCrawler\Dependencies\Aws\Sdk;
 use Mihdan\ReCrawler\Dependencies\Aws\DynamoDb\DynamoDbClient;
+use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\FormatterInterface;
 use Mihdan\ReCrawler\Dependencies\Aws\DynamoDb\Marshaler;
 use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\ScalarFormatter;
-use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
+use Mihdan\ReCrawler\Dependencies\Monolog\Level;
+use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 /**
  * Amazon DynamoDB handler (http://aws.amazon.com/dynamodb/)
  *
@@ -23,69 +26,40 @@ use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
  */
 class DynamoDbHandler extends AbstractProcessingHandler
 {
-    const DATE_FORMAT = 'Y-m-d\\TH:i:s.uO';
-    /**
-     * @var DynamoDbClient
-     */
-    protected $client;
-    /**
-     * @var string
-     */
-    protected $table;
-    /**
-     * @var int
-     */
-    protected $version;
-    /**
-     * @var Marshaler
-     */
-    protected $marshaler;
-    /**
-     * @param DynamoDbClient $client
-     * @param string         $table
-     * @param int            $level
-     * @param bool           $bubble
-     */
-    public function __construct(DynamoDbClient $client, $table, $level = Logger::DEBUG, $bubble = \true)
+    public const DATE_FORMAT = 'Y-m-d\\TH:i:s.uO';
+    protected DynamoDbClient $client;
+    protected string $table;
+    protected Marshaler $marshaler;
+    public function __construct(DynamoDbClient $client, string $table, int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
-        if (\defined('Aws\\Sdk::VERSION') && \version_compare(Sdk::VERSION, '3.0', '>=')) {
-            $this->version = 3;
-            $this->marshaler = new Marshaler();
-        } else {
-            $this->version = 2;
-        }
+        $this->marshaler = new Marshaler();
         $this->client = $client;
         $this->table = $table;
         parent::__construct($level, $bubble);
     }
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    protected function write(array $record)
+    protected function write(LogRecord $record) : void
     {
-        $filtered = $this->filterEmptyFields($record['formatted']);
-        if ($this->version === 3) {
-            $formatted = $this->marshaler->marshalItem($filtered);
-        } else {
-            /** @phpstan-ignore-next-line */
-            $formatted = $this->client->formatAttributes($filtered);
-        }
-        $this->client->putItem(array('TableName' => $this->table, 'Item' => $formatted));
+        $filtered = $this->filterEmptyFields($record->formatted);
+        $formatted = $this->marshaler->marshalItem($filtered);
+        $this->client->putItem(['TableName' => $this->table, 'Item' => $formatted]);
     }
     /**
-     * @param  array $record
-     * @return array
+     * @param  mixed[] $record
+     * @return mixed[]
      */
-    protected function filterEmptyFields(array $record)
+    protected function filterEmptyFields(array $record) : array
     {
         return \array_filter($record, function ($value) {
-            return !empty($value) || \false === $value || 0 === $value;
+            return [] !== $value;
         });
     }
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    protected function getDefaultFormatter()
+    protected function getDefaultFormatter() : FormatterInterface
     {
         return new ScalarFormatter(self::DATE_FORMAT);
     }

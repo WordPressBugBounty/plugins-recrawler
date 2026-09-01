@@ -32,8 +32,6 @@
  * ?>
  * </code>
  *
- * @category  Crypt
- * @package   DES
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -46,16 +44,13 @@ use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadModeException;
 /**
  * Pure-PHP implementation of DES.
  *
- * @package DES
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 class DES extends BlockCipher
 {
     /**
      * Contains $keys[self::ENCRYPT]
      *
-     * @access private
      * @see \phpseclib3\Crypt\DES::setupKey()
      * @see \phpseclib3\Crypt\DES::processBlock()
      */
@@ -63,7 +58,6 @@ class DES extends BlockCipher
     /**
      * Contains $keys[self::DECRYPT]
      *
-     * @access private
      * @see \phpseclib3\Crypt\DES::setupKey()
      * @see \phpseclib3\Crypt\DES::processBlock()
      */
@@ -71,41 +65,36 @@ class DES extends BlockCipher
     /**
      * Block Length of the cipher
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::block_size
+     * @see Common\SymmetricKey::block_size
      * @var int
-     * @access private
      */
     protected $block_size = 8;
     /**
      * Key Length (in bytes)
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setKeyLength()
+     * @see Common\SymmetricKey::setKeyLength()
      * @var int
-     * @access private
      */
     protected $key_length = 8;
     /**
      * The mcrypt specific name of the cipher
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::cipher_name_mcrypt
+     * @see Common\SymmetricKey::cipher_name_mcrypt
      * @var string
-     * @access private
      */
     protected $cipher_name_mcrypt = 'des';
     /**
      * The OpenSSL names of the cipher / modes
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::openssl_mode_names
+     * @see Common\SymmetricKey::openssl_mode_names
      * @var array
-     * @access private
      */
     protected $openssl_mode_names = [self::MODE_ECB => 'des-ecb', self::MODE_CBC => 'des-cbc', self::MODE_CFB => 'des-cfb', self::MODE_OFB => 'des-ofb'];
     /**
      * Optimizing value while CFB-encrypting
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::cfb_init_len
+     * @see Common\SymmetricKey::cfb_init_len
      * @var int
-     * @access private
      */
     protected $cfb_init_len = 500;
     /**
@@ -116,7 +105,6 @@ class DES extends BlockCipher
      * @see self::setupKey()
      * @see self::processBlock()
      * @var int
-     * @access private
      */
     protected $des_rounds = 1;
     /**
@@ -124,7 +112,6 @@ class DES extends BlockCipher
      *
      * @see self::setKey()
      * @var string
-     * @access private
      */
     protected $key_length_max = 8;
     /**
@@ -132,9 +119,15 @@ class DES extends BlockCipher
      *
      * @see self::setupKey()
      * @var array
-     * @access private
      */
     private $keys;
+    /**
+     * Key Cache "key"
+     *
+     * @see self::setupKey()
+     * @var array
+     */
+    private $kl;
     /**
      * Shuffle table.
      *
@@ -145,7 +138,6 @@ class DES extends BlockCipher
      * @see self::processBlock()
      * @see self::setupKey()
      * @var array
-     * @access private
      */
     protected static $shuffle = ["\x00\x00\x00\x00\x00\x00\x00\x00", "\x00\x00\x00\x00\x00\x00\x00\xff", "\x00\x00\x00\x00\x00\x00\xff\x00", "\x00\x00\x00\x00\x00\x00\xff\xff", "\x00\x00\x00\x00\x00\xff\x00\x00", "\x00\x00\x00\x00\x00\xff\x00\xff", "\x00\x00\x00\x00\x00\xff\xff\x00", "\x00\x00\x00\x00\x00\xff\xff\xff", "\x00\x00\x00\x00\xff\x00\x00\x00", "\x00\x00\x00\x00\xff\x00\x00\xff", "\x00\x00\x00\x00\xff\x00\xff\x00", "\x00\x00\x00\x00\xff\x00\xff\xff", "\x00\x00\x00\x00\xff\xff\x00\x00", "\x00\x00\x00\x00\xff\xff\x00\xff", "\x00\x00\x00\x00\xff\xff\xff\x00", "\x00\x00\x00\x00\xff\xff\xff\xff", "\x00\x00\x00\xff\x00\x00\x00\x00", "\x00\x00\x00\xff\x00\x00\x00\xff", "\x00\x00\x00\xff\x00\x00\xff\x00", "\x00\x00\x00\xff\x00\x00\xff\xff", "\x00\x00\x00\xff\x00\xff\x00\x00", "\x00\x00\x00\xff\x00\xff\x00\xff", "\x00\x00\x00\xff\x00\xff\xff\x00", "\x00\x00\x00\xff\x00\xff\xff\xff", "\x00\x00\x00\xff\xff\x00\x00\x00", "\x00\x00\x00\xff\xff\x00\x00\xff", "\x00\x00\x00\xff\xff\x00\xff\x00", "\x00\x00\x00\xff\xff\x00\xff\xff", "\x00\x00\x00\xff\xff\xff\x00\x00", "\x00\x00\x00\xff\xff\xff\x00\xff", "\x00\x00\x00\xff\xff\xff\xff\x00", "\x00\x00\x00\xff\xff\xff\xff\xff", "\x00\x00\xff\x00\x00\x00\x00\x00", "\x00\x00\xff\x00\x00\x00\x00\xff", "\x00\x00\xff\x00\x00\x00\xff\x00", "\x00\x00\xff\x00\x00\x00\xff\xff", "\x00\x00\xff\x00\x00\xff\x00\x00", "\x00\x00\xff\x00\x00\xff\x00\xff", "\x00\x00\xff\x00\x00\xff\xff\x00", "\x00\x00\xff\x00\x00\xff\xff\xff", "\x00\x00\xff\x00\xff\x00\x00\x00", "\x00\x00\xff\x00\xff\x00\x00\xff", "\x00\x00\xff\x00\xff\x00\xff\x00", "\x00\x00\xff\x00\xff\x00\xff\xff", "\x00\x00\xff\x00\xff\xff\x00\x00", "\x00\x00\xff\x00\xff\xff\x00\xff", "\x00\x00\xff\x00\xff\xff\xff\x00", "\x00\x00\xff\x00\xff\xff\xff\xff", "\x00\x00\xff\xff\x00\x00\x00\x00", "\x00\x00\xff\xff\x00\x00\x00\xff", "\x00\x00\xff\xff\x00\x00\xff\x00", "\x00\x00\xff\xff\x00\x00\xff\xff", "\x00\x00\xff\xff\x00\xff\x00\x00", "\x00\x00\xff\xff\x00\xff\x00\xff", "\x00\x00\xff\xff\x00\xff\xff\x00", "\x00\x00\xff\xff\x00\xff\xff\xff", "\x00\x00\xff\xff\xff\x00\x00\x00", "\x00\x00\xff\xff\xff\x00\x00\xff", "\x00\x00\xff\xff\xff\x00\xff\x00", "\x00\x00\xff\xff\xff\x00\xff\xff", "\x00\x00\xff\xff\xff\xff\x00\x00", "\x00\x00\xff\xff\xff\xff\x00\xff", "\x00\x00\xff\xff\xff\xff\xff\x00", "\x00\x00\xff\xff\xff\xff\xff\xff", "\x00\xff\x00\x00\x00\x00\x00\x00", "\x00\xff\x00\x00\x00\x00\x00\xff", "\x00\xff\x00\x00\x00\x00\xff\x00", "\x00\xff\x00\x00\x00\x00\xff\xff", "\x00\xff\x00\x00\x00\xff\x00\x00", "\x00\xff\x00\x00\x00\xff\x00\xff", "\x00\xff\x00\x00\x00\xff\xff\x00", "\x00\xff\x00\x00\x00\xff\xff\xff", "\x00\xff\x00\x00\xff\x00\x00\x00", "\x00\xff\x00\x00\xff\x00\x00\xff", "\x00\xff\x00\x00\xff\x00\xff\x00", "\x00\xff\x00\x00\xff\x00\xff\xff", "\x00\xff\x00\x00\xff\xff\x00\x00", "\x00\xff\x00\x00\xff\xff\x00\xff", "\x00\xff\x00\x00\xff\xff\xff\x00", "\x00\xff\x00\x00\xff\xff\xff\xff", "\x00\xff\x00\xff\x00\x00\x00\x00", "\x00\xff\x00\xff\x00\x00\x00\xff", "\x00\xff\x00\xff\x00\x00\xff\x00", "\x00\xff\x00\xff\x00\x00\xff\xff", "\x00\xff\x00\xff\x00\xff\x00\x00", "\x00\xff\x00\xff\x00\xff\x00\xff", "\x00\xff\x00\xff\x00\xff\xff\x00", "\x00\xff\x00\xff\x00\xff\xff\xff", "\x00\xff\x00\xff\xff\x00\x00\x00", "\x00\xff\x00\xff\xff\x00\x00\xff", "\x00\xff\x00\xff\xff\x00\xff\x00", "\x00\xff\x00\xff\xff\x00\xff\xff", "\x00\xff\x00\xff\xff\xff\x00\x00", "\x00\xff\x00\xff\xff\xff\x00\xff", "\x00\xff\x00\xff\xff\xff\xff\x00", "\x00\xff\x00\xff\xff\xff\xff\xff", "\x00\xff\xff\x00\x00\x00\x00\x00", "\x00\xff\xff\x00\x00\x00\x00\xff", "\x00\xff\xff\x00\x00\x00\xff\x00", "\x00\xff\xff\x00\x00\x00\xff\xff", "\x00\xff\xff\x00\x00\xff\x00\x00", "\x00\xff\xff\x00\x00\xff\x00\xff", "\x00\xff\xff\x00\x00\xff\xff\x00", "\x00\xff\xff\x00\x00\xff\xff\xff", "\x00\xff\xff\x00\xff\x00\x00\x00", "\x00\xff\xff\x00\xff\x00\x00\xff", "\x00\xff\xff\x00\xff\x00\xff\x00", "\x00\xff\xff\x00\xff\x00\xff\xff", "\x00\xff\xff\x00\xff\xff\x00\x00", "\x00\xff\xff\x00\xff\xff\x00\xff", "\x00\xff\xff\x00\xff\xff\xff\x00", "\x00\xff\xff\x00\xff\xff\xff\xff", "\x00\xff\xff\xff\x00\x00\x00\x00", "\x00\xff\xff\xff\x00\x00\x00\xff", "\x00\xff\xff\xff\x00\x00\xff\x00", "\x00\xff\xff\xff\x00\x00\xff\xff", "\x00\xff\xff\xff\x00\xff\x00\x00", "\x00\xff\xff\xff\x00\xff\x00\xff", "\x00\xff\xff\xff\x00\xff\xff\x00", "\x00\xff\xff\xff\x00\xff\xff\xff", "\x00\xff\xff\xff\xff\x00\x00\x00", "\x00\xff\xff\xff\xff\x00\x00\xff", "\x00\xff\xff\xff\xff\x00\xff\x00", "\x00\xff\xff\xff\xff\x00\xff\xff", "\x00\xff\xff\xff\xff\xff\x00\x00", "\x00\xff\xff\xff\xff\xff\x00\xff", "\x00\xff\xff\xff\xff\xff\xff\x00", "\x00\xff\xff\xff\xff\xff\xff\xff", "\xff\x00\x00\x00\x00\x00\x00\x00", "\xff\x00\x00\x00\x00\x00\x00\xff", "\xff\x00\x00\x00\x00\x00\xff\x00", "\xff\x00\x00\x00\x00\x00\xff\xff", "\xff\x00\x00\x00\x00\xff\x00\x00", "\xff\x00\x00\x00\x00\xff\x00\xff", "\xff\x00\x00\x00\x00\xff\xff\x00", "\xff\x00\x00\x00\x00\xff\xff\xff", "\xff\x00\x00\x00\xff\x00\x00\x00", "\xff\x00\x00\x00\xff\x00\x00\xff", "\xff\x00\x00\x00\xff\x00\xff\x00", "\xff\x00\x00\x00\xff\x00\xff\xff", "\xff\x00\x00\x00\xff\xff\x00\x00", "\xff\x00\x00\x00\xff\xff\x00\xff", "\xff\x00\x00\x00\xff\xff\xff\x00", "\xff\x00\x00\x00\xff\xff\xff\xff", "\xff\x00\x00\xff\x00\x00\x00\x00", "\xff\x00\x00\xff\x00\x00\x00\xff", "\xff\x00\x00\xff\x00\x00\xff\x00", "\xff\x00\x00\xff\x00\x00\xff\xff", "\xff\x00\x00\xff\x00\xff\x00\x00", "\xff\x00\x00\xff\x00\xff\x00\xff", "\xff\x00\x00\xff\x00\xff\xff\x00", "\xff\x00\x00\xff\x00\xff\xff\xff", "\xff\x00\x00\xff\xff\x00\x00\x00", "\xff\x00\x00\xff\xff\x00\x00\xff", "\xff\x00\x00\xff\xff\x00\xff\x00", "\xff\x00\x00\xff\xff\x00\xff\xff", "\xff\x00\x00\xff\xff\xff\x00\x00", "\xff\x00\x00\xff\xff\xff\x00\xff", "\xff\x00\x00\xff\xff\xff\xff\x00", "\xff\x00\x00\xff\xff\xff\xff\xff", "\xff\x00\xff\x00\x00\x00\x00\x00", "\xff\x00\xff\x00\x00\x00\x00\xff", "\xff\x00\xff\x00\x00\x00\xff\x00", "\xff\x00\xff\x00\x00\x00\xff\xff", "\xff\x00\xff\x00\x00\xff\x00\x00", "\xff\x00\xff\x00\x00\xff\x00\xff", "\xff\x00\xff\x00\x00\xff\xff\x00", "\xff\x00\xff\x00\x00\xff\xff\xff", "\xff\x00\xff\x00\xff\x00\x00\x00", "\xff\x00\xff\x00\xff\x00\x00\xff", "\xff\x00\xff\x00\xff\x00\xff\x00", "\xff\x00\xff\x00\xff\x00\xff\xff", "\xff\x00\xff\x00\xff\xff\x00\x00", "\xff\x00\xff\x00\xff\xff\x00\xff", "\xff\x00\xff\x00\xff\xff\xff\x00", "\xff\x00\xff\x00\xff\xff\xff\xff", "\xff\x00\xff\xff\x00\x00\x00\x00", "\xff\x00\xff\xff\x00\x00\x00\xff", "\xff\x00\xff\xff\x00\x00\xff\x00", "\xff\x00\xff\xff\x00\x00\xff\xff", "\xff\x00\xff\xff\x00\xff\x00\x00", "\xff\x00\xff\xff\x00\xff\x00\xff", "\xff\x00\xff\xff\x00\xff\xff\x00", "\xff\x00\xff\xff\x00\xff\xff\xff", "\xff\x00\xff\xff\xff\x00\x00\x00", "\xff\x00\xff\xff\xff\x00\x00\xff", "\xff\x00\xff\xff\xff\x00\xff\x00", "\xff\x00\xff\xff\xff\x00\xff\xff", "\xff\x00\xff\xff\xff\xff\x00\x00", "\xff\x00\xff\xff\xff\xff\x00\xff", "\xff\x00\xff\xff\xff\xff\xff\x00", "\xff\x00\xff\xff\xff\xff\xff\xff", "\xff\xff\x00\x00\x00\x00\x00\x00", "\xff\xff\x00\x00\x00\x00\x00\xff", "\xff\xff\x00\x00\x00\x00\xff\x00", "\xff\xff\x00\x00\x00\x00\xff\xff", "\xff\xff\x00\x00\x00\xff\x00\x00", "\xff\xff\x00\x00\x00\xff\x00\xff", "\xff\xff\x00\x00\x00\xff\xff\x00", "\xff\xff\x00\x00\x00\xff\xff\xff", "\xff\xff\x00\x00\xff\x00\x00\x00", "\xff\xff\x00\x00\xff\x00\x00\xff", "\xff\xff\x00\x00\xff\x00\xff\x00", "\xff\xff\x00\x00\xff\x00\xff\xff", "\xff\xff\x00\x00\xff\xff\x00\x00", "\xff\xff\x00\x00\xff\xff\x00\xff", "\xff\xff\x00\x00\xff\xff\xff\x00", "\xff\xff\x00\x00\xff\xff\xff\xff", "\xff\xff\x00\xff\x00\x00\x00\x00", "\xff\xff\x00\xff\x00\x00\x00\xff", "\xff\xff\x00\xff\x00\x00\xff\x00", "\xff\xff\x00\xff\x00\x00\xff\xff", "\xff\xff\x00\xff\x00\xff\x00\x00", "\xff\xff\x00\xff\x00\xff\x00\xff", "\xff\xff\x00\xff\x00\xff\xff\x00", "\xff\xff\x00\xff\x00\xff\xff\xff", "\xff\xff\x00\xff\xff\x00\x00\x00", "\xff\xff\x00\xff\xff\x00\x00\xff", "\xff\xff\x00\xff\xff\x00\xff\x00", "\xff\xff\x00\xff\xff\x00\xff\xff", "\xff\xff\x00\xff\xff\xff\x00\x00", "\xff\xff\x00\xff\xff\xff\x00\xff", "\xff\xff\x00\xff\xff\xff\xff\x00", "\xff\xff\x00\xff\xff\xff\xff\xff", "\xff\xff\xff\x00\x00\x00\x00\x00", "\xff\xff\xff\x00\x00\x00\x00\xff", "\xff\xff\xff\x00\x00\x00\xff\x00", "\xff\xff\xff\x00\x00\x00\xff\xff", "\xff\xff\xff\x00\x00\xff\x00\x00", "\xff\xff\xff\x00\x00\xff\x00\xff", "\xff\xff\xff\x00\x00\xff\xff\x00", "\xff\xff\xff\x00\x00\xff\xff\xff", "\xff\xff\xff\x00\xff\x00\x00\x00", "\xff\xff\xff\x00\xff\x00\x00\xff", "\xff\xff\xff\x00\xff\x00\xff\x00", "\xff\xff\xff\x00\xff\x00\xff\xff", "\xff\xff\xff\x00\xff\xff\x00\x00", "\xff\xff\xff\x00\xff\xff\x00\xff", "\xff\xff\xff\x00\xff\xff\xff\x00", "\xff\xff\xff\x00\xff\xff\xff\xff", "\xff\xff\xff\xff\x00\x00\x00\x00", "\xff\xff\xff\xff\x00\x00\x00\xff", "\xff\xff\xff\xff\x00\x00\xff\x00", "\xff\xff\xff\xff\x00\x00\xff\xff", "\xff\xff\xff\xff\x00\xff\x00\x00", "\xff\xff\xff\xff\x00\xff\x00\xff", "\xff\xff\xff\xff\x00\xff\xff\x00", "\xff\xff\xff\xff\x00\xff\xff\xff", "\xff\xff\xff\xff\xff\x00\x00\x00", "\xff\xff\xff\xff\xff\x00\x00\xff", "\xff\xff\xff\xff\xff\x00\xff\x00", "\xff\xff\xff\xff\xff\x00\xff\xff", "\xff\xff\xff\xff\xff\xff\x00\x00", "\xff\xff\xff\xff\xff\xff\x00\xff", "\xff\xff\xff\xff\xff\xff\xff\x00", "\xff\xff\xff\xff\xff\xff\xff\xff"];
     /**
@@ -154,7 +146,6 @@ class DES extends BlockCipher
      * Indexing this table with each source byte performs the initial bit permutation.
      *
      * @var array
-     * @access private
      */
     protected static $ipmap = [0x0, 0x10, 0x1, 0x11, 0x20, 0x30, 0x21, 0x31, 0x2, 0x12, 0x3, 0x13, 0x22, 0x32, 0x23, 0x33, 0x40, 0x50, 0x41, 0x51, 0x60, 0x70, 0x61, 0x71, 0x42, 0x52, 0x43, 0x53, 0x62, 0x72, 0x63, 0x73, 0x4, 0x14, 0x5, 0x15, 0x24, 0x34, 0x25, 0x35, 0x6, 0x16, 0x7, 0x17, 0x26, 0x36, 0x27, 0x37, 0x44, 0x54, 0x45, 0x55, 0x64, 0x74, 0x65, 0x75, 0x46, 0x56, 0x47, 0x57, 0x66, 0x76, 0x67, 0x77, 0x80, 0x90, 0x81, 0x91, 0xa0, 0xb0, 0xa1, 0xb1, 0x82, 0x92, 0x83, 0x93, 0xa2, 0xb2, 0xa3, 0xb3, 0xc0, 0xd0, 0xc1, 0xd1, 0xe0, 0xf0, 0xe1, 0xf1, 0xc2, 0xd2, 0xc3, 0xd3, 0xe2, 0xf2, 0xe3, 0xf3, 0x84, 0x94, 0x85, 0x95, 0xa4, 0xb4, 0xa5, 0xb5, 0x86, 0x96, 0x87, 0x97, 0xa6, 0xb6, 0xa7, 0xb7, 0xc4, 0xd4, 0xc5, 0xd5, 0xe4, 0xf4, 0xe5, 0xf5, 0xc6, 0xd6, 0xc7, 0xd7, 0xe6, 0xf6, 0xe7, 0xf7, 0x8, 0x18, 0x9, 0x19, 0x28, 0x38, 0x29, 0x39, 0xa, 0x1a, 0xb, 0x1b, 0x2a, 0x3a, 0x2b, 0x3b, 0x48, 0x58, 0x49, 0x59, 0x68, 0x78, 0x69, 0x79, 0x4a, 0x5a, 0x4b, 0x5b, 0x6a, 0x7a, 0x6b, 0x7b, 0xc, 0x1c, 0xd, 0x1d, 0x2c, 0x3c, 0x2d, 0x3d, 0xe, 0x1e, 0xf, 0x1f, 0x2e, 0x3e, 0x2f, 0x3f, 0x4c, 0x5c, 0x4d, 0x5d, 0x6c, 0x7c, 0x6d, 0x7d, 0x4e, 0x5e, 0x4f, 0x5f, 0x6e, 0x7e, 0x6f, 0x7f, 0x88, 0x98, 0x89, 0x99, 0xa8, 0xb8, 0xa9, 0xb9, 0x8a, 0x9a, 0x8b, 0x9b, 0xaa, 0xba, 0xab, 0xbb, 0xc8, 0xd8, 0xc9, 0xd9, 0xe8, 0xf8, 0xe9, 0xf9, 0xca, 0xda, 0xcb, 0xdb, 0xea, 0xfa, 0xeb, 0xfb, 0x8c, 0x9c, 0x8d, 0x9d, 0xac, 0xbc, 0xad, 0xbd, 0x8e, 0x9e, 0x8f, 0x9f, 0xae, 0xbe, 0xaf, 0xbf, 0xcc, 0xdc, 0xcd, 0xdd, 0xec, 0xfc, 0xed, 0xfd, 0xce, 0xde, 0xcf, 0xdf, 0xee, 0xfe, 0xef, 0xff];
     /**
@@ -162,7 +153,6 @@ class DES extends BlockCipher
      * Indexing this table with a byte value reverses the bit order.
      *
      * @var array
-     * @access private
      */
     protected static $invipmap = [0x0, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x8, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x4, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4, 0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 0xc, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc, 0x3c, 0xbc, 0x7c, 0xfc, 0x2, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2, 0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2, 0xa, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa, 0x6, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6, 0xe, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee, 0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x1, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1, 0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1, 0x9, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9, 0x5, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5, 0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0xd, 0x8d, 0x4d, 0xcd, 0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd, 0x3, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3, 0xb, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb, 0x7, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7, 0xf, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff];
     /**
@@ -172,63 +162,54 @@ class DES extends BlockCipher
      * P table: concatenation can then be replaced by exclusive ORs.
      *
      * @var array
-     * @access private
      */
     protected static $sbox1 = [0x808200, 0x0, 0x8000, 0x808202, 0x808002, 0x8202, 0x2, 0x8000, 0x200, 0x808200, 0x808202, 0x200, 0x800202, 0x808002, 0x800000, 0x2, 0x202, 0x800200, 0x800200, 0x8200, 0x8200, 0x808000, 0x808000, 0x800202, 0x8002, 0x800002, 0x800002, 0x8002, 0x0, 0x202, 0x8202, 0x800000, 0x8000, 0x808202, 0x2, 0x808000, 0x808200, 0x800000, 0x800000, 0x200, 0x808002, 0x8000, 0x8200, 0x800002, 0x200, 0x2, 0x800202, 0x8202, 0x808202, 0x8002, 0x808000, 0x800202, 0x800002, 0x202, 0x8202, 0x808200, 0x202, 0x800200, 0x800200, 0x0, 0x8002, 0x8200, 0x0, 0x808002];
     /**
      * Pre-permuted S-box2
      *
      * @var array
-     * @access private
      */
     protected static $sbox2 = [0x40084010, 0x40004000, 0x4000, 0x84010, 0x80000, 0x10, 0x40080010, 0x40004010, 0x40000010, 0x40084010, 0x40084000, 0x40000000, 0x40004000, 0x80000, 0x10, 0x40080010, 0x84000, 0x80010, 0x40004010, 0x0, 0x40000000, 0x4000, 0x84010, 0x40080000, 0x80010, 0x40000010, 0x0, 0x84000, 0x4010, 0x40084000, 0x40080000, 0x4010, 0x0, 0x84010, 0x40080010, 0x80000, 0x40004010, 0x40080000, 0x40084000, 0x4000, 0x40080000, 0x40004000, 0x10, 0x40084010, 0x84010, 0x10, 0x4000, 0x40000000, 0x4010, 0x40084000, 0x80000, 0x40000010, 0x80010, 0x40004010, 0x40000010, 0x80010, 0x84000, 0x0, 0x40004000, 0x4010, 0x40000000, 0x40080010, 0x40084010, 0x84000];
     /**
      * Pre-permuted S-box3
      *
      * @var array
-     * @access private
      */
     protected static $sbox3 = [0x104, 0x4010100, 0x0, 0x4010004, 0x4000100, 0x0, 0x10104, 0x4000100, 0x10004, 0x4000004, 0x4000004, 0x10000, 0x4010104, 0x10004, 0x4010000, 0x104, 0x4000000, 0x4, 0x4010100, 0x100, 0x10100, 0x4010000, 0x4010004, 0x10104, 0x4000104, 0x10100, 0x10000, 0x4000104, 0x4, 0x4010104, 0x100, 0x4000000, 0x4010100, 0x4000000, 0x10004, 0x104, 0x10000, 0x4010100, 0x4000100, 0x0, 0x100, 0x10004, 0x4010104, 0x4000100, 0x4000004, 0x100, 0x0, 0x4010004, 0x4000104, 0x10000, 0x4000000, 0x4010104, 0x4, 0x10104, 0x10100, 0x4000004, 0x4010000, 0x4000104, 0x104, 0x4010000, 0x10104, 0x4, 0x4010004, 0x10100];
     /**
      * Pre-permuted S-box4
      *
      * @var array
-     * @access private
      */
     protected static $sbox4 = [0x80401000, 0x80001040, 0x80001040, 0x40, 0x401040, 0x80400040, 0x80400000, 0x80001000, 0x0, 0x401000, 0x401000, 0x80401040, 0x80000040, 0x0, 0x400040, 0x80400000, 0x80000000, 0x1000, 0x400000, 0x80401000, 0x40, 0x400000, 0x80001000, 0x1040, 0x80400040, 0x80000000, 0x1040, 0x400040, 0x1000, 0x401040, 0x80401040, 0x80000040, 0x400040, 0x80400000, 0x401000, 0x80401040, 0x80000040, 0x0, 0x0, 0x401000, 0x1040, 0x400040, 0x80400040, 0x80000000, 0x80401000, 0x80001040, 0x80001040, 0x40, 0x80401040, 0x80000040, 0x80000000, 0x1000, 0x80400000, 0x80001000, 0x401040, 0x80400040, 0x80001000, 0x1040, 0x400000, 0x80401000, 0x40, 0x400000, 0x1000, 0x401040];
     /**
      * Pre-permuted S-box5
      *
      * @var array
-     * @access private
      */
     protected static $sbox5 = [0x80, 0x1040080, 0x1040000, 0x21000080, 0x40000, 0x80, 0x20000000, 0x1040000, 0x20040080, 0x40000, 0x1000080, 0x20040080, 0x21000080, 0x21040000, 0x40080, 0x20000000, 0x1000000, 0x20040000, 0x20040000, 0x0, 0x20000080, 0x21040080, 0x21040080, 0x1000080, 0x21040000, 0x20000080, 0x0, 0x21000000, 0x1040080, 0x1000000, 0x21000000, 0x40080, 0x40000, 0x21000080, 0x80, 0x1000000, 0x20000000, 0x1040000, 0x21000080, 0x20040080, 0x1000080, 0x20000000, 0x21040000, 0x1040080, 0x20040080, 0x80, 0x1000000, 0x21040000, 0x21040080, 0x40080, 0x21000000, 0x21040080, 0x1040000, 0x0, 0x20040000, 0x21000000, 0x40080, 0x1000080, 0x20000080, 0x40000, 0x0, 0x20040000, 0x1040080, 0x20000080];
     /**
      * Pre-permuted S-box6
      *
      * @var array
-     * @access private
      */
     protected static $sbox6 = [0x10000008, 0x10200000, 0x2000, 0x10202008, 0x10200000, 0x8, 0x10202008, 0x200000, 0x10002000, 0x202008, 0x200000, 0x10000008, 0x200008, 0x10002000, 0x10000000, 0x2008, 0x0, 0x200008, 0x10002008, 0x2000, 0x202000, 0x10002008, 0x8, 0x10200008, 0x10200008, 0x0, 0x202008, 0x10202000, 0x2008, 0x202000, 0x10202000, 0x10000000, 0x10002000, 0x8, 0x10200008, 0x202000, 0x10202008, 0x200000, 0x2008, 0x10000008, 0x200000, 0x10002000, 0x10000000, 0x2008, 0x10000008, 0x10202008, 0x202000, 0x10200000, 0x202008, 0x10202000, 0x0, 0x10200008, 0x8, 0x2000, 0x10200000, 0x202008, 0x2000, 0x200008, 0x10002008, 0x0, 0x10202000, 0x10000000, 0x200008, 0x10002008];
     /**
      * Pre-permuted S-box7
      *
      * @var array
-     * @access private
      */
     protected static $sbox7 = [0x100000, 0x2100001, 0x2000401, 0x0, 0x400, 0x2000401, 0x100401, 0x2100400, 0x2100401, 0x100000, 0x0, 0x2000001, 0x1, 0x2000000, 0x2100001, 0x401, 0x2000400, 0x100401, 0x100001, 0x2000400, 0x2000001, 0x2100000, 0x2100400, 0x100001, 0x2100000, 0x400, 0x401, 0x2100401, 0x100400, 0x1, 0x2000000, 0x100400, 0x2000000, 0x100400, 0x100000, 0x2000401, 0x2000401, 0x2100001, 0x2100001, 0x1, 0x100001, 0x2000000, 0x2000400, 0x100000, 0x2100400, 0x401, 0x100401, 0x2100400, 0x401, 0x2000001, 0x2100401, 0x2100000, 0x100400, 0x0, 0x1, 0x2100401, 0x0, 0x100401, 0x2100000, 0x400, 0x2000001, 0x2000400, 0x400, 0x100001];
     /**
      * Pre-permuted S-box8
      *
      * @var array
-     * @access private
      */
     protected static $sbox8 = [0x8000820, 0x800, 0x20000, 0x8020820, 0x8000000, 0x8000820, 0x20, 0x8000000, 0x20020, 0x8020000, 0x8020820, 0x20800, 0x8020800, 0x20820, 0x800, 0x20, 0x8020000, 0x8000020, 0x8000800, 0x820, 0x20800, 0x20020, 0x8020020, 0x8020800, 0x820, 0x0, 0x0, 0x8020020, 0x8000020, 0x8000800, 0x20820, 0x20000, 0x20820, 0x20000, 0x8020800, 0x800, 0x20, 0x8020020, 0x800, 0x20820, 0x8000800, 0x20, 0x8000020, 0x8020000, 0x8020020, 0x8000000, 0x20000, 0x8000820, 0x0, 0x8020820, 0x20020, 0x8000020, 0x8020000, 0x8000800, 0x8000820, 0x0, 0x8020820, 0x20800, 0x20800, 0x820, 0x820, 0x20020, 0x8000000, 0x8020800];
     /**
      * Default Constructor.
      *
      * @param string $mode
-     * @access public
      * @throws BadModeException if an invalid / unsupported mode is provided
      */
     public function __construct($mode)
@@ -243,15 +224,20 @@ class DES extends BlockCipher
      *
      * This is mainly just a wrapper to set things up for \phpseclib3\Crypt\Common\SymmetricKey::isValidEngine()
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::isValidEngine()
+     * @see Common\SymmetricKey::isValidEngine()
      * @param int $engine
-     * @access protected
      * @return bool
      */
     protected function isValidEngineHelper($engine)
     {
         if ($this->key_length_max == 8) {
             if ($engine == self::ENGINE_OPENSSL) {
+                // quoting https://www.openssl.org/news/openssl-3.0-notes.html, OpenSSL 3.0.1
+                // "Moved all variations of the EVP ciphers CAST5, BF, IDEA, SEED, RC2, RC4, RC5, and DES to the legacy provider"
+                // in theory openssl_get_cipher_methods() should catch this but, on GitHub Actions, at least, it does not
+                if (\defined('OPENSSL_VERSION_TEXT') && \version_compare(\preg_replace('#OpenSSL (\\d+\\.\\d+\\.\\d+) .*#', '$1', \OPENSSL_VERSION_TEXT), '3.0.1', '>=')) {
+                    return \false;
+                }
                 $this->cipher_name_openssl_ecb = 'des-ecb';
                 $this->cipher_name_openssl = 'des-' . $this->openssl_translate_mode();
             }
@@ -265,8 +251,7 @@ class DES extends BlockCipher
      *
      * DES also requires that every eighth bit be a parity bit, however, we'll ignore that.
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setKey()
-     * @access public
+     * @see Common\SymmetricKey::setKey()
      * @param string $key
      */
     public function setKey($key)
@@ -280,10 +265,9 @@ class DES extends BlockCipher
     /**
      * Encrypts a block
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::encryptBlock()
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::encrypt()
+     * @see Common\SymmetricKey::encryptBlock()
+     * @see Common\SymmetricKey::encrypt()
      * @see self::encrypt()
-     * @access private
      * @param string $in
      * @return string
      */
@@ -294,10 +278,9 @@ class DES extends BlockCipher
     /**
      * Decrypts a block
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::decryptBlock()
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::decrypt()
+     * @see Common\SymmetricKey::decryptBlock()
+     * @see Common\SymmetricKey::decrypt()
      * @see self::decrypt()
-     * @access private
      * @param string $in
      * @return string
      */
@@ -314,7 +297,6 @@ class DES extends BlockCipher
      *
      * @see self::encryptBlock()
      * @see self::decryptBlock()
-     * @access private
      * @param string $block
      * @param int $mode
      * @return string
@@ -323,14 +305,14 @@ class DES extends BlockCipher
     {
         static $sbox1, $sbox2, $sbox3, $sbox4, $sbox5, $sbox6, $sbox7, $sbox8, $shuffleip, $shuffleinvip;
         if (!$sbox1) {
-            $sbox1 = \array_map('intval', self::$sbox1);
-            $sbox2 = \array_map('intval', self::$sbox2);
-            $sbox3 = \array_map('intval', self::$sbox3);
-            $sbox4 = \array_map('intval', self::$sbox4);
-            $sbox5 = \array_map('intval', self::$sbox5);
-            $sbox6 = \array_map('intval', self::$sbox6);
-            $sbox7 = \array_map('intval', self::$sbox7);
-            $sbox8 = \array_map('intval', self::$sbox8);
+            $sbox1 = \array_map([self::class, 'safe_intval'], self::$sbox1);
+            $sbox2 = \array_map([self::class, 'safe_intval'], self::$sbox2);
+            $sbox3 = \array_map([self::class, 'safe_intval'], self::$sbox3);
+            $sbox4 = \array_map([self::class, 'safe_intval'], self::$sbox4);
+            $sbox5 = \array_map([self::class, 'safe_intval'], self::$sbox5);
+            $sbox6 = \array_map([self::class, 'safe_intval'], self::$sbox6);
+            $sbox7 = \array_map([self::class, 'safe_intval'], self::$sbox7);
+            $sbox8 = \array_map([self::class, 'safe_intval'], self::$sbox8);
             /* Merge $shuffle with $[inv]ipmap */
             for ($i = 0; $i < 256; ++$i) {
                 $shuffleip[] = self::$shuffle[self::$ipmap[$i]];
@@ -371,8 +353,7 @@ class DES extends BlockCipher
     /**
      * Creates the key schedule
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setupKey()
-     * @access private
+     * @see Common\SymmetricKey::setupKey()
      */
     protected function setupKey()
     {
@@ -431,8 +412,8 @@ class DES extends BlockCipher
                 $cp = $pc2mapc1[$c >> 24] | $pc2mapc2[$c >> 16 & 0xff] | $pc2mapc3[$c >> 8 & 0xff] | $pc2mapc4[$c & 0xff];
                 $dp = $pc2mapd1[$d >> 24] | $pc2mapd2[$d >> 16 & 0xff] | $pc2mapd3[$d >> 8 & 0xff] | $pc2mapd4[$d & 0xff];
                 // Reorder: odd bytes/even bytes. Push the result in key schedule.
-                $val1 = $cp & 0xff000000 | $cp << 8 & 0xff0000 | $dp >> 16 & 0xff00 | $dp >> 8 & 0xff;
-                $val2 = $cp << 8 & 0xff000000 | $cp << 16 & 0xff0000 | $dp >> 8 & 0xff00 | $dp & 0xff;
+                $val1 = $cp & self::safe_intval(0xff000000) | $cp << 8 & 0xff0000 | $dp >> 16 & 0xff00 | $dp >> 8 & 0xff;
+                $val2 = $cp << 8 & self::safe_intval(0xff000000) | $cp << 16 & 0xff0000 | $dp >> 8 & 0xff00 | $dp & 0xff;
                 $keys[$des_round][self::ENCRYPT][] = $val1;
                 $keys[$des_round][self::DECRYPT][$ki - 1] = $val1;
                 $keys[$des_round][self::ENCRYPT][] = $val2;
@@ -452,8 +433,7 @@ class DES extends BlockCipher
     /**
      * Setup the performance-optimized function for de/encrypt()
      *
-     * @see \phpseclib3\Crypt\Common\SymmetricKey::setupInlineCrypt()
-     * @access private
+     * @see Common\SymmetricKey::setupInlineCrypt()
      */
     protected function setupInlineCrypt()
     {
@@ -463,14 +443,14 @@ class DES extends BlockCipher
         $des_rounds = $this->des_rounds;
         $init_crypt = 'static $sbox1, $sbox2, $sbox3, $sbox4, $sbox5, $sbox6, $sbox7, $sbox8, $shuffleip, $shuffleinvip;
             if (!$sbox1) {
-                $sbox1 = array_map("intval", self::$sbox1);
-                $sbox2 = array_map("intval", self::$sbox2);
-                $sbox3 = array_map("intval", self::$sbox3);
-                $sbox4 = array_map("intval", self::$sbox4);
-                $sbox5 = array_map("intval", self::$sbox5);
-                $sbox6 = array_map("intval", self::$sbox6);
-                $sbox7 = array_map("intval", self::$sbox7);
-                $sbox8 = array_map("intval", self::$sbox8);' . '
+                $sbox1 = array_map("self::safe_intval", self::$sbox1);
+                $sbox2 = array_map("self::safe_intval", self::$sbox2);
+                $sbox3 = array_map("self::safe_intval", self::$sbox3);
+                $sbox4 = array_map("self::safe_intval", self::$sbox4);
+                $sbox5 = array_map("self::safe_intval", self::$sbox5);
+                $sbox6 = array_map("self::safe_intval", self::$sbox6);
+                $sbox7 = array_map("self::safe_intval", self::$sbox7);
+                $sbox8 = array_map("self::safe_intval", self::$sbox8);' . '
                 for ($i = 0; $i < 256; ++$i) {
                     $shuffleip[]    =  self::$shuffle[self::$ipmap[$i]];
                     $shuffleinvip[] =  self::$shuffle[self::$invipmap[$i]];

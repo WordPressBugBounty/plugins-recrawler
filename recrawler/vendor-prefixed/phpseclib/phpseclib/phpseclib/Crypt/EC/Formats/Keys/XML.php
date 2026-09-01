@@ -10,8 +10,6 @@
  *
  * PHP version 5
  *
- * @category  Crypt
- * @package   EC
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2015 Jim Wigginton
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
@@ -19,20 +17,18 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\Formats\Keys;
 
-use Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime\Base64;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\Base as BaseCurve;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\Montgomery as MontgomeryCurve;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\Prime as PrimeCurve;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\TwistedEdwards as TwistedEdwardsCurve;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\EC\BaseCurves\Montgomery as MontgomeryCurve;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadConfigurationException;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\UnsupportedCurveException;
+use Mihdan\ReCrawler\Dependencies\phpseclib3\Math\BigInteger;
 /**
  * XML Formatted EC Key Handler
  *
- * @package EC
  * @author  Jim Wigginton <terrafrost@php.net>
- * @access  public
  */
 abstract class XML
 {
@@ -52,7 +48,6 @@ abstract class XML
     /**
      * Break a public or private key down into its constituent components
      *
-     * @access public
      * @param string $key
      * @param string $password optional
      * @return array
@@ -63,7 +58,13 @@ abstract class XML
         if (!Strings::is_stringable($key)) {
             throw new \UnexpectedValueException('Key should be a string - not a ' . \gettype($key));
         }
+        if (!\class_exists('DOMDocument')) {
+            throw new BadConfigurationException('The dom extension is not setup correctly on this system');
+        }
         $use_errors = \libxml_use_internal_errors(\true);
+        if (\substr($key, 0, 5) != '<?xml') {
+            $key = '<xml>' . $key . '</xml>';
+        }
         $temp = self::isolateNamespace($key, 'http://www.w3.org/2009/xmldsig11#');
         if ($temp) {
             $key = $temp;
@@ -73,9 +74,6 @@ abstract class XML
             $key = $temp;
         }
         $dom = new \DOMDocument();
-        if (\substr($key, 0, 5) != '<?xml') {
-            $key = '<xml>' . $key . '</xml>';
-        }
         if (!$dom->loadXML($key)) {
             \libxml_use_internal_errors($use_errors);
             throw new \UnexpectedValueException('Key does not appear to contain XML');
@@ -97,7 +95,7 @@ abstract class XML
      * @param bool $decode optional
      * @return \DOMNodeList
      */
-    private static function query($xpath, $name, $error = null, $decode = \true)
+    private static function query(\DOMXPath $xpath, $name, $error = null, $decode = \true)
     {
         $query = '/';
         $names = \explode('/', $name);
@@ -144,13 +142,13 @@ abstract class XML
      */
     private static function decodeValue($value)
     {
-        return Base64::decode(\str_replace(["\r", "\n", ' ', "\t"], '', $value));
+        return Strings::base64_decode(\str_replace(["\r", "\n", ' ', "\t"], '', $value));
     }
     /**
      * Extract points from an XML document
      *
      * @param \DOMXPath $xpath
-     * @param \phpseclib3\Crypt\EC\BaseCurves\Base $curve
+     * @param BaseCurve $curve
      * @return object[]
      */
     private static function extractPointRFC4050(\DOMXPath $xpath, BaseCurve $curve)
@@ -174,7 +172,7 @@ abstract class XML
      * on the curve parameters
      *
      * @param \DomXPath $xpath
-     * @return \phpseclib3\Crypt\EC\BaseCurves\Base|false
+     * @return BaseCurve|false
      */
     private static function loadCurveByParam(\DOMXPath $xpath)
     {
@@ -237,7 +235,7 @@ abstract class XML
      * on the curve parameters
      *
      * @param \DomXPath $xpath
-     * @return \phpseclib3\Crypt\EC\BaseCurves\Base|false
+     * @return BaseCurve|false
      */
     private static function loadCurveByParamRFC4050(\DOMXPath $xpath)
     {
@@ -304,7 +302,7 @@ abstract class XML
     /**
      * Convert a public key to the appropriate format
      *
-     * @param \phpseclib3\Crypt\EC\BaseCurves\Base $curve
+     * @param BaseCurve $curve
      * @param \phpseclib3\Math\Common\FiniteField\Integer[] $publicKey
      * @param array $options optional
      * @return string
@@ -325,12 +323,12 @@ abstract class XML
             return '<' . $pre . 'ECDSAKeyValue xmlns' . $post . '="http://www.w3.org/2001/04/xmldsig-more#">' . "\r\n" . self::encodeXMLParameters($curve, $pre, $options) . "\r\n" . '<' . $pre . 'PublicKey>' . "\r\n" . '<' . $pre . 'X Value="' . $publicKey[0] . '" />' . "\r\n" . '<' . $pre . 'Y Value="' . $publicKey[1] . '" />' . "\r\n" . '</' . $pre . 'PublicKey>' . "\r\n" . '</' . $pre . 'ECDSAKeyValue>';
         }
         $publicKey = "\x04" . $publicKey[0]->toBytes() . $publicKey[1]->toBytes();
-        return '<' . $pre . 'ECDSAKeyValue xmlns' . $post . '="http://www.w3.org/2009/xmldsig11#">' . "\r\n" . self::encodeXMLParameters($curve, $pre, $options) . "\r\n" . '<' . $pre . 'PublicKey>' . Base64::encode($publicKey) . '</' . $pre . 'PublicKey>' . "\r\n" . '</' . $pre . 'ECDSAKeyValue>';
+        return '<' . $pre . 'ECDSAKeyValue xmlns' . $post . '="http://www.w3.org/2009/xmldsig11#">' . "\r\n" . self::encodeXMLParameters($curve, $pre, $options) . "\r\n" . '<' . $pre . 'PublicKey>' . Strings::base64_encode($publicKey) . '</' . $pre . 'PublicKey>' . "\r\n" . '</' . $pre . 'ECDSAKeyValue>';
     }
     /**
      * Encode Parameters
      *
-     * @param \phpseclib3\Crypt\EC\BaseCurves\Base $curve
+     * @param BaseCurve $curve
      * @param string $pre
      * @param array $options optional
      * @return string|false
@@ -363,12 +361,12 @@ abstract class XML
             $temp = $result['specifiedCurve'];
             switch ($temp['fieldID']['fieldType']) {
                 case 'prime-field':
-                    $xml .= '<' . $pre . 'Prime>' . "\r\n" . '<' . $pre . 'P>' . Base64::encode($temp['fieldID']['parameters']->toBytes()) . '</' . $pre . 'P>' . "\r\n" . '</' . $pre . 'Prime>' . "\r\n";
+                    $xml .= '<' . $pre . 'Prime>' . "\r\n" . '<' . $pre . 'P>' . Strings::base64_encode($temp['fieldID']['parameters']->toBytes()) . '</' . $pre . 'P>' . "\r\n" . '</' . $pre . 'Prime>' . "\r\n";
                     break;
                 default:
                     throw new UnsupportedCurveException('Field Type of ' . $temp['fieldID']['fieldType'] . ' is not supported');
             }
-            $xml .= '</' . $pre . 'FieldID>' . "\r\n" . '<' . $pre . 'Curve>' . "\r\n" . '<' . $pre . 'A>' . Base64::encode($temp['curve']['a']) . '</' . $pre . 'A>' . "\r\n" . '<' . $pre . 'B>' . Base64::encode($temp['curve']['b']) . '</' . $pre . 'B>' . "\r\n" . '</' . $pre . 'Curve>' . "\r\n" . '<' . $pre . 'Base>' . Base64::encode($temp['base']) . '</' . $pre . 'Base>' . "\r\n" . '<' . $pre . 'Order>' . Base64::encode($temp['order']) . '</' . $pre . 'Order>' . "\r\n" . '</' . $pre . 'ECParameters>';
+            $xml .= '</' . $pre . 'FieldID>' . "\r\n" . '<' . $pre . 'Curve>' . "\r\n" . '<' . $pre . 'A>' . Strings::base64_encode($temp['curve']['a']) . '</' . $pre . 'A>' . "\r\n" . '<' . $pre . 'B>' . Strings::base64_encode($temp['curve']['b']) . '</' . $pre . 'B>' . "\r\n" . '</' . $pre . 'Curve>' . "\r\n" . '<' . $pre . 'Base>' . Strings::base64_encode($temp['base']) . '</' . $pre . 'Base>' . "\r\n" . '<' . $pre . 'Order>' . Strings::base64_encode($temp['order']) . '</' . $pre . 'Order>' . "\r\n" . '</' . $pre . 'ECParameters>';
             return $xml;
         }
     }

@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 /*
  * This file is part of the Monolog package.
  *
@@ -10,6 +11,7 @@
  */
 namespace Mihdan\ReCrawler\Dependencies\Monolog\Processor;
 
+use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 /**
  * Adds value of getmypid into records
  *
@@ -18,12 +20,11 @@ namespace Mihdan\ReCrawler\Dependencies\Monolog\Processor;
 class ProcessIdProcessor implements ProcessorInterface
 {
     /**
-     * @param  array $record
-     * @return array
+     * @inheritDoc
      */
-    public function __invoke(array $record)
+    public function __invoke(LogRecord $record) : LogRecord
     {
-        $record['extra']['process_id'] = \getmypid();
+        $record->extra['process_id'] = \getmypid();
         return $record;
     }
 }
