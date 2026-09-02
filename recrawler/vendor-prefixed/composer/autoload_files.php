@@ -11,5 +11,4 @@ return array(
     'ed56c43f3903cda501c273ee9b7253c6' => $baseDir . '/vendor-prefixed/guzzlehttp/guzzle/src/functions_include.php',
     'd545091be0232c72f7efe670f960e632' => $baseDir . '/vendor-prefixed/google/apiclient-services/autoload.php',
     '4a00ad369bb2175e2cec0dc4969dd8a6' => $baseDir . '/vendor-prefixed/google/apiclient/src/aliases.php',
-    '5411c8ad951051fc56be16b24ab824f9' => $baseDir . '/vendor-prefixed/woocommerce/action-scheduler/functions.php',
 );

@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'mihdan/recrawler',
-        'pretty_version' => '0.3.2',
-        'version' => '0.3.2.0',
-        'reference' => 'c7ccd671f59d08d475a6f85185eb9d90757ff068',
+        'pretty_version' => '0.3.3',
+        'version' => '0.3.3.0',
+        'reference' => 'eb6b83ac50fbff4c11ad29eaeaef7ba6131ed66d',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -74,9 +74,9 @@
             'dev_requirement' => false,
         ),
         'mihdan/recrawler' => array(
-            'pretty_version' => '0.3.2',
-            'version' => '0.3.2.0',
-            'reference' => 'c7ccd671f59d08d475a6f85185eb9d90757ff068',
+            'pretty_version' => '0.3.3',
+            'version' => '0.3.3.0',
+            'reference' => 'eb6b83ac50fbff4c11ad29eaeaef7ba6131ed66d',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
