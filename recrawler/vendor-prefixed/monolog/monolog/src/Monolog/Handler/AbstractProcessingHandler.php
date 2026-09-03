@@ -37,7 +37,7 @@ abstract class AbstractProcessingHandler extends AbstractHandler implements Proc
         }
         $record->formatted = $this->getFormatter()->format($record);
         $this->write($record);
-        return \false === $this->bubble;
+        return !$this->getBubble();
     }
     /**
      * Writes the (already formatted) record down to the log of the implementing handler

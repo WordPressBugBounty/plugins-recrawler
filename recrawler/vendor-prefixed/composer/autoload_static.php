@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
+class ComposerStaticInit762d84d81b649a371121b4f2030c5885
 {
     public static $files = array (
         '14879c181a0568fe1bcc9a48e321da01' => __DIR__ . '/../..' . '/vendor-prefixed/ralouphie/getallheaders/src/getallheaders.php',
@@ -30,6 +30,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Attribute' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Mihdan\\ReCrawler\\Dependencies\\Firebase\\JWT\\BeforeValidException' => __DIR__ . '/../..' . '/vendor-prefixed/firebase/php-jwt/src/BeforeValidException.php',
         'Mihdan\\ReCrawler\\Dependencies\\Firebase\\JWT\\CachedKeySet' => __DIR__ . '/../..' . '/vendor-prefixed/firebase/php-jwt/src/CachedKeySet.php',
         'Mihdan\\ReCrawler\\Dependencies\\Firebase\\JWT\\ExpiredException' => __DIR__ . '/../..' . '/vendor-prefixed/firebase/php-jwt/src/ExpiredException.php',
@@ -157,14 +158,20 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\CurlVersion' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/CurlVersion.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\HostValidator' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/HostValidator.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/MockHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/Proxy.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\ProxyEnvironment' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/ProxyEnvironment.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\StreamHandler' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/StreamHandler.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Handler\\TlsVersion' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Handler/TlsVersion.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\MessageFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/MessageFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\MessageFormatterInterface' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/MessageFormatterInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Middleware' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Middleware.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Multiplexing' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Multiplexing.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Pool' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Pool.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\PrepareBodyMiddleware' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/PrepareBodyMiddleware.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Promise\\AggregateException' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/promises/src/AggregateException.php',
@@ -203,6 +210,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Query' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Query.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Request' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Request.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Response' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Response.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Rfc3986' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Rfc3986.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Rfc7230' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Rfc7230.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\ServerRequest' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/ServerRequest.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Psr7\\Stream' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/psr7/src/Stream.php',
@@ -218,6 +226,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\RequestOptions' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/RequestOptions.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\RetryMiddleware' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\TransferStats' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/TransferStats.php',
+        'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\TransportSharing' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/TransportSharing.php',
         'Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\Utils' => __DIR__ . '/../..' . '/vendor-prefixed/guzzlehttp/guzzle/src/Utils.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Attribute\\AsMonologProcessor' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Attribute/AsMonologProcessor.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Attribute\\WithMonologChannel' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Attribute/WithMonologChannel.php',
@@ -239,9 +248,11 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\LogstashFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/LogstashFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\MongoDBFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/MongoDBFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\NormalizerFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/NormalizerFormatter.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\RedactingFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/RedactingFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\ScalarFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/ScalarFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\SyslogFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/SyslogFormatter.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\WildfireFormatter' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/WildfireFormatter.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Formatter\\WrappingFormatterInterface' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Formatter/WrappingFormatterInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\AbstractHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/AbstractHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\AbstractProcessingHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/AbstractProcessingHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\AbstractSyslogHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/AbstractSyslogHandler.php',
@@ -269,6 +280,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\FlowdockHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/FlowdockHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\FormattableHandlerInterface' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/FormattableHandlerInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\FormattableHandlerTrait' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/FormattableHandlerTrait.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\FrankenPhpHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/FrankenPhpHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\GelfHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/GelfHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\GroupHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/GroupHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\Handler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/Handler.php',
@@ -277,6 +289,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\IFTTTHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/IFTTTHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\InsightOpsHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/InsightOpsHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\LogEntriesHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/LogEntriesHandler.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\LogMonsterHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/LogMonsterHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\LogglyHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/LogglyHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\LogmaticHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/LogmaticHandler.php',
         'Mihdan\\ReCrawler\\Dependencies\\Monolog\\Handler\\MailHandler' => __DIR__ . '/../..' . '/vendor-prefixed/monolog/monolog/src/Monolog/Handler/MailHandler.php',
@@ -351,6 +364,7 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\ParagonIE\\ConstantTime\\Encoding' => __DIR__ . '/../..' . '/vendor-prefixed/paragonie/constant_time_encoding/src/Encoding.php',
         'Mihdan\\ReCrawler\\Dependencies\\ParagonIE\\ConstantTime\\Hex' => __DIR__ . '/../..' . '/vendor-prefixed/paragonie/constant_time_encoding/src/Hex.php',
         'Mihdan\\ReCrawler\\Dependencies\\ParagonIE\\ConstantTime\\RFC4648' => __DIR__ . '/../..' . '/vendor-prefixed/paragonie/constant_time_encoding/src/RFC4648.php',
+        'Mihdan\\ReCrawler\\Dependencies\\PhpToken' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Cache\\CacheException' => __DIR__ . '/../..' . '/vendor-prefixed/psr/cache/src/CacheException.php',
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Cache\\CacheItemInterface' => __DIR__ . '/../..' . '/vendor-prefixed/psr/cache/src/CacheItemInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Cache\\CacheItemPoolInterface' => __DIR__ . '/../..' . '/vendor-prefixed/psr/cache/src/CacheItemPoolInterface.php',
@@ -380,6 +394,11 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Log\\LoggerInterface' => __DIR__ . '/../..' . '/vendor-prefixed/psr/log/src/LoggerInterface.php',
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Log\\LoggerTrait' => __DIR__ . '/../..' . '/vendor-prefixed/psr/log/src/LoggerTrait.php',
         'Mihdan\\ReCrawler\\Dependencies\\Psr\\Log\\NullLogger' => __DIR__ . '/../..' . '/vendor-prefixed/psr/log/src/NullLogger.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Stringable' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Php80.php',
+        'Mihdan\\ReCrawler\\Dependencies\\Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/PhpToken.php',
+        'Mihdan\\ReCrawler\\Dependencies\\UnhandledMatchError' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'Mihdan\\ReCrawler\\Dependencies\\ValueError' => __DIR__ . '/../..' . '/vendor-prefixed/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Common\\Functions\\Strings' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Common/Functions/Strings.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\AES' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/AES.php',
         'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\Blowfish' => __DIR__ . '/../..' . '/vendor-prefixed/phpseclib/phpseclib/phpseclib/Crypt/Blowfish.php',
@@ -721,9 +740,9 @@ class ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit6af731674e15ff6bf97cdf636c9749c4::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit762d84d81b649a371121b4f2030c5885::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit762d84d81b649a371121b4f2030c5885::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit762d84d81b649a371121b4f2030c5885::$classMap;
 
         }, null, ClassLoader::class);
     }

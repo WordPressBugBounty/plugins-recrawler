@@ -14,7 +14,6 @@ namespace Mihdan\ReCrawler\Dependencies\Monolog\Handler;
 use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\LineFormatter;
 use Mihdan\ReCrawler\Dependencies\Monolog\Formatter\FormatterInterface;
 use Mihdan\ReCrawler\Dependencies\Monolog\Level;
-use Mihdan\ReCrawler\Dependencies\Monolog\Utils;
 use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
 /**
  * Stores to PHP error_log() handler.

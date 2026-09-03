@@ -21,6 +21,7 @@ use InvalidArgumentException;
 use Mihdan\ReCrawler\Dependencies\Elasticsearch\Common\Exceptions\RuntimeException as ElasticsearchRuntimeException;
 use Mihdan\ReCrawler\Dependencies\Elasticsearch\Client;
 use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
+use Mihdan\ReCrawler\Dependencies\Monolog\Utils;
 use Mihdan\ReCrawler\Dependencies\Elastic\Elasticsearch\Exception\InvalidArgumentException as ElasticInvalidArgumentException;
 use Mihdan\ReCrawler\Dependencies\Elastic\Elasticsearch\Client as Client8;
 /**
@@ -107,7 +108,7 @@ class ElasticsearchHandler extends AbstractProcessingHandler
      */
     public function setFormatter(FormatterInterface $formatter) : HandlerInterface
     {
-        if ($formatter instanceof ElasticsearchFormatter) {
+        if (Utils::unwrapFormatter($formatter) instanceof ElasticsearchFormatter) {
             return parent::setFormatter($formatter);
         }
         throw new InvalidArgumentException('ElasticsearchHandler is only compatible with ElasticsearchFormatter');

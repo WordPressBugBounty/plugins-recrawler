@@ -72,7 +72,7 @@ class DeduplicationHandler extends BufferHandler
                 $passthru = $passthru === \true || !\is_array($store) || !$this->isDuplicate($store, $record);
                 if ($passthru) {
                     $line = $this->buildDeduplicationStoreEntry($record);
-                    \file_put_contents($this->deduplicationStore, $line . "\n", \FILE_APPEND);
+                    \file_put_contents($this->deduplicationStore, $line . "\n", \FILE_APPEND | \LOCK_EX);
                     if (!\is_array($store)) {
                         $store = [];
                     }
@@ -99,7 +99,12 @@ class DeduplicationHandler extends BufferHandler
         $expectedMessage = \preg_replace('{[\\r\\n].*}', '', $record->message);
         $yesterday = \time() - 86400;
         for ($i = \count($store) - 1; $i >= 0; $i--) {
-            list($timestamp, $level, $message) = \explode(':', $store[$i], 3);
+            $parts = \explode(':', $store[$i], 3);
+            if (\count($parts) < 3) {
+                // Skip invalid/incomplete lines (e.g. partially written due to concurrent access)
+                continue;
+            }
+            [$timestamp, $level, $message] = $parts;
             if ($level === $record->level->getName() && $message === $expectedMessage && $timestamp > $timestampValidity) {
                 return \true;
             }
@@ -126,6 +131,7 @@ class DeduplicationHandler extends BufferHandler
             throw new \RuntimeException('Failed to open file for reading and writing: ' . $this->deduplicationStore);
         }
         if (\false === \flock($handle, \LOCK_EX)) {
+            \fclose($handle);
             return;
         }
         $validLogs = [];

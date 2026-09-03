@@ -34,7 +34,6 @@ namespace Mihdan\ReCrawler\Dependencies\phpseclib3\System\SSH;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Common\Functions\Strings;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\Common\PublicKey;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\PublicKeyLoader;
-use Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\RSA;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Exception\BadConfigurationException;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\Net\SSH2;
 use Mihdan\ReCrawler\Dependencies\phpseclib3\System\SSH\Agent\Identity;

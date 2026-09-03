@@ -19,6 +19,7 @@ use Mihdan\ReCrawler\Dependencies\Monolog\Level;
 use Mihdan\ReCrawler\Dependencies\Elastica\Client;
 use Mihdan\ReCrawler\Dependencies\Elastica\Exception\ExceptionInterface;
 use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
+use Mihdan\ReCrawler\Dependencies\Monolog\Utils;
 /**
  * Elastic Search handler
  *
@@ -83,7 +84,7 @@ class ElasticaHandler extends AbstractProcessingHandler
      */
     public function setFormatter(FormatterInterface $formatter) : HandlerInterface
     {
-        if ($formatter instanceof ElasticaFormatter) {
+        if (Utils::unwrapFormatter($formatter) instanceof ElasticaFormatter) {
             return parent::setFormatter($formatter);
         }
         throw new \InvalidArgumentException('ElasticaHandler is only compatible with ElasticaFormatter');
