@@ -85,7 +85,7 @@ abstract class PKCS8 extends Progenitor
         }
         $params = ASN1::asn1map($decoded[0], Maps\ECParameters::MAP);
         if (!$params) {
-            throw new \RuntimeException('Mihdan\\ReCrawler\\Dependencies\\Unable to decode the parameters using Maps\\ECParameters');
+            throw new \RuntimeException('Unable to decode the parameters using Maps\ECParameters');
         }
         $components = [];
         $components['curve'] = self::loadCurveByParam($params);
@@ -116,11 +116,11 @@ abstract class PKCS8 extends Progenitor
         $components = [];
         if (isset($key['privateKey'])) {
             $components['curve'] = $key['privateKeyAlgorithm']['algorithm'] == 'id-Ed25519' ? new Ed25519() : new Ed448();
-            $expected = \chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($components['curve']::SIZE);
-            if (\substr($key['privateKey'], 0, 2) != $expected) {
-                throw new \RuntimeException('The first two bytes of the ' . $key['privateKeyAlgorithm']['algorithm'] . ' private key field should be 0x' . \bin2hex($expected));
+            $expected = chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($components['curve']::SIZE);
+            if (substr($key['privateKey'], 0, 2) != $expected) {
+                throw new \RuntimeException('The first two bytes of the ' . $key['privateKeyAlgorithm']['algorithm'] . ' private key field should be 0x' . bin2hex($expected));
             }
-            $arr = $components['curve']->extractSecret(\substr($key['privateKey'], 2));
+            $arr = $components['curve']->extractSecret(substr($key['privateKey'], 2));
             $components['dA'] = $arr['dA'];
             $components['secret'] = $arr['secret'];
         }
@@ -140,18 +140,18 @@ abstract class PKCS8 extends Progenitor
         $components = [];
         if (isset($key['privateKey'])) {
             $components['curve'] = $key['privateKeyAlgorithm']['algorithm'] == 'id-X25519' ? new Curve25519() : new Curve448();
-            $expected = \chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($components['curve']::SIZE);
+            $expected = chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($components['curve']::SIZE);
             $privateKey = (string) $key['privateKey'];
-            if (\substr($privateKey, 0, 2) != $expected) {
-                throw new \RuntimeException('The first two bytes of the ' . $key['privateKeyAlgorithm']['algorithm'] . ' private key field should be 0x' . \bin2hex($expected));
+            if (substr($privateKey, 0, 2) != $expected) {
+                throw new \RuntimeException('The first two bytes of the ' . $key['privateKeyAlgorithm']['algorithm'] . ' private key field should be 0x' . bin2hex($expected));
             }
-            $components['dA'] = new BigInteger(\substr($privateKey, 2), 256);
+            $components['dA'] = new BigInteger(substr($privateKey, 2), 256);
         }
         if (isset($key['publicKey'])) {
             if (!isset($components['curve'])) {
                 $components['curve'] = $key['publicKeyAlgorithm']['algorithm'] == 'id-X25519' ? new Curve25519() : new Curve448();
             }
-            $components['QA'] = [$components['curve']->convertInteger(new BigInteger(\strrev($key['publicKey']), 256))];
+            $components['QA'] = [$components['curve']->convertInteger(new BigInteger(strrev($key['publicKey']), 256))];
         }
         if (isset($key['privateKey']) && !isset($components['QA'])) {
             $components['QA'] = self::deriveMontgomeryPublicKey($components);
@@ -170,7 +170,7 @@ abstract class PKCS8 extends Progenitor
     {
         self::initialize_static_variables();
         if ($curve instanceof MontgomeryCurve) {
-            return self::wrapPublicKey(\str_pad(\strrev($publicKey[0]->toBytes()), $curve::SIZE, "\x00", \STR_PAD_RIGHT), null, $curve instanceof Curve25519 ? 'id-X25519' : 'id-X448', $options);
+            return self::wrapPublicKey(str_pad(strrev($publicKey[0]->toBytes()), $curve::SIZE, "\x00", \STR_PAD_RIGHT), null, $curve instanceof Curve25519 ? 'id-X25519' : 'id-X448', $options);
         }
         if ($curve instanceof TwistedEdwardsCurve) {
             return self::wrapPublicKey($curve->encodePoint($publicKey), null, $curve instanceof Ed25519 ? 'id-Ed25519' : 'id-Ed448', $options);
@@ -194,10 +194,10 @@ abstract class PKCS8 extends Progenitor
     {
         self::initialize_static_variables();
         if ($curve instanceof MontgomeryCurve) {
-            return self::wrapPrivateKey(\chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($curve::SIZE) . \str_pad($privateKey->toBytes(), $curve::SIZE, "\x00", \STR_PAD_LEFT), [], null, $password, $curve instanceof Curve25519 ? 'id-X25519' : 'id-X448');
+            return self::wrapPrivateKey(chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($curve::SIZE) . str_pad($privateKey->toBytes(), $curve::SIZE, "\x00", \STR_PAD_LEFT), [], null, $password, $curve instanceof Curve25519 ? 'id-X25519' : 'id-X448');
         }
         if ($curve instanceof TwistedEdwardsCurve) {
-            return self::wrapPrivateKey(\chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($curve::SIZE) . $secret, [], null, $password, $curve instanceof Ed25519 ? 'id-Ed25519' : 'id-Ed448');
+            return self::wrapPrivateKey(chr(ASN1::TYPE_OCTET_STRING) . ASN1::encodeLength($curve::SIZE) . $secret, [], null, $password, $curve instanceof Ed25519 ? 'id-Ed25519' : 'id-Ed448');
         }
         $publicKey = "\x04" . $publicKey[0]->toBytes() . $publicKey[1]->toBytes();
         $params = new ASN1\Element(self::encodeParameters($curve, \false, $options));

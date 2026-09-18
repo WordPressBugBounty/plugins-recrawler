@@ -45,7 +45,7 @@ class SymfonyMailerHandler extends MailHandler
     /**
      * {@inheritDoc}
      */
-    protected function send(string $content, array $records) : void
+    protected function send(string $content, array $records): void
     {
         $this->mailer->send($this->buildMessage($content, $records));
     }
@@ -54,7 +54,7 @@ class SymfonyMailerHandler extends MailHandler
      *
      * @param string|null $format The format of the subject
      */
-    protected function getSubjectFormatter(?string $format) : FormatterInterface
+    protected function getSubjectFormatter(?string $format): FormatterInterface
     {
         return new LineFormatter($format);
     }
@@ -64,7 +64,7 @@ class SymfonyMailerHandler extends MailHandler
      * @param string      $content formatted email body to be sent
      * @param LogRecord[] $records Log records that formed the content
      */
-    protected function buildMessage(string $content, array $records) : Email
+    protected function buildMessage(string $content, array $records): Email
     {
         $message = null;
         if ($this->emailTemplate instanceof Email) {
@@ -73,7 +73,7 @@ class SymfonyMailerHandler extends MailHandler
             $message = ($this->emailTemplate)($content, $records);
         }
         if (!$message instanceof Email) {
-            $record = \reset($records);
+            $record = reset($records);
             throw new \InvalidArgumentException('Could not resolve message as instance of Email or a callable returning it' . ($record instanceof LogRecord ? Utils::getRecordMessageForException($record) : ''));
         }
         if (\count($records) > 0) {
@@ -81,17 +81,15 @@ class SymfonyMailerHandler extends MailHandler
             $message->subject($subjectFormatter->format($this->getHighestRecord($records)));
         }
         if ($this->isHtmlBody($content)) {
-            if (null !== ($charset = $message->getHtmlCharset())) {
+            if (null !== $charset = $message->getHtmlCharset()) {
                 $message->html($content, $charset);
             } else {
                 $message->html($content);
             }
+        } else if (null !== $charset = $message->getTextCharset()) {
+            $message->text($content, $charset);
         } else {
-            if (null !== ($charset = $message->getTextCharset())) {
-                $message->text($content, $charset);
-            } else {
-                $message->text($content);
-            }
+            $message->text($content);
         }
         return $message->date(new \DateTimeImmutable());
     }

@@ -172,34 +172,34 @@ abstract class DSA extends AsymmetricKey
         if (self::$forcedEngine == 'libsodium') {
             throw new BadConfigurationException('Engine ' . self::$forcedEngine . ' is forced but unsupported for DSA');
         }
-        if (self::$forcedEngine == 'OpenSSL' && !\defined('OPENSSL_KEYTYPE_DSA')) {
+        if (self::$forcedEngine == 'OpenSSL' && !defined('OPENSSL_KEYTYPE_DSA')) {
             throw new BadConfigurationException("Engine OpenSSL is forced but unsupported for DSA");
         }
         $class = new \ReflectionClass(static::class);
         if ($class->isFinal()) {
             throw new \RuntimeException('createKey() should not be called from final classes (' . static::class . ')');
         }
-        if (\count($args) == 2 && \is_int($args[0]) && \is_int($args[1])) {
+        if (count($args) == 2 && is_int($args[0]) && is_int($args[1])) {
             $params = self::createParameters($args[0], $args[1]);
-        } elseif (\count($args) == 1 && $args[0] instanceof Parameters) {
+        } elseif (count($args) == 1 && $args[0] instanceof Parameters) {
             $params = $args[0];
-        } elseif (!\count($args)) {
+        } elseif (!count($args)) {
             $params = self::createParameters();
         } else {
             throw new InsufficientSetupException('Valid parameters are either two integers (L and N), a single DSA object or no parameters at all.');
         }
         // at this point the only two supported values for self::$forcedEngine are OpenSSL, PHP and null
         // if it's either OpenSSL or null we'll use OpenSSL (if it's available)
-        if (self::$forcedEngine !== 'PHP' && \defined('OPENSSL_KEYTYPE_DSA')) {
+        if (self::$forcedEngine !== 'PHP' && defined('OPENSSL_KEYTYPE_DSA')) {
             $config = [];
             if (self::$configFile) {
                 $config['config'] = self::$configFile;
             }
-            $dsa = \openssl_pkey_new($config + ['private_key_type' => \OPENSSL_KEYTYPE_DSA, 'p' => $params->p, 'q' => $params->q, 'g' => $params->g]);
-            if ($dsa && \openssl_pkey_export($dsa, $privatekeystr, null, $config)) {
+            $dsa = openssl_pkey_new($config + ['private_key_type' => \OPENSSL_KEYTYPE_DSA, 'p' => $params->p, 'q' => $params->q, 'g' => $params->g]);
+            if ($dsa && openssl_pkey_export($dsa, $privatekeystr, null, $config)) {
                 // clear the buffer of error strings stemming from a minimalistic openssl.cnf
                 // https://github.com/php/php-src/issues/11054 talks about other errors this'll pick up
-                while (\openssl_error_string() !== \false) {
+                while (openssl_error_string() !== \false) {
                 }
                 return DSA::load($privatekeystr)->withHash($params->hash->getHash())->withSignatureFormat($params->shortFormat);
             } elseif (isset(self::$forcedEngine)) {

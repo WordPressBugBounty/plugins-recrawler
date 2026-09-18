@@ -37,7 +37,7 @@ class MercurialProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         // return if the level is not high enough
         if ($record->level->isLowerThan($this->level)) {
@@ -49,12 +49,12 @@ class MercurialProcessor implements ProcessorInterface
     /**
      * @return array{branch: string, revision: string}|array<never>
      */
-    private static function getMercurialInfo() : array
+    private static function getMercurialInfo(): array
     {
         if (self::$cache !== null) {
             return self::$cache;
         }
-        $result = \explode(' ', \trim((string) \shell_exec('hg id -nb')));
+        $result = explode(' ', trim((string) shell_exec('hg id -nb')));
         if (\count($result) >= 3) {
             return self::$cache = ['branch' => $result[1], 'revision' => $result[2]];
         }

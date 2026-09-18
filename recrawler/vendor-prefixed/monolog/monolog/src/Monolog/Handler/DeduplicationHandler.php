@@ -53,18 +53,18 @@ class DeduplicationHandler extends BufferHandler
     public function __construct(HandlerInterface $handler, ?string $deduplicationStore = null, int|string|Level $deduplicationLevel = Level::Error, int $time = 60, bool $bubble = \true)
     {
         parent::__construct($handler, 0, Level::Debug, $bubble, \false);
-        $this->deduplicationStore = $deduplicationStore === null ? \sys_get_temp_dir() . '/monolog-dedup-' . \substr(\md5(__FILE__), 0, 20) . '.log' : $deduplicationStore;
+        $this->deduplicationStore = $deduplicationStore === null ? sys_get_temp_dir() . '/monolog-dedup-' . substr(md5(__FILE__), 0, 20) . '.log' : $deduplicationStore;
         $this->deduplicationLevel = Logger::toMonologLevel($deduplicationLevel);
         $this->time = $time;
     }
-    public function flush() : void
+    public function flush(): void
     {
         if ($this->bufferSize === 0) {
             return;
         }
         $store = null;
-        if (\file_exists($this->deduplicationStore)) {
-            $store = \file($this->deduplicationStore, \FILE_IGNORE_NEW_LINES | \FILE_SKIP_EMPTY_LINES);
+        if (file_exists($this->deduplicationStore)) {
+            $store = file($this->deduplicationStore, \FILE_IGNORE_NEW_LINES | \FILE_SKIP_EMPTY_LINES);
         }
         $passthru = null;
         foreach ($this->buffer as $record) {
@@ -72,7 +72,7 @@ class DeduplicationHandler extends BufferHandler
                 $passthru = $passthru === \true || !\is_array($store) || !$this->isDuplicate($store, $record);
                 if ($passthru) {
                     $line = $this->buildDeduplicationStoreEntry($record);
-                    \file_put_contents($this->deduplicationStore, $line . "\n", \FILE_APPEND | \LOCK_EX);
+                    file_put_contents($this->deduplicationStore, $line . "\n", \FILE_APPEND | \LOCK_EX);
                     if (!\is_array($store)) {
                         $store = [];
                     }
@@ -93,13 +93,13 @@ class DeduplicationHandler extends BufferHandler
      * If there is a store entry older than e.g. a day, this method should set `$this->gc` to `true` to trigger garbage collection.
      * @param string[] $store The deduplication store
      */
-    protected function isDuplicate(array $store, LogRecord $record) : bool
+    protected function isDuplicate(array $store, LogRecord $record): bool
     {
         $timestampValidity = $record->datetime->getTimestamp() - $this->time;
-        $expectedMessage = \preg_replace('{[\\r\\n].*}', '', $record->message);
-        $yesterday = \time() - 86400;
+        $expectedMessage = preg_replace('{[\r\n].*}', '', $record->message);
+        $yesterday = time() - 86400;
         for ($i = \count($store) - 1; $i >= 0; $i--) {
-            $parts = \explode(':', $store[$i], 3);
+            $parts = explode(':', $store[$i], 3);
             if (\count($parts) < 3) {
                 // Skip invalid/incomplete lines (e.g. partially written due to concurrent access)
                 continue;
@@ -117,38 +117,38 @@ class DeduplicationHandler extends BufferHandler
     /**
      * @return string The given record serialized as a single line of text
      */
-    protected function buildDeduplicationStoreEntry(LogRecord $record) : string
+    protected function buildDeduplicationStoreEntry(LogRecord $record): string
     {
-        return $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . \preg_replace('{[\\r\\n].*}', '', $record->message);
+        return $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . preg_replace('{[\r\n].*}', '', $record->message);
     }
-    private function collectLogs() : void
+    private function collectLogs(): void
     {
-        if (!\file_exists($this->deduplicationStore)) {
+        if (!file_exists($this->deduplicationStore)) {
             return;
         }
-        $handle = \fopen($this->deduplicationStore, 'rw+');
+        $handle = fopen($this->deduplicationStore, 'rw+');
         if (\false === $handle) {
             throw new \RuntimeException('Failed to open file for reading and writing: ' . $this->deduplicationStore);
         }
-        if (\false === \flock($handle, \LOCK_EX)) {
-            \fclose($handle);
+        if (\false === flock($handle, \LOCK_EX)) {
+            fclose($handle);
             return;
         }
         $validLogs = [];
-        $timestampValidity = \time() - $this->time;
-        while (!\feof($handle)) {
-            $log = \fgets($handle);
-            if (\is_string($log) && '' !== $log && \substr($log, 0, 10) >= $timestampValidity) {
+        $timestampValidity = time() - $this->time;
+        while (!feof($handle)) {
+            $log = fgets($handle);
+            if (\is_string($log) && '' !== $log && substr($log, 0, 10) >= $timestampValidity) {
                 $validLogs[] = $log;
             }
         }
-        \ftruncate($handle, 0);
-        \rewind($handle);
+        ftruncate($handle, 0);
+        rewind($handle);
         foreach ($validLogs as $log) {
-            \fwrite($handle, $log);
+            fwrite($handle, $log);
         }
-        \flock($handle, \LOCK_UN);
-        \fclose($handle);
+        flock($handle, \LOCK_UN);
+        fclose($handle);
         $this->gc = \false;
     }
 }

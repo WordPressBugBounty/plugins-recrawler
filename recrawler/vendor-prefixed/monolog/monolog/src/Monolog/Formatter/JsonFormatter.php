@@ -48,21 +48,21 @@ class JsonFormatter extends NormalizerFormatter
      * compatibility with some API endpoints, alternative styles
      * are available.
      */
-    public function getBatchMode() : int
+    public function getBatchMode(): int
     {
         return $this->batchMode;
     }
     /**
      * True if newlines are appended to every formatted record
      */
-    public function isAppendingNewlines() : bool
+    public function isAppendingNewlines(): bool
     {
         return $this->appendNewline;
     }
     /**
      * @inheritDoc
      */
-    public function format(LogRecord $record) : string
+    public function format(LogRecord $record): string
     {
         $normalized = $this->normalizeRecord($record);
         return $this->toJson($normalized, \true) . ($this->appendNewline ? "\n" : '');
@@ -70,7 +70,7 @@ class JsonFormatter extends NormalizerFormatter
     /**
      * @inheritDoc
      */
-    public function formatBatch(array $records) : string
+    public function formatBatch(array $records): string
     {
         return match ($this->batchMode) {
             static::BATCH_MODE_NEWLINES => $this->formatBatchNewlines($records),
@@ -80,7 +80,7 @@ class JsonFormatter extends NormalizerFormatter
     /**
      * @return $this
      */
-    public function includeStacktraces(bool $include = \true) : self
+    public function includeStacktraces(bool $include = \true): self
     {
         $this->includeStacktraces = $include;
         return $this;
@@ -88,7 +88,7 @@ class JsonFormatter extends NormalizerFormatter
     /**
      * @return array<array<mixed>|bool|float|int|\stdClass|string|null>
      */
-    protected function normalizeRecord(LogRecord $record) : array
+    protected function normalizeRecord(LogRecord $record): array
     {
         $normalized = parent::normalizeRecord($record);
         if (isset($normalized['context']) && $normalized['context'] === []) {
@@ -112,9 +112,9 @@ class JsonFormatter extends NormalizerFormatter
      *
      * @phpstan-param LogRecord[] $records
      */
-    protected function formatBatchJson(array $records) : string
+    protected function formatBatchJson(array $records): string
     {
-        $formatted = \array_map(fn(LogRecord $record) => $this->normalizeRecord($record), $records);
+        $formatted = array_map(fn(LogRecord $record) => $this->normalizeRecord($record), $records);
         return $this->toJson($formatted, \true);
     }
     /**
@@ -123,22 +123,22 @@ class JsonFormatter extends NormalizerFormatter
      *
      * @phpstan-param LogRecord[] $records
      */
-    protected function formatBatchNewlines(array $records) : string
+    protected function formatBatchNewlines(array $records): string
     {
         $oldNewline = $this->appendNewline;
         $this->appendNewline = \false;
-        $formatted = \array_map(fn(LogRecord $record) => $this->format($record), $records);
+        $formatted = array_map(fn(LogRecord $record) => $this->format($record), $records);
         $this->appendNewline = $oldNewline;
-        return \implode("\n", $formatted);
+        return implode("\n", $formatted);
     }
     /**
      * Normalizes given $data.
      *
      * @return null|scalar|array<mixed[]|scalar|null|object>|object
      */
-    protected function normalize(mixed $data, int $depth = 0) : mixed
+    protected function normalize(mixed $data, int $depth = 0): mixed
     {
-        if (\is_null($data) || \is_scalar($data)) {
+        if (is_null($data) || is_scalar($data)) {
             return $data;
         }
         if ($depth > $this->maxNormalizeDepth) {
@@ -187,7 +187,7 @@ class JsonFormatter extends NormalizerFormatter
      *
      * @return array<array-key, string|int|array<string|int|array<string>>>
      */
-    protected function normalizeException(Throwable $e, int $depth = 0) : array
+    protected function normalizeException(Throwable $e, int $depth = 0): array
     {
         $data = parent::normalizeException($e, $depth);
         if (!$this->includeStacktraces) {

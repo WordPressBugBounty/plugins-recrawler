@@ -12,7 +12,11 @@ class Key
      * @param string|OpenSSLAsymmetricKey|OpenSSLCertificate $keyMaterial
      * @param string $algorithm
      */
-    public function __construct(#[\SensitiveParameter] private $keyMaterial, private string $algorithm)
+    public function __construct(
+        #[\SensitiveParameter]
+        private $keyMaterial,
+        private string $algorithm
+    )
     {
         if (!\is_string($keyMaterial) && !$keyMaterial instanceof OpenSSLAsymmetricKey && !$keyMaterial instanceof OpenSSLCertificate) {
             throw new TypeError('Key material must be a string, OpenSSLCertificate, or OpenSSLAsymmetricKey');
@@ -29,7 +33,7 @@ class Key
      *
      * @return string
      */
-    public function getAlgorithm() : string
+    public function getAlgorithm(): string
     {
         return $this->algorithm;
     }

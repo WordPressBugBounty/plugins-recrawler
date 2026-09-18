@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime;
 
-use Mihdan\ReCrawler\Dependencies\Override;
+use Override;
 /**
  *  Copyright (c) 2016 - 2022 Paragon Initiative Enterprises.
  *  Copyright (c) 2014 Steve "Sc00bz" Thomas (steve at tobtu dot com)
@@ -46,7 +46,7 @@ abstract class Base64DotSlash extends Base64
      * @return int
      */
     #[Override]
-    protected static function decode6Bits(int $src) : int
+    protected static function decode6Bits(int $src): int
     {
         $ret = -1;
         // if ($src > 0x2d && $src < 0x30) ret += $src - 0x2e + 1; // -45
@@ -67,7 +67,7 @@ abstract class Base64DotSlash extends Base64
      * @return string
      */
     #[Override]
-    protected static function encode6Bits(int $src) : string
+    protected static function encode6Bits(int $src): string
     {
         $src += 0x2e;
         // if ($src > 0x2f) $src += 0x41 - 0x30; // 17

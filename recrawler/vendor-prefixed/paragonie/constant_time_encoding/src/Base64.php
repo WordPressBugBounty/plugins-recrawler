@@ -4,9 +4,9 @@ declare (strict_types=1);
 namespace Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime;
 
 use InvalidArgumentException;
-use Mihdan\ReCrawler\Dependencies\Override;
+use Override;
 use RangeException;
-use Mihdan\ReCrawler\Dependencies\SensitiveParameter;
+use SensitiveParameter;
 use SodiumException;
 use TypeError;
 use function extension_loaded;
@@ -62,7 +62,10 @@ abstract class Base64 implements EncoderInterface
      * @throws TypeError
      */
     #[Override]
-    public static function encode(#[SensitiveParameter] string $binString) : string
+    public static function encode(
+        #[SensitiveParameter]
+        string $binString
+    ): string
     {
         if (extension_loaded('sodium')) {
             $variant = match (static::class) {
@@ -91,7 +94,10 @@ abstract class Base64 implements EncoderInterface
      * @throws TypeError
      * @api
      */
-    public static function encodeUnpadded(#[SensitiveParameter] string $src) : string
+    public static function encodeUnpadded(
+        #[SensitiveParameter]
+        string $src
+    ): string
     {
         if (extension_loaded('sodium')) {
             $variant = match (static::class) {
@@ -116,7 +122,11 @@ abstract class Base64 implements EncoderInterface
      *
      * @throws TypeError
      */
-    protected static function doEncode(#[SensitiveParameter] string $src, bool $pad = \true) : string
+    protected static function doEncode(
+        #[SensitiveParameter]
+        string $src,
+        bool $pad = \true
+    ): string
     {
         $dest = '';
         $srcLen = strlen($src);
@@ -162,7 +172,11 @@ abstract class Base64 implements EncoderInterface
      * @throws TypeError
      */
     #[Override]
-    public static function decode(#[SensitiveParameter] string $encodedString, bool $strictPadding = \false) : string
+    public static function decode(
+        #[SensitiveParameter]
+        string $encodedString,
+        bool $strictPadding = \false
+    ): string
     {
         // Remove padding
         $srcLen = strlen($encodedString);
@@ -251,7 +265,10 @@ abstract class Base64 implements EncoderInterface
      * @return string
      * @api
      */
-    public static function decodeNoPadding(#[SensitiveParameter] string $encodedString) : string
+    public static function decodeNoPadding(
+        #[SensitiveParameter]
+        string $encodedString
+    ): string
     {
         $srcLen = strlen($encodedString);
         if ($srcLen === 0) {
@@ -276,7 +293,7 @@ abstract class Base64 implements EncoderInterface
      * @param int $src
      * @return int
      */
-    protected static function decode6Bits(int $src) : int
+    protected static function decode6Bits(int $src): int
     {
         $ret = -1;
         // if ($src > 0x40 && $src < 0x5b) $ret += $src - 0x41 + 1; // -64
@@ -298,7 +315,7 @@ abstract class Base64 implements EncoderInterface
      * @param int $src
      * @return string
      */
-    protected static function encode6Bits(int $src) : string
+    protected static function encode6Bits(int $src): string
     {
         $diff = 0x41;
         // if ($src > 25) $diff += 0x61 - 0x41 - 26; // 6

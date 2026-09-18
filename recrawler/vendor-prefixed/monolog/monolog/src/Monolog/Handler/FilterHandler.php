@@ -66,9 +66,9 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
     /**
      * @phpstan-return list<Level> List of levels
      */
-    public function getAcceptedLevels() : array
+    public function getAcceptedLevels(): array
     {
-        return \array_map(fn(int $level) => Level::from($level), \array_keys($this->acceptedLevels));
+        return array_map(fn(int $level) => Level::from($level), array_keys($this->acceptedLevels));
     }
     /**
      * @param  int|string|Level|LogLevel::*|array<int|string|Level|LogLevel::*> $minLevelOrList A list of levels to accept or a minimum level or level name if maxLevel is provided
@@ -78,14 +78,14 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
      * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::*|array<value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::*> $minLevelOrList
      * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::* $maxLevel
      */
-    public function setAcceptedLevels(int|string|Level|array $minLevelOrList = Level::Debug, int|string|Level $maxLevel = Level::Emergency) : self
+    public function setAcceptedLevels(int|string|Level|array $minLevelOrList = Level::Debug, int|string|Level $maxLevel = Level::Emergency): self
     {
         if (\is_array($minLevelOrList)) {
-            $acceptedLevels = \array_map(Logger::toMonologLevel(...), $minLevelOrList);
+            $acceptedLevels = array_map(Logger::toMonologLevel(...), $minLevelOrList);
         } else {
             $minLevelOrList = Logger::toMonologLevel($minLevelOrList);
             $maxLevel = Logger::toMonologLevel($maxLevel);
-            $acceptedLevels = \array_values(\array_filter(Level::cases(), fn(Level $level) => $level->value >= $minLevelOrList->value && $level->value <= $maxLevel->value));
+            $acceptedLevels = array_values(array_filter(Level::cases(), fn(Level $level) => $level->value >= $minLevelOrList->value && $level->value <= $maxLevel->value));
         }
         $this->acceptedLevels = [];
         foreach ($acceptedLevels as $level) {
@@ -96,14 +96,14 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return isset($this->acceptedLevels[$record->level->value]);
     }
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (!$this->isHandling($record)) {
             return \false;
@@ -117,7 +117,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         $filtered = [];
         foreach ($records as $record) {
@@ -134,7 +134,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
      *
      * If the handler was provided as a factory, this will trigger the handler's instantiation.
      */
-    public function getHandler(LogRecord|null $record = null) : HandlerInterface
+    public function getHandler(LogRecord|null $record = null): HandlerInterface
     {
         if (!$this->handler instanceof HandlerInterface) {
             $handler = ($this->handler)($record, $this);
@@ -148,7 +148,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {
@@ -160,7 +160,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {
@@ -168,7 +168,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
         }
         throw new \UnexpectedValueException('The nested handler of type ' . \get_class($handler) . ' does not support formatters.');
     }
-    public function reset() : void
+    public function reset(): void
     {
         $this->resetProcessors();
         if ($this->getHandler() instanceof ResettableInterface) {

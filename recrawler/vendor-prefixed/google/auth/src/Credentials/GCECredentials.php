@@ -101,7 +101,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
     /**
      * The Windows Registry key path to the product name
      */
-    private const WINDOWS_REGISTRY_KEY_PATH = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+    private const WINDOWS_REGISTRY_KEY_PATH = 'HKEY_LOCAL_MACHINE\SYSTEM\HardwareConfig\Current\\';
     /**
      * The Windows registry key name for the product name
      */
@@ -189,10 +189,10 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         }
         $tokenUri = self::getTokenUri($serviceAccountIdentity);
         if ($scope) {
-            if (\is_string($scope)) {
-                $scope = \explode(' ', $scope);
+            if (is_string($scope)) {
+                $scope = explode(' ', $scope);
             }
-            $scope = \implode(',', $scope);
+            $scope = implode(',', $scope);
             $tokenUri = $tokenUri . '?scopes=' . $scope;
         } elseif ($targetAudience) {
             $tokenUri = self::getIdTokenUri($serviceAccountIdentity);
@@ -216,7 +216,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::TOKEN_URI_PATH;
         if ($serviceAccountIdentity) {
-            return \str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
+            return str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
         }
         return $base;
     }
@@ -232,7 +232,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::CLIENT_ID_URI_PATH;
         if ($serviceAccountIdentity) {
-            return \str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
+            return str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
         }
         return $base;
     }
@@ -248,7 +248,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::ID_TOKEN_URI_PATH;
         if ($serviceAccountIdentity) {
-            return \str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
+            return str_replace('/default/', '/' . $serviceAccountIdentity . '/', $base);
         }
         return $base;
     }
@@ -280,7 +280,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
      */
     public static function onAppEngineFlexible()
     {
-        return \substr((string) \getenv('GAE_INSTANCE'), 0, 4) === 'aef-';
+        return substr((string) getenv('GAE_INSTANCE'), 0, 4) === 'aef-';
     }
     /**
      * Determines if this a GCE instance, by accessing the expected metadata
@@ -318,17 +318,17 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         // Detect GCE residency on Linux
         return self::detectResidencyLinux(self::GKE_PRODUCT_NAME_FILE);
     }
-    private static function detectResidencyLinux(string $productNameFile) : bool
+    private static function detectResidencyLinux(string $productNameFile): bool
     {
-        if (\file_exists($productNameFile)) {
-            $productName = \trim((string) \file_get_contents($productNameFile));
-            return 0 === \strpos($productName, self::PRODUCT_NAME);
+        if (file_exists($productNameFile)) {
+            $productName = trim((string) file_get_contents($productNameFile));
+            return 0 === strpos($productName, self::PRODUCT_NAME);
         }
         return \false;
     }
-    private static function detectResidencyWindows(string $registryProductKey) : bool
+    private static function detectResidencyWindows(string $registryProductKey): bool
     {
-        if (!\class_exists(COM::class)) {
+        if (!class_exists(COM::class)) {
             // the COM extension must be installed and enabled to detect Windows residency
             // see https://www.php.net/manual/en/book.com.php
             return \false;
@@ -342,7 +342,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
             // which might mean that it is a windows instance that is not on GCE
             return \false;
         }
-        return 0 === \strpos($productName, self::PRODUCT_NAME);
+        return 0 === strpos($productName, self::PRODUCT_NAME);
     }
     /**
      * Implements FetchAuthTokenInterface#fetchAuthToken.
@@ -379,10 +379,10 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         if ($this->targetAudience) {
             return $this->lastReceivedToken = ['id_token' => $response];
         }
-        if (null === ($json = \json_decode($response, \true))) {
+        if (null === $json = json_decode($response, \true)) {
             throw new \Exception('Invalid JSON response');
         }
-        $json['expires_at'] = \time() + $json['expires_in'];
+        $json['expires_at'] = time() + $json['expires_in'];
         // store this so we can retrieve it later
         $this->lastReceivedToken = $json;
         return $json;
@@ -404,7 +404,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
     public function getLastReceivedToken()
     {
         if ($this->lastReceivedToken) {
-            if (\array_key_exists('id_token', $this->lastReceivedToken)) {
+            if (array_key_exists('id_token', $this->lastReceivedToken)) {
                 return $this->lastReceivedToken;
             }
             return ['access_token' => $this->lastReceivedToken['access_token'], 'expires_at' => $this->lastReceivedToken['expires_at']];
@@ -465,7 +465,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
      * @param callable|null $httpHandler Callback which delivers psr7 request
      * @return string
      */
-    public function getUniverseDomain(?callable $httpHandler = null) : string
+    public function getUniverseDomain(?callable $httpHandler = null): string
     {
         if (null !== $this->universeDomain) {
             return $this->universeDomain;
@@ -531,7 +531,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface, Pro
         // Set isOnGce
         $this->isOnGce = $isOnGce;
     }
-    protected function getCredType() : string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

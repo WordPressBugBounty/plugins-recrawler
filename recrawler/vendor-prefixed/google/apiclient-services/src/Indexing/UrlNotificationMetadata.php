@@ -79,4 +79,4 @@ class UrlNotificationMetadata extends \Mihdan\ReCrawler\Dependencies\Google\Mode
     }
 }
 // Adding a class alias for backwards compatibility with the previous class name.
-\class_alias(UrlNotificationMetadata::class, 'Mihdan\\ReCrawler\\Dependencies\\Google_Service_Indexing_UrlNotificationMetadata');
+class_alias(UrlNotificationMetadata::class, 'Mihdan\ReCrawler\Dependencies\Google_Service_Indexing_UrlNotificationMetadata');

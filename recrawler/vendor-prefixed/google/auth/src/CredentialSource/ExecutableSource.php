@@ -100,7 +100,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      *
      * @return ?string
      */
-    public function getCacheKey() : ?string
+    public function getCacheKey(): ?string
     {
         return $this->command . '.' . $this->outputFile;
     }
@@ -110,13 +110,13 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      * @throws RuntimeException if the executable is not allowed to run.
      * @throws ExecutableResponseError if the executable response is invalid.
      */
-    public function fetchSubjectToken(?callable $httpHandler = null) : string
+    public function fetchSubjectToken(?callable $httpHandler = null): string
     {
         // Check if the executable is allowed to run.
-        if (\getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
+        if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
             throw new RuntimeException('Pluggable Auth executables need to be explicitly allowed to run by ' . 'setting the GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES environment ' . 'Variable to 1.');
         }
-        if (!($executableResponse = $this->getCachedExecutableResponse())) {
+        if (!$executableResponse = $this->getCachedExecutableResponse()) {
             // Run the executable.
             $exitCode = ($this->executableHandler)($this->command);
             $output = $this->executableHandler->getOutput();
@@ -126,7 +126,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             }
             $executableResponse = $this->parseExecutableResponse($output);
             // Validate expiration.
-            if (isset($executableResponse['expiration_time']) && \time() >= $executableResponse['expiration_time']) {
+            if (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time']) {
                 throw new ExecutableResponseError('Executable response is expired.');
             }
         }
@@ -140,9 +140,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     /**
      * @return array<string, mixed>|null
      */
-    private function getCachedExecutableResponse() : ?array
+    private function getCachedExecutableResponse(): ?array
     {
-        if ($this->outputFile && \file_exists($this->outputFile) && !empty(\trim($outputFileContents = (string) \file_get_contents($this->outputFile)))) {
+        if ($this->outputFile && file_exists($this->outputFile) && !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))) {
             try {
                 $executableResponse = $this->parseExecutableResponse($outputFileContents);
             } catch (ExecutableResponseError $e) {
@@ -152,7 +152,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 // If the cached token was unsuccessful, run the executable to get a new one.
                 return null;
             }
-            if (isset($executableResponse['expiration_time']) && \time() >= $executableResponse['expiration_time']) {
+            if (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time']) {
                 // If the cached token is expired, run the executable to get a new one.
                 return null;
             }
@@ -163,16 +163,16 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     /**
      * @return array<string, mixed>
      */
-    private function parseExecutableResponse(string $response) : array
+    private function parseExecutableResponse(string $response): array
     {
-        $executableResponse = \json_decode($response, \true);
-        if (\json_last_error() !== \JSON_ERROR_NONE) {
+        $executableResponse = json_decode($response, \true);
+        if (json_last_error() !== \JSON_ERROR_NONE) {
             throw new ExecutableResponseError('The executable returned an invalid response: ' . $response, 'INVALID_RESPONSE');
         }
-        if (!\array_key_exists('version', $executableResponse)) {
+        if (!array_key_exists('version', $executableResponse)) {
             throw new ExecutableResponseError('Executable response must contain a "version" field.');
         }
-        if (!\array_key_exists('success', $executableResponse)) {
+        if (!array_key_exists('success', $executableResponse)) {
             throw new ExecutableResponseError('Executable response must contain a "success" field.');
         }
         // Validate required fields for a successful response.
@@ -182,16 +182,16 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             if (!isset($executableResponse['token_type'])) {
                 throw new ExecutableResponseError('Executable response must contain a "token_type" field when successful');
             }
-            if (!\in_array($executableResponse['token_type'], $tokenTypes)) {
-                throw new ExecutableResponseError(\sprintf('Executable response "token_type" field must be one of %s.', \implode(', ', $tokenTypes)));
+            if (!in_array($executableResponse['token_type'], $tokenTypes)) {
+                throw new ExecutableResponseError(sprintf('Executable response "token_type" field must be one of %s.', implode(', ', $tokenTypes)));
             }
             // Validate subject token for SAML and OIDC.
             if ($executableResponse['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE) {
                 if (empty($executableResponse['saml_response'])) {
-                    throw new ExecutableResponseError(\sprintf('Executable response must contain a "saml_response" field when token_type=%s.', self::SAML_SUBJECT_TOKEN_TYPE));
+                    throw new ExecutableResponseError(sprintf('Executable response must contain a "saml_response" field when token_type=%s.', self::SAML_SUBJECT_TOKEN_TYPE));
                 }
             } elseif (empty($executableResponse['id_token'])) {
-                throw new ExecutableResponseError(\sprintf('Executable response must contain a "id_token" field when ' . 'token_type=%s.', $executableResponse['token_type']));
+                throw new ExecutableResponseError(sprintf('Executable response must contain a "id_token" field when ' . 'token_type=%s.', $executableResponse['token_type']));
             }
             // Validate expiration exists when an output file is specified.
             if ($this->outputFile) {
@@ -201,7 +201,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             }
         } else {
             // Both code and message must be provided for unsuccessful responses.
-            if (!\array_key_exists('code', $executableResponse)) {
+            if (!array_key_exists('code', $executableResponse)) {
                 throw new ExecutableResponseError('Executable response must contain a "code" field when unsuccessful.');
             }
             if (empty($executableResponse['message'])) {

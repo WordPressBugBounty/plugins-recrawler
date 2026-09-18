@@ -41,35 +41,35 @@ class HandlerWrapper implements HandlerInterface, ProcessableHandlerInterface, F
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return $this->handler->isHandling($record);
     }
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         return $this->handler->handle($record);
     }
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         $this->handler->handleBatch($records);
     }
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         $this->handler->close();
     }
     /**
      * @inheritDoc
      */
-    public function pushProcessor(callable $callback) : HandlerInterface
+    public function pushProcessor(callable $callback): HandlerInterface
     {
         if ($this->handler instanceof ProcessableHandlerInterface) {
             $this->handler->pushProcessor($callback);
@@ -80,7 +80,7 @@ class HandlerWrapper implements HandlerInterface, ProcessableHandlerInterface, F
     /**
      * @inheritDoc
      */
-    public function popProcessor() : callable
+    public function popProcessor(): callable
     {
         if ($this->handler instanceof ProcessableHandlerInterface) {
             return $this->handler->popProcessor();
@@ -90,7 +90,7 @@ class HandlerWrapper implements HandlerInterface, ProcessableHandlerInterface, F
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         if ($this->handler instanceof FormattableHandlerInterface) {
             $this->handler->setFormatter($formatter);
@@ -101,14 +101,14 @@ class HandlerWrapper implements HandlerInterface, ProcessableHandlerInterface, F
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         if ($this->handler instanceof FormattableHandlerInterface) {
             return $this->handler->getFormatter();
         }
         throw new \LogicException('The wrapped handler does not implement ' . FormattableHandlerInterface::class);
     }
-    public function reset() : void
+    public function reset(): void
     {
         if ($this->handler instanceof ResettableInterface) {
             $this->handler->reset();

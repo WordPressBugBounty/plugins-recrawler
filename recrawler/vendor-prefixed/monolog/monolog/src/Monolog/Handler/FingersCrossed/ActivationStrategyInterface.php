@@ -22,5 +22,5 @@ interface ActivationStrategyInterface
     /**
      * Returns whether the given record activates the handler.
      */
-    public function isHandlerActivated(LogRecord $record) : bool;
+    public function isHandlerActivated(LogRecord $record): bool;
 }

@@ -55,7 +55,7 @@ class RotatingFileHandler extends StreamHandler
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         parent::close();
         if (\true === $this->mustRotate) {
@@ -65,17 +65,17 @@ class RotatingFileHandler extends StreamHandler
     /**
      * @inheritDoc
      */
-    public function reset() : void
+    public function reset(): void
     {
         parent::reset();
     }
     /**
      * @return $this
      */
-    public function setFilenameFormat(string $filenameFormat, string $dateFormat) : self
+    public function setFilenameFormat(string $filenameFormat, string $dateFormat): self
     {
         $this->setDateFormat($dateFormat);
-        if (\substr_count($filenameFormat, '{date}') === 0) {
+        if (substr_count($filenameFormat, '{date}') === 0) {
             throw new InvalidArgumentException('Invalid filename format - format must contain at least `{date}`, because otherwise rotating is impossible.');
         }
         $this->filenameFormat = $filenameFormat;
@@ -86,11 +86,11 @@ class RotatingFileHandler extends StreamHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         // on the first record written, if the log is new, we rotate (once per day) after the log has been written so that the new file exists
         if (null === $this->mustRotate) {
-            $this->mustRotate = null === $this->url || !\file_exists($this->url);
+            $this->mustRotate = null === $this->url || !file_exists($this->url);
         }
         // if the next rotation is expired, then we rotate immediately
         if ($this->nextRotation <= $record->datetime) {
@@ -107,7 +107,7 @@ class RotatingFileHandler extends StreamHandler
     /**
      * Rotates the files.
      */
-    protected function rotate() : void
+    protected function rotate(): void
     {
         // update filename
         $this->url = $this->getTimedFilename();
@@ -123,35 +123,35 @@ class RotatingFileHandler extends StreamHandler
             return;
         }
         // Sorting the files by name to remove the older ones
-        \usort($logFiles, function ($a, $b) {
-            return \strcmp($b, $a);
+        usort($logFiles, function ($a, $b) {
+            return strcmp($b, $a);
         });
-        $basePath = self::normalizeDirectorySeparators(\dirname($this->filename));
+        $basePath = self::normalizeDirectorySeparators(dirname($this->filename));
         foreach (\array_slice($logFiles, $this->maxFiles) as $file) {
-            if (\is_writable($file)) {
+            if (is_writable($file)) {
                 // suppress errors here as unlink() might fail if two processes
                 // are cleaning up/rotating at the same time
-                \set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) : bool {
+                set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline): bool {
                     return \true;
                 });
-                \unlink($file);
-                $dir = self::normalizeDirectorySeparators(\dirname($file));
+                unlink($file);
+                $dir = self::normalizeDirectorySeparators(dirname($file));
                 while ($dir !== $basePath) {
-                    $entries = \scandir($dir);
-                    if ($entries === \false || \count(\array_diff($entries, ['.', '..'])) > 0) {
+                    $entries = scandir($dir);
+                    if ($entries === \false || \count(array_diff($entries, ['.', '..'])) > 0) {
                         break;
                     }
-                    \rmdir($dir);
-                    $dir = self::normalizeDirectorySeparators(\dirname($dir));
+                    rmdir($dir);
+                    $dir = self::normalizeDirectorySeparators(dirname($dir));
                 }
-                \restore_error_handler();
+                restore_error_handler();
             }
         }
     }
-    protected function getTimedFilename() : string
+    protected function getTimedFilename(): string
     {
-        $fileInfo = \pathinfo($this->filename);
-        $timedFilename = \str_replace(['{filename}', '{date}'], [$fileInfo['filename'], (new \DateTimeImmutable(timezone: $this->timezone))->format($this->dateFormat)], self::appendDirectorySeparator($fileInfo['dirname'] ?? '') . $this->filenameFormat);
+        $fileInfo = pathinfo($this->filename);
+        $timedFilename = str_replace(['{filename}', '{date}'], [$fileInfo['filename'], (new \DateTimeImmutable(timezone: $this->timezone))->format($this->dateFormat)], self::appendDirectorySeparator($fileInfo['dirname'] ?? '') . $this->filenameFormat);
         if (isset($fileInfo['extension'])) {
             $timedFilename .= '.' . $fileInfo['extension'];
         }
@@ -166,9 +166,9 @@ class RotatingFileHandler extends StreamHandler
      * deliberately requires two characters before the colon so a Windows drive
      * letter is left alone.
      */
-    private static function appendDirectorySeparator(string $dirName) : string
+    private static function appendDirectorySeparator(string $dirName): string
     {
-        if (1 === \preg_match('#^[a-zA-Z][a-zA-Z0-9+.-]+:$#', $dirName)) {
+        if (1 === preg_match('#^[a-zA-Z][a-zA-Z0-9+.-]+:$#', $dirName)) {
             return $dirName . '//';
         }
         return $dirName . '/';
@@ -181,12 +181,12 @@ class RotatingFileHandler extends StreamHandler
      * pathinfo() dirname. Both sides have to be normalised, and only on Windows:
      * on POSIX a backslash is a legal filename character.
      */
-    private static function normalizeDirectorySeparators(string $path) : string
+    private static function normalizeDirectorySeparators(string $path): string
     {
         if ('\\' !== \DIRECTORY_SEPARATOR) {
             return $path;
         }
-        return \str_replace('\\', '/', $path);
+        return str_replace('\\', '/', $path);
     }
     /**
      * Finds the log files that previous rotations left behind.
@@ -199,21 +199,21 @@ class RotatingFileHandler extends StreamHandler
      *
      * @return string[]
      */
-    protected function findRotatedFiles() : array
+    protected function findRotatedFiles(): array
     {
         $pattern = self::normalizeDirectorySeparators($this->getGlobPattern());
         // split off the literal directory prefix, so only the subtree the pattern
         // can actually reach has to be walked
-        $slashPos = \strrpos(\substr($pattern, 0, \strcspn($pattern, '*?[')), '/');
-        $baseDir = \false === $slashPos ? './' : \substr($pattern, 0, $slashPos + 1);
-        $relativePattern = \false === $slashPos ? $pattern : \substr($pattern, $slashPos + 1);
-        $regex = '#^' . \preg_quote($baseDir, '#') . self::globToRegex($relativePattern) . '$#';
-        if (!\is_dir($baseDir)) {
+        $slashPos = strrpos(substr($pattern, 0, strcspn($pattern, '*?[')), '/');
+        $baseDir = \false === $slashPos ? './' : substr($pattern, 0, $slashPos + 1);
+        $relativePattern = \false === $slashPos ? $pattern : substr($pattern, $slashPos + 1);
+        $regex = '#^' . preg_quote($baseDir, '#') . self::globToRegex($relativePattern) . '$#';
+        if (!is_dir($baseDir)) {
             return [];
         }
         try {
             // walking the subtree is only needed when the pattern itself nests
-            $iterator = \str_contains($relativePattern, '/') ? new \RecursiveIteratorIterator(
+            $iterator = str_contains($relativePattern, '/') ? new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($baseDir, \FilesystemIterator::SKIP_DOTS),
                 \RecursiveIteratorIterator::LEAVES_ONLY,
                 // an unreadable subdirectory skips that subtree instead of throwing
@@ -230,7 +230,7 @@ class RotatingFileHandler extends StreamHandler
                 continue;
             }
             $path = self::normalizeDirectorySeparators((string) $path);
-            if (1 === \preg_match($regex, $path)) {
+            if (1 === preg_match($regex, $path)) {
                 $logFiles[] = $path;
             }
         }
@@ -242,7 +242,7 @@ class RotatingFileHandler extends StreamHandler
      * Wildcards stop at "/" like glob's do, so a pattern for one directory
      * cannot start matching nested files once the walk goes deeper.
      */
-    private static function globToRegex(string $glob) : string
+    private static function globToRegex(string $glob): string
     {
         $regex = '';
         for ($i = 0, $length = \strlen($glob); $i < $length; $i++) {
@@ -256,40 +256,40 @@ class RotatingFileHandler extends StreamHandler
                 continue;
             }
             // a "]" directly after the opening bracket is literal, hence $i + 2
-            if ('[' === $char && \false !== ($end = \strpos($glob, ']', $i + 2))) {
-                $class = \substr($glob, $i + 1, $end - $i - 1);
+            if ('[' === $char && \false !== $end = strpos($glob, ']', $i + 2)) {
+                $class = substr($glob, $i + 1, $end - $i - 1);
                 $negate = '';
-                if (\str_starts_with($class, '!')) {
+                if (str_starts_with($class, '!')) {
                     $negate = '^';
-                    $class = \substr($class, 1);
+                    $class = substr($class, 1);
                 }
-                $regex .= '[' . $negate . \str_replace(['\\', ']', '^'], ['\\\\', '\\]', '\\^'], $class) . ']';
+                $regex .= '[' . $negate . str_replace(['\\', ']', '^'], ['\\\\', '\]', '\^'], $class) . ']';
                 $i = $end;
                 continue;
             }
-            $regex .= \preg_quote($char, '#');
+            $regex .= preg_quote($char, '#');
         }
         return $regex;
     }
-    protected function getGlobPattern() : string
+    protected function getGlobPattern(): string
     {
-        $fileInfo = \pathinfo($this->filename);
-        $glob = \str_replace(['{filename}', '{date}'], [$fileInfo['filename'], \str_replace(['Y', 'y', 'm', 'd', 'H'], ['[0-9][0-9][0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]'], $this->dateFormat)], self::appendDirectorySeparator($fileInfo['dirname'] ?? '') . $this->filenameFormat);
+        $fileInfo = pathinfo($this->filename);
+        $glob = str_replace(['{filename}', '{date}'], [$fileInfo['filename'], str_replace(['Y', 'y', 'm', 'd', 'H'], ['[0-9][0-9][0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]', '[0-9][0-9]'], $this->dateFormat)], self::appendDirectorySeparator($fileInfo['dirname'] ?? '') . $this->filenameFormat);
         if (isset($fileInfo['extension'])) {
             $glob .= '.' . $fileInfo['extension'];
         }
         return $glob;
     }
-    protected function setDateFormat(string $dateFormat) : void
+    protected function setDateFormat(string $dateFormat): void
     {
-        if (0 === \preg_match('{^[Yy](([/_.-]?m)([/_.-]?d([/_.-]?H)?)?)?$}', $dateFormat)) {
+        if (0 === preg_match('{^[Yy](([/_.-]?m)([/_.-]?d([/_.-]?H)?)?)?$}', $dateFormat)) {
             throw new InvalidArgumentException('Invalid date format - format must be one of RotatingFileHandler::FILE_PER_HOUR ("Y-m-d-H"), ' . 'RotatingFileHandler::FILE_PER_DAY ("Y-m-d"), RotatingFileHandler::FILE_PER_MONTH ("Y-m") ' . 'or RotatingFileHandler::FILE_PER_YEAR ("Y"), or you can set one of the ' . 'date formats using slashes, underscores and/or dots instead of dashes.');
         }
         $this->dateFormat = $dateFormat;
     }
-    protected function getNextRotation() : \DateTimeImmutable
+    protected function getNextRotation(): \DateTimeImmutable
     {
-        return match (\str_replace(['/', '_', '.'], '-', $this->dateFormat)) {
+        return match (str_replace(['/', '_', '.'], '-', $this->dateFormat)) {
             self::FILE_PER_MONTH => (new \DateTimeImmutable('first day of next month', $this->timezone))->setTime(0, 0, 0),
             self::FILE_PER_YEAR => (new \DateTimeImmutable('first day of January next year', $this->timezone))->setTime(0, 0, 0),
             default => (new \DateTimeImmutable('tomorrow', $this->timezone))->setTime(0, 0, 0),

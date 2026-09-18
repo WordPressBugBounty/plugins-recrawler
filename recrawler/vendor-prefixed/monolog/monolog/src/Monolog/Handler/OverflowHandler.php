@@ -68,7 +68,7 @@ class OverflowHandler extends AbstractHandler implements FormattableHandlerInter
      *
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if ($record->level->isLowerThan($this->level)) {
             return \false;
@@ -97,7 +97,7 @@ class OverflowHandler extends AbstractHandler implements FormattableHandlerInter
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         if ($this->handler instanceof FormattableHandlerInterface) {
             $this->handler->setFormatter($formatter);
@@ -108,7 +108,7 @@ class OverflowHandler extends AbstractHandler implements FormattableHandlerInter
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         if ($this->handler instanceof FormattableHandlerInterface) {
             return $this->handler->getFormatter();

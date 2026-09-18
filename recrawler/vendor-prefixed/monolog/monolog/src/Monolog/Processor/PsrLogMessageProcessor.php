@@ -37,19 +37,19 @@ class PsrLogMessageProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
-        if (\false === \strpos($record->message, '{')) {
+        if (\false === strpos($record->message, '{')) {
             return $record;
         }
         $replacements = [];
         $context = $record->context;
         foreach ($context as $key => $val) {
             $placeholder = '{' . $key . '}';
-            if (\strpos($record->message, $placeholder) === \false) {
+            if (strpos($record->message, $placeholder) === \false) {
                 continue;
             }
-            if (null === $val || \is_scalar($val) || \is_object($val) && \method_exists($val, "__toString")) {
+            if (null === $val || \is_scalar($val) || \is_object($val) && method_exists($val, "__toString")) {
                 $replacements[$placeholder] = $val;
             } elseif ($val instanceof \DateTimeInterface) {
                 if (null === $this->dateFormat && $val instanceof \Mihdan\ReCrawler\Dependencies\Monolog\JsonSerializableDateTimeImmutable) {
@@ -59,8 +59,8 @@ class PsrLogMessageProcessor implements ProcessorInterface
                 } else {
                     $replacements[$placeholder] = $val->format($this->dateFormat ?? static::SIMPLE_DATE);
                 }
-            } elseif ($val instanceof \Mihdan\ReCrawler\Dependencies\UnitEnum) {
-                $replacements[$placeholder] = $val instanceof \Mihdan\ReCrawler\Dependencies\BackedEnum ? $val->value : $val->name;
+            } elseif ($val instanceof \UnitEnum) {
+                $replacements[$placeholder] = $val instanceof \BackedEnum ? $val->value : $val->name;
             } elseif (\is_object($val)) {
                 $replacements[$placeholder] = '[object ' . Utils::getClass($val) . ']';
             } elseif (\is_array($val)) {
@@ -72,6 +72,6 @@ class PsrLogMessageProcessor implements ProcessorInterface
                 unset($context[$key]);
             }
         }
-        return $record->with(message: \strtr($record->message, $replacements), context: $context);
+        return $record->with(message: strtr($record->message, $replacements), context: $context);
     }
 }

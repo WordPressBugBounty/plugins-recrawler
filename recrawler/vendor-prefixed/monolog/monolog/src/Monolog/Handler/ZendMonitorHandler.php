@@ -28,7 +28,7 @@ class ZendMonitorHandler extends AbstractProcessingHandler
      */
     public function __construct(int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
-        if (!\function_exists('Mihdan\\ReCrawler\\Dependencies\\zend_monitor_custom_event')) {
+        if (!\function_exists('Mihdan\ReCrawler\Dependencies\zend_monitor_custom_event')) {
             throw new MissingExtensionException('You must have Zend Server installed with Zend Monitor enabled in order to use this handler');
         }
         parent::__construct($level, $bubble);
@@ -36,7 +36,7 @@ class ZendMonitorHandler extends AbstractProcessingHandler
     /**
      * Translates Monolog log levels to ZendMonitor levels.
      */
-    protected function toZendMonitorLevel(Level $level) : int
+    protected function toZendMonitorLevel(Level $level): int
     {
         return match ($level) {
             Level::Debug => \Mihdan\ReCrawler\Dependencies\ZEND_MONITOR_EVENT_SEVERITY_INFO,
@@ -52,7 +52,7 @@ class ZendMonitorHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->writeZendMonitorCustomEvent($record->level->getName(), $record->message, $record->formatted, $this->toZendMonitorLevel($record->level));
     }
@@ -63,14 +63,14 @@ class ZendMonitorHandler extends AbstractProcessingHandler
      * @param array<mixed> $formatted Displayed in Custom Variables tab
      * @param int          $severity  Set the event severity level (-1,0,1)
      */
-    protected function writeZendMonitorCustomEvent(string $type, string $message, array $formatted, int $severity) : void
+    protected function writeZendMonitorCustomEvent(string $type, string $message, array $formatted, int $severity): void
     {
         zend_monitor_custom_event($type, $message, $formatted, $severity);
     }
     /**
      * @inheritDoc
      */
-    public function getDefaultFormatter() : FormatterInterface
+    public function getDefaultFormatter(): FormatterInterface
     {
         return new NormalizerFormatter();
     }

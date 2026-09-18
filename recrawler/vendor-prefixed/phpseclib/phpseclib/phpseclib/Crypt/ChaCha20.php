@@ -45,7 +45,7 @@ class ChaCha20 extends Salsa20
                 // or PHP and then subsequent blocks would then be done with libsodium but idk - it's not a high priority atm
                 // we could also make it so that if $this->counter == 0 and $this->continuousBuffer then do the first string
                 // with libsodium and subsequent strings with openssl or pure-PHP but again not a high priority
-                return \function_exists('sodium_crypto_aead_chacha20poly1305_ietf_encrypt') && $this->key_length == 32 && ($this->usePoly1305 && !isset($this->poly1305Key) && $this->counter == 0 || $this->counter == 1) && !$this->continuousBuffer;
+                return function_exists('sodium_crypto_aead_chacha20poly1305_ietf_encrypt') && $this->key_length == 32 && ($this->usePoly1305 && !isset($this->poly1305Key) && $this->counter == 0 || $this->counter == 1) && !$this->continuousBuffer;
             case self::ENGINE_OPENSSL:
                 // OpenSSL 1.1.0 (released 25 Aug 2016) added support for chacha20.
                 // PHP didn't support OpenSSL 1.1.0 until 7.0.19 (11 May 2017)
@@ -104,12 +104,12 @@ class ChaCha20 extends Salsa20
     private function encrypt_with_libsodium($plaintext)
     {
         $params = [$plaintext, $this->aad, $this->nonce, $this->key];
-        $ciphertext = \strlen($this->nonce) == 8 ? \sodium_crypto_aead_chacha20poly1305_encrypt(...$params) : \sodium_crypto_aead_chacha20poly1305_ietf_encrypt(...$params);
+        $ciphertext = strlen($this->nonce) == 8 ? sodium_crypto_aead_chacha20poly1305_encrypt(...$params) : sodium_crypto_aead_chacha20poly1305_ietf_encrypt(...$params);
         if (!$this->usePoly1305) {
-            return \substr($ciphertext, 0, \strlen($plaintext));
+            return substr($ciphertext, 0, strlen($plaintext));
         }
-        $newciphertext = \substr($ciphertext, 0, \strlen($plaintext));
-        $this->newtag = $this->usingGeneratedPoly1305Key && \strlen($this->nonce) == 12 ? \substr($ciphertext, \strlen($plaintext)) : $this->poly1305($newciphertext);
+        $newciphertext = substr($ciphertext, 0, strlen($plaintext));
+        $this->newtag = $this->usingGeneratedPoly1305Key && strlen($this->nonce) == 12 ? substr($ciphertext, strlen($plaintext)) : $this->poly1305($newciphertext);
         return $newciphertext;
     }
     /**
@@ -126,8 +126,8 @@ class ChaCha20 extends Salsa20
             if ($this->oldtag === \false) {
                 throw new InsufficientSetupException('Authentication Tag has not been set');
             }
-            if ($this->usingGeneratedPoly1305Key && \strlen($this->nonce) == 12) {
-                $plaintext = \sodium_crypto_aead_chacha20poly1305_ietf_decrypt(...$params);
+            if ($this->usingGeneratedPoly1305Key && strlen($this->nonce) == 12) {
+                $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt(...$params);
                 $this->oldtag = \false;
                 if ($plaintext === \false) {
                     throw new BadDecryptionException('Derived authentication tag and supplied authentication tag do not match');
@@ -135,14 +135,14 @@ class ChaCha20 extends Salsa20
                 return $plaintext;
             }
             $newtag = $this->poly1305($ciphertext);
-            if ($this->oldtag != \substr($newtag, 0, \strlen($this->oldtag))) {
+            if ($this->oldtag != substr($newtag, 0, strlen($this->oldtag))) {
                 $this->oldtag = \false;
                 throw new BadDecryptionException('Derived authentication tag and supplied authentication tag do not match');
             }
             $this->oldtag = \false;
         }
-        $plaintext = \strlen($this->nonce) == 8 ? \sodium_crypto_aead_chacha20poly1305_encrypt(...$params) : \sodium_crypto_aead_chacha20poly1305_ietf_encrypt(...$params);
-        return \substr($plaintext, 0, \strlen($ciphertext));
+        $plaintext = strlen($this->nonce) == 8 ? sodium_crypto_aead_chacha20poly1305_encrypt(...$params) : sodium_crypto_aead_chacha20poly1305_ietf_encrypt(...$params);
+        return substr($plaintext, 0, strlen($ciphertext));
     }
     /**
      * Sets the nonce.
@@ -151,7 +151,7 @@ class ChaCha20 extends Salsa20
      */
     public function setNonce($nonce)
     {
-        if (!\is_string($nonce)) {
+        if (!is_string($nonce)) {
             throw new \UnexpectedValueException('The nonce should be a string');
         }
         /*
@@ -161,14 +161,14 @@ class ChaCha20 extends Salsa20
           block count.  We have modified this here to be more consistent with
           recommendations in Section 3.2 of [RFC5116]."
         */
-        switch (\strlen($nonce)) {
+        switch (strlen($nonce)) {
             case 8:
             // 64 bits
             case 12:
                 // 96 bits
                 break;
             default:
-                throw new \LengthException('Nonce of size ' . \strlen($nonce) . ' not supported by this algorithm. Only 64-bit nonces or 96-bit nonces are supported');
+                throw new \LengthException('Nonce of size ' . strlen($nonce) . ' not supported by this algorithm. Only 64-bit nonces or 96-bit nonces are supported');
         }
         $this->nonce = $nonce;
         $this->changed = \true;
@@ -213,7 +213,7 @@ class ChaCha20 extends Salsa20
             $this->createPoly1305Key();
         }
         $key = $this->key;
-        if (\strlen($key) == 16) {
+        if (strlen($key) == 16) {
             $constant = 'expand 16-byte k';
             $key .= $key;
         } else {
@@ -221,7 +221,7 @@ class ChaCha20 extends Salsa20
         }
         $this->p1 = $constant . $key;
         $this->p2 = $this->nonce;
-        if (\strlen($this->nonce) == 8) {
+        if (strlen($this->nonce) == 8) {
             $this->p2 = "\x00\x00\x00\x00" . $this->p2;
         }
     }
@@ -299,7 +299,7 @@ class ChaCha20 extends Salsa20
      */
     protected static function salsa20($x)
     {
-        list(, $x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x8, $x9, $x10, $x11, $x12, $x13, $x14, $x15) = \unpack('V*', $x);
+        list(, $x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x8, $x9, $x10, $x11, $x12, $x13, $x14, $x15) = unpack('V*', $x);
         $z0 = $x0;
         $z1 = $x1;
         $z2 = $x2;
@@ -994,6 +994,6 @@ class ChaCha20 extends Salsa20
         $x13 += $z13;
         $x14 += $z14;
         $x15 += $z15;
-        return \pack('V*', self::safe_intval($x0), self::safe_intval($x1), self::safe_intval($x2), self::safe_intval($x3), self::safe_intval($x4), self::safe_intval($x5), self::safe_intval($x6), self::safe_intval($x7), self::safe_intval($x8), self::safe_intval($x9), self::safe_intval($x10), self::safe_intval($x11), self::safe_intval($x12), self::safe_intval($x13), self::safe_intval($x14), self::safe_intval($x15));
+        return pack('V*', self::safe_intval($x0), self::safe_intval($x1), self::safe_intval($x2), self::safe_intval($x3), self::safe_intval($x4), self::safe_intval($x5), self::safe_intval($x6), self::safe_intval($x7), self::safe_intval($x8), self::safe_intval($x9), self::safe_intval($x10), self::safe_intval($x11), self::safe_intval($x12), self::safe_intval($x13), self::safe_intval($x14), self::safe_intval($x15));
     }
 }

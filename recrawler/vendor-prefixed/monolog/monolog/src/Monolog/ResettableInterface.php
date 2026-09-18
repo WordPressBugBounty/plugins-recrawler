@@ -27,5 +27,5 @@ namespace Mihdan\ReCrawler\Dependencies\Monolog;
  */
 interface ResettableInterface
 {
-    public function reset() : void;
+    public function reset(): void;
 }

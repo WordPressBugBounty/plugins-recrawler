@@ -22,6 +22,6 @@ class ExecutableResponseError extends Error
 {
     public function __construct(string $message, string $executableErrorCode = 'INVALID_EXECUTABLE_RESPONSE')
     {
-        parent::__construct(\sprintf('Error code %s: %s', $executableErrorCode, $message));
+        parent::__construct(sprintf('Error code %s: %s', $executableErrorCode, $message));
     }
 }

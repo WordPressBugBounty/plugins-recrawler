@@ -30,7 +30,7 @@ class MongoDBFormatter implements FormatterInterface
      */
     public function __construct(int $maxNestingLevel = 3, bool $exceptionTraceAsString = \true)
     {
-        $this->maxNestingLevel = \max($maxNestingLevel, 0);
+        $this->maxNestingLevel = max($maxNestingLevel, 0);
         $this->exceptionTraceAsString = $exceptionTraceAsString;
     }
     /**
@@ -38,7 +38,7 @@ class MongoDBFormatter implements FormatterInterface
      *
      * @return mixed[]
      */
-    public function format(LogRecord $record) : array
+    public function format(LogRecord $record): array
     {
         /** @var mixed[] $res */
         $res = $this->formatArray($record->toArray());
@@ -49,7 +49,7 @@ class MongoDBFormatter implements FormatterInterface
      *
      * @return array<mixed[]>
      */
-    public function formatBatch(array $records) : array
+    public function formatBatch(array $records): array
     {
         $formatted = [];
         foreach ($records as $key => $record) {
@@ -85,7 +85,7 @@ class MongoDBFormatter implements FormatterInterface
      */
     protected function formatObject($value, int $nestingLevel)
     {
-        $objectVars = \get_object_vars($value);
+        $objectVars = get_object_vars($value);
         $objectVars['class'] = Utils::getClass($value);
         return $this->formatArray($objectVars, $nestingLevel);
     }
@@ -102,8 +102,8 @@ class MongoDBFormatter implements FormatterInterface
         }
         return $this->formatArray($formattedException, $nestingLevel);
     }
-    protected function formatDate(\DateTimeInterface $value, int $nestingLevel) : UTCDateTime
+    protected function formatDate(\DateTimeInterface $value, int $nestingLevel): UTCDateTime
     {
-        return new UTCDateTime((int) \floor((float) $value->format('U.u') * 1000));
+        return new UTCDateTime((int) floor((float) $value->format('U.u') * 1000));
     }
 }

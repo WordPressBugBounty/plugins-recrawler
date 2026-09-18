@@ -28,14 +28,14 @@ trait LoggingTrait
     /**
      * @param RpcLogEvent $event
      */
-    private function logRequest(RpcLogEvent $event) : void
+    private function logRequest(RpcLogEvent $event): void
     {
-        $debugEvent = ['timestamp' => $event->timestamp, 'severity' => \strtoupper(LogLevel::DEBUG), 'processId' => $event->processId ?? null, 'requestId' => $event->requestId ?? null, 'rpcName' => $event->rpcName ?? null];
-        $debugEvent = \array_filter($debugEvent, fn($value) => !\is_null($value));
+        $debugEvent = ['timestamp' => $event->timestamp, 'severity' => strtoupper(LogLevel::DEBUG), 'processId' => $event->processId ?? null, 'requestId' => $event->requestId ?? null, 'rpcName' => $event->rpcName ?? null];
+        $debugEvent = array_filter($debugEvent, fn($value) => !is_null($value));
         $jsonPayload = ['request.method' => $event->method, 'request.url' => $event->url, 'request.headers' => $event->headers, 'request.payload' => $this->truncatePayload($event->payload), 'request.jwt' => $this->getJwtToken($event->headers ?? []), 'retryAttempt' => $event->retryAttempt];
         // Remove null values
-        $debugEvent['jsonPayload'] = \array_filter($jsonPayload, fn($value) => !\is_null($value));
-        $stringifiedEvent = \json_encode($debugEvent, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
+        $debugEvent['jsonPayload'] = array_filter($jsonPayload, fn($value) => !is_null($value));
+        $stringifiedEvent = json_encode($debugEvent, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
         // There was an error stringifying the event, return to not break execution
         if ($stringifiedEvent === \false) {
             return;
@@ -45,13 +45,13 @@ trait LoggingTrait
     /**
      * @param RpcLogEvent $event
      */
-    private function logResponse(RpcLogEvent $event) : void
+    private function logResponse(RpcLogEvent $event): void
     {
-        $debugEvent = ['timestamp' => $event->timestamp, 'severity' => \strtoupper(LogLevel::DEBUG), 'processId' => $event->processId ?? null, 'requestId' => $event->requestId ?? null, 'jsonPayload' => ['response.status' => $event->status, 'response.headers' => $event->headers, 'response.payload' => $this->truncatePayload($event->payload), 'latencyMillis' => $event->latency]];
+        $debugEvent = ['timestamp' => $event->timestamp, 'severity' => strtoupper(LogLevel::DEBUG), 'processId' => $event->processId ?? null, 'requestId' => $event->requestId ?? null, 'jsonPayload' => ['response.status' => $event->status, 'response.headers' => $event->headers, 'response.payload' => $this->truncatePayload($event->payload), 'latencyMillis' => $event->latency]];
         // Remove null values
-        $debugEvent = \array_filter($debugEvent, fn($value) => !\is_null($value));
-        $debugEvent['jsonPayload'] = \array_filter($debugEvent['jsonPayload'], fn($value) => !\is_null($value));
-        $stringifiedEvent = \json_encode($debugEvent, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
+        $debugEvent = array_filter($debugEvent, fn($value) => !is_null($value));
+        $debugEvent['jsonPayload'] = array_filter($debugEvent['jsonPayload'], fn($value) => !is_null($value));
+        $stringifiedEvent = json_encode($debugEvent, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
         // There was an error stringifying the event, return to not break execution
         if ($stringifiedEvent !== \false) {
             $this->logger->debug($stringifiedEvent);
@@ -61,29 +61,29 @@ trait LoggingTrait
      * @param array<mixed> $headers
      * @return null|array<string, string|false>
      */
-    private function getJwtToken(array $headers) : null|array
+    private function getJwtToken(array $headers): null|array
     {
         if (empty($headers)) {
             return null;
         }
         $tokenHeader = $headers['Authorization'] ?? '';
-        $token = \str_replace('Bearer ', '', $tokenHeader);
-        if (\substr_count($token, '.') !== 2) {
+        $token = str_replace('Bearer ', '', $tokenHeader);
+        if (substr_count($token, '.') !== 2) {
             return null;
         }
-        [$header, $token, $_] = \explode('.', $token);
-        return ['header' => \base64_decode($header), 'token' => \base64_decode($token)];
+        [$header, $token, $_] = explode('.', $token);
+        return ['header' => base64_decode($header), 'token' => base64_decode($token)];
     }
     /**
      * @param null|string $payload
      * @return string
      */
-    private function truncatePayload(null|string $payload) : null|string
+    private function truncatePayload(null|string $payload): null|string
     {
         $maxLength = 500;
-        if (\is_null($payload) || \strlen($payload) <= $maxLength) {
+        if (is_null($payload) || strlen($payload) <= $maxLength) {
             return $payload;
         }
-        return \substr($payload, 0, $maxLength) . '...';
+        return substr($payload, 0, $maxLength) . '...';
     }
 }

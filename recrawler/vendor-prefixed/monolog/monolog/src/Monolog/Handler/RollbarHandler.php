@@ -52,7 +52,7 @@ class RollbarHandler extends AbstractProcessingHandler
      *
      * @return 'debug'|'info'|'warning'|'error'|'critical'
      */
-    protected function toRollbarLevel(Level $level) : string
+    protected function toRollbarLevel(Level $level): string
     {
         return match ($level) {
             Level::Debug => 'debug',
@@ -68,15 +68,15 @@ class RollbarHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if (!$this->initialized) {
             // __destructor() doesn't get called on Fatal errors
-            \register_shutdown_function([$this, 'close']);
+            register_shutdown_function([$this, 'close']);
             $this->initialized = \true;
         }
         $context = $record->context;
-        $context = \array_merge($context, $record->extra, ['level' => $this->toRollbarLevel($record->level), 'monolog_level' => $record->level->getName(), 'channel' => $record->channel, 'datetime' => $record->datetime->format('U')]);
+        $context = array_merge($context, $record->extra, ['level' => $this->toRollbarLevel($record->level), 'monolog_level' => $record->level->getName(), 'channel' => $record->channel, 'datetime' => $record->datetime->format('U')]);
         if (isset($context['exception']) && $context['exception'] instanceof Throwable) {
             $exception = $context['exception'];
             unset($context['exception']);
@@ -87,7 +87,7 @@ class RollbarHandler extends AbstractProcessingHandler
         $this->rollbarLogger->log($context['level'], $toLog, $context);
         $this->hasRecords = \true;
     }
-    public function flush() : void
+    public function flush(): void
     {
         if ($this->hasRecords) {
             $this->rollbarLogger->flush();
@@ -97,14 +97,14 @@ class RollbarHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         $this->flush();
     }
     /**
      * @inheritDoc
      */
-    public function reset() : void
+    public function reset(): void
     {
         $this->flush();
         parent::reset();

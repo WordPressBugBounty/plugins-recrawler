@@ -83,35 +83,35 @@ class SysVCacheItemPool implements CacheItemPoolInterface
      */
     public function __construct($options = [])
     {
-        if (!\extension_loaded('sysvshm')) {
+        if (!extension_loaded('sysvshm')) {
             throw new \RuntimeException('sysvshm extension is required to use this ItemPool');
         }
         $this->options = $options + ['variableKey' => self::VAR_KEY, 'proj' => self::DEFAULT_PROJ, 'semProj' => self::DEFAULT_SEM_PROJ, 'memsize' => self::DEFAULT_MEMSIZE, 'perm' => self::DEFAULT_PERM];
         $this->items = [];
         $this->deferredItems = [];
-        $this->sysvKey = \ftok(__FILE__, $this->options['proj']);
+        $this->sysvKey = ftok(__FILE__, $this->options['proj']);
         // gracefully handle when `sysvsem` isn't loaded
         // @TODO(v2): throw an exception when the extension isn't loaded
-        if (\extension_loaded('sysvsem')) {
-            $semKey = \ftok(__FILE__, $this->options['semProj']);
-            $this->semId = \sem_get($semKey, 1, $this->options['perm'], \true);
+        if (extension_loaded('sysvsem')) {
+            $semKey = ftok(__FILE__, $this->options['semProj']);
+            $this->semId = sem_get($semKey, 1, $this->options['perm'], \true);
         }
     }
     /**
      * @param mixed $key
      * @return CacheItemInterface
      */
-    public function getItem($key) : CacheItemInterface
+    public function getItem($key): CacheItemInterface
     {
         $this->loadItems();
-        return \current($this->getItems([$key]));
+        return current($this->getItems([$key]));
         // @phpstan-ignore-line
     }
     /**
      * @param array<mixed> $keys
      * @return iterable<CacheItemInterface>
      */
-    public function getItems(array $keys = []) : iterable
+    public function getItems(array $keys = []): iterable
     {
         $this->loadItems();
         $items = [];
@@ -123,7 +123,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function hasItem($key) : bool
+    public function hasItem($key): bool
     {
         $this->loadItems();
         return isset($this->items[$key]) && $this->items[$key]->isHit();
@@ -131,7 +131,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function clear() : bool
+    public function clear(): bool
     {
         if (!$this->acquireLock()) {
             return \false;
@@ -146,14 +146,14 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function deleteItem($key) : bool
+    public function deleteItem($key): bool
     {
         return $this->deleteItems([$key]);
     }
     /**
      * {@inheritdoc}
      */
-    public function deleteItems(array $keys) : bool
+    public function deleteItems(array $keys): bool
     {
         if (!$this->acquireLock()) {
             return \false;
@@ -172,7 +172,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function save(CacheItemInterface $item) : bool
+    public function save(CacheItemInterface $item): bool
     {
         if (!$this->acquireLock()) {
             return \false;
@@ -188,7 +188,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function saveDeferred(CacheItemInterface $item) : bool
+    public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItems[$item->getKey()] = $item;
         return \true;
@@ -196,7 +196,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function commit() : bool
+    public function commit(): bool
     {
         if (!$this->acquireLock()) {
             return \false;
@@ -221,9 +221,9 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         if (!$this->acquireLock()) {
             return \false;
         }
-        if (\false !== ($shmid = $this->attachShm())) {
-            $success = \shm_put_var($shmid, $this->options['variableKey'], $this->items);
-            \shm_detach($shmid);
+        if (\false !== $shmid = $this->attachShm()) {
+            $success = shm_put_var($shmid, $this->options['variableKey'], $this->items);
+            shm_detach($shmid);
             $this->releaseLock();
             return $success;
         }
@@ -240,10 +240,10 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         if (!$this->acquireLock()) {
             return \false;
         }
-        if (\false !== ($shmid = $this->attachShm())) {
-            $data = @\shm_get_var($shmid, $this->options['variableKey']);
+        if (\false !== $shmid = $this->attachShm()) {
+            $data = @shm_get_var($shmid, $this->options['variableKey']);
             $this->items = $data ?: [];
-            \shm_detach($shmid);
+            shm_detach($shmid);
             $this->hasLoadedItems = \true;
             $this->releaseLock();
             return \true;
@@ -251,7 +251,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->releaseLock();
         return \false;
     }
-    private function acquireLock() : bool
+    private function acquireLock(): bool
     {
         if ($this->semId === \false) {
             // if `sysvsem` isn't loaded, or if `sem_get` fails, return true
@@ -259,36 +259,36 @@ class SysVCacheItemPool implements CacheItemPoolInterface
             // @TODO consider better handling when `sem_get` fails.
             return \true;
         }
-        $currentPid = \getmypid();
+        $currentPid = getmypid();
         if ($this->lockOwnerPid === $currentPid) {
             // We already have the lock
             return \true;
         }
-        if (\sem_acquire($this->semId)) {
+        if (sem_acquire($this->semId)) {
             $this->lockOwnerPid = (int) $currentPid;
             return \true;
         }
         return \false;
     }
-    private function releaseLock() : bool
+    private function releaseLock(): bool
     {
-        if ($this->semId === \false || $this->lockOwnerPid !== \getmypid()) {
+        if ($this->semId === \false || $this->lockOwnerPid !== getmypid()) {
             return \true;
         }
         $this->lockOwnerPid = null;
-        return \sem_release($this->semId);
+        return sem_release($this->semId);
     }
-    private function resetShm() : void
+    private function resetShm(): void
     {
         // Remove the shared memory segment and semaphore when clearing the cache
-        $shmid = @\shm_attach($this->sysvKey);
+        $shmid = @shm_attach($this->sysvKey);
         if ($shmid !== \false) {
-            @\shm_remove($shmid);
-            @\shm_detach($shmid);
+            @shm_remove($shmid);
+            @shm_detach($shmid);
         }
     }
-    private function attachShm() : SysvSharedMemory|false
+    private function attachShm(): SysvSharedMemory|false
     {
-        return \shm_attach($this->sysvKey, $this->options['memsize'], $this->options['perm']);
+        return shm_attach($this->sysvKey, $this->options['memsize'], $this->options['perm']);
     }
 }

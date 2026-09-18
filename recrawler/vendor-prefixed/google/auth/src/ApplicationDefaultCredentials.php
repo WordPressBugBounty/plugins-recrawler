@@ -154,17 +154,17 @@ class ApplicationDefaultCredentials
         $jsonKey = CredentialsLoader::fromEnv() ?: CredentialsLoader::fromWellKnownFile();
         $anyScope = $scope ?: $defaultScope;
         if (!$httpHandler) {
-            if (!($client = HttpClientCache::getHttpClient())) {
+            if (!$client = HttpClientCache::getHttpClient()) {
                 $client = new Client();
                 HttpClientCache::setHttpClient($client);
             }
             $httpHandler = HttpHandlerFactory::build($client, $logger);
         }
-        if (\is_null($quotaProject)) {
+        if (is_null($quotaProject)) {
             // if a quota project isn't specified, try to get one from the env var
             $quotaProject = CredentialsLoader::quotaProjectFromEnv();
         }
-        if (!\is_null($jsonKey)) {
+        if (!is_null($jsonKey)) {
             if ($quotaProject) {
                 $jsonKey['quota_project_id'] = $quotaProject;
             }
@@ -179,10 +179,10 @@ class ApplicationDefaultCredentials
             $creds->setIsOnGce(\true);
             // save the credentials a trip to the metadata server
         }
-        if (\is_null($creds)) {
+        if (is_null($creds)) {
             throw new DomainException(self::notFound());
         }
-        if (!\is_null($cache)) {
+        if (!is_null($cache)) {
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
         }
         return $creds;
@@ -248,14 +248,14 @@ class ApplicationDefaultCredentials
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv() ?: CredentialsLoader::fromWellKnownFile();
         if (!$httpHandler) {
-            if (!($client = HttpClientCache::getHttpClient())) {
+            if (!$client = HttpClientCache::getHttpClient()) {
                 $client = new Client();
                 HttpClientCache::setHttpClient($client);
             }
             $httpHandler = HttpHandlerFactory::build($client);
         }
-        if (!\is_null($jsonKey)) {
-            if (!\array_key_exists('type', $jsonKey)) {
+        if (!is_null($jsonKey)) {
+            if (!array_key_exists('type', $jsonKey)) {
                 throw new \InvalidArgumentException('json key is missing the type field');
             }
             $creds = match ($jsonKey['type']) {
@@ -269,10 +269,10 @@ class ApplicationDefaultCredentials
             $creds->setIsOnGce(\true);
             // save the credentials a trip to the metadata server
         }
-        if (\is_null($creds)) {
+        if (is_null($creds)) {
             throw new DomainException(self::notFound());
         }
-        if (!\is_null($cache)) {
+        if (!is_null($cache)) {
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
         }
         return $creds;
@@ -284,18 +284,18 @@ class ApplicationDefaultCredentials
      *
      * @return null|LoggerInterface
      */
-    public static function getDefaultLogger() : null|LoggerInterface
+    public static function getDefaultLogger(): null|LoggerInterface
     {
-        $loggingFlag = \getenv(self::SDK_DEBUG_ENV_VAR);
+        $loggingFlag = getenv(self::SDK_DEBUG_ENV_VAR);
         // Env var is not set
         if (empty($loggingFlag)) {
             return null;
         }
-        $loggingFlag = \strtolower($loggingFlag);
+        $loggingFlag = strtolower($loggingFlag);
         // Env Var is not true
         if ($loggingFlag !== 'true') {
             if ($loggingFlag !== 'false') {
-                \trigger_error('The ' . self::SDK_DEBUG_ENV_VAR . ' is set, but it is set to another value than false or true. Logging is disabled');
+                trigger_error('The ' . self::SDK_DEBUG_ENV_VAR . ' is set, but it is set to another value than false or true. Logging is disabled');
             }
             return null;
         }

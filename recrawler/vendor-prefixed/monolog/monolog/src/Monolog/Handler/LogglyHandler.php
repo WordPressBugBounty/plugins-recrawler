@@ -53,7 +53,7 @@ class LogglyHandler extends AbstractProcessingHandler
     /**
      * Loads and returns the shared curl handler for the given endpoint.
      */
-    protected function getCurlHandler(string $endpoint) : CurlHandle
+    protected function getCurlHandler(string $endpoint): CurlHandle
     {
         if (!\array_key_exists($endpoint, $this->curlHandlers)) {
             $this->curlHandlers[$endpoint] = $this->loadCurlHandle($endpoint);
@@ -63,20 +63,20 @@ class LogglyHandler extends AbstractProcessingHandler
     /**
      * Starts a fresh curl session for the given endpoint and returns its handler.
      */
-    private function loadCurlHandle(string $endpoint) : CurlHandle
+    private function loadCurlHandle(string $endpoint): CurlHandle
     {
-        $url = \sprintf("https://%s/%s/%s/", static::HOST, $endpoint, $this->token);
-        $ch = \curl_init();
-        \curl_setopt($ch, \CURLOPT_URL, $url);
-        \curl_setopt($ch, \CURLOPT_POST, \true);
-        \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
+        $url = sprintf("https://%s/%s/%s/", static::HOST, $endpoint, $this->token);
+        $ch = curl_init();
+        curl_setopt($ch, \CURLOPT_URL, $url);
+        curl_setopt($ch, \CURLOPT_POST, \true);
+        curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
         return $ch;
     }
     /**
      * @param  string[]|string $tag
      * @return $this
      */
-    public function setTag(string|array $tag) : self
+    public function setTag(string|array $tag): self
     {
         if ('' === $tag || [] === $tag) {
             $this->tag = [];
@@ -89,40 +89,40 @@ class LogglyHandler extends AbstractProcessingHandler
      * @param  string[]|string $tag
      * @return $this
      */
-    public function addTag(string|array $tag) : self
+    public function addTag(string|array $tag): self
     {
         if ('' !== $tag) {
             $tag = \is_array($tag) ? $tag : [$tag];
-            $this->tag = \array_unique(\array_merge($this->tag, $tag));
+            $this->tag = array_unique(array_merge($this->tag, $tag));
         }
         return $this;
     }
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->send($record->formatted, static::ENDPOINT_SINGLE);
     }
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         $level = $this->level;
-        $records = \array_filter($records, function ($record) use($level) {
+        $records = array_filter($records, function ($record) use ($level) {
             return $record->level->value >= $level->value;
         });
         if (\count($records) > 0) {
             $this->send($this->getFormatter()->formatBatch($records), static::ENDPOINT_BATCH);
         }
     }
-    protected function send(string $data, string $endpoint) : void
+    protected function send(string $data, string $endpoint): void
     {
         $ch = $this->getCurlHandler($endpoint);
         $headers = ['Content-Type: application/json'];
         if (\count($this->tag) > 0) {
-            $headers[] = 'X-LOGGLY-TAG: ' . \implode(',', $this->tag);
+            $headers[] = 'X-LOGGLY-TAG: ' . implode(',', $this->tag);
         }
-        \curl_setopt($ch, \CURLOPT_POSTFIELDS, $data);
-        \curl_setopt($ch, \CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, \CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, \CURLOPT_HTTPHEADER, $headers);
         Curl\Util::execute($ch, 5);
     }
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new LogglyFormatter();
     }

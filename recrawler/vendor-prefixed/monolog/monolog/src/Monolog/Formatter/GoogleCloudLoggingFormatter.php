@@ -23,7 +23,7 @@ use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
  */
 class GoogleCloudLoggingFormatter extends JsonFormatter
 {
-    protected function normalizeRecord(LogRecord $record) : array
+    protected function normalizeRecord(LogRecord $record): array
     {
         $normalized = parent::normalizeRecord($record);
         // Re-key level for GCP logging

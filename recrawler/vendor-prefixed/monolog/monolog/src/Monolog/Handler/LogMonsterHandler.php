@@ -72,21 +72,21 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return \true;
     }
     /**
      * Manually feed the log monster so it does not complain on close (until reset() is called)
      */
-    public function feed() : void
+    public function feed(): void
     {
         $this->fed = \true;
     }
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (!$this->wantsContextChips || \count($record->context) > 0) {
             $this->eaten++;
@@ -97,7 +97,7 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         if (!$this->fed && $this->eaten < $this->hunger) {
             $record = new LogRecord(datetime: new \DateTimeImmutable('now'), channel: $this->channel, level: $this->angerLevel, message: 'Om nom nom... the log monster is hangry: it only ate ' . $this->eaten . ' of ' . $this->hunger . ' expected log records', context: ['eaten' => $this->eaten, 'hunger' => $this->hunger]);
@@ -108,7 +108,7 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
         }
         $this->getHandler()->close();
     }
-    public function reset() : void
+    public function reset(): void
     {
         $this->fed = \false;
         $this->eaten = 0;
@@ -122,7 +122,7 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
      *
      * If the handler was provided as a factory, this will trigger the handler's instantiation.
      */
-    public function getHandler(?LogRecord $record = null) : HandlerInterface
+    public function getHandler(?LogRecord $record = null): HandlerInterface
     {
         if (!$this->handler instanceof HandlerInterface) {
             $handler = ($this->handler)($record, $this);
@@ -136,7 +136,7 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {
@@ -148,7 +148,7 @@ class LogMonsterHandler extends Handler implements ProcessableHandlerInterface, 
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {

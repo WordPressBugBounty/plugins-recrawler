@@ -51,7 +51,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
      * which are very likely to be secrets/tokens. Provided as an opt-in pattern as it may
      * cause collateral damage on legitimate long strings (hashes, UUIDs, base64, ...).
      */
-    public const TOKEN_PATTERN = '{\\b(?:[a-z]+_)*[a-zA-Z0-9]{30,}\\b}';
+    public const TOKEN_PATTERN = '{\b(?:[a-z]+_)*[a-zA-Z0-9]{30,}\b}';
     /**
      * How deep to walk the record and the output, mirrors NormalizerFormatter's default
      */
@@ -78,15 +78,15 @@ final class RedactingFormatter implements WrappingFormatterInterface
      */
     public function __construct(private readonly FormatterInterface $formatter, array $sensitiveKeys = ['password', 'passwd', 'pwd', 'secret', 'token', 'api_key', 'apikey', 'authorization', 'auth', 'cookie'], array $patterns = [], private readonly string $mask = '[REDACTED]', private readonly bool $redactSensitiveParameters = \true, private readonly int $minSecretLength = 5)
     {
-        $this->sensitiveKeys = \array_values(\array_map('strtolower', $sensitiveKeys));
+        $this->sensitiveKeys = array_values(array_map('strtolower', $sensitiveKeys));
         foreach ($patterns as $pattern) {
-            if (@\preg_match($pattern, '') === \false) {
-                throw new \InvalidArgumentException(\sprintf('Invalid redaction pattern provided to RedactingFormatter: %s', \var_export($pattern, \true)));
+            if (@preg_match($pattern, '') === \false) {
+                throw new \InvalidArgumentException(sprintf('Invalid redaction pattern provided to RedactingFormatter: %s', var_export($pattern, \true)));
             }
         }
-        $this->patterns = \array_values($patterns);
+        $this->patterns = array_values($patterns);
     }
-    public function getWrappedFormatter() : FormatterInterface
+    public function getWrappedFormatter(): FormatterInterface
     {
         return $this->formatter;
     }
@@ -104,7 +104,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
         }
         return $this->sweep($this->formatter->formatBatch($records), $secrets);
     }
-    private function redactRecord(LogRecord $record) : LogRecord
+    private function redactRecord(LogRecord $record): LogRecord
     {
         return $record->with(context: $this->redactKeys($record->context), extra: $this->redactKeys($record->extra));
     }
@@ -112,14 +112,14 @@ final class RedactingFormatter implements WrappingFormatterInterface
      * @param  array<mixed> $data
      * @return array<mixed>
      */
-    private function redactKeys(array $data, int $depth = 0) : array
+    private function redactKeys(array $data, int $depth = 0): array
     {
         // context comes from userland and can hold a self-referencing array
         if ($depth > self::MAX_DEPTH) {
             return $data;
         }
         foreach ($data as $key => $value) {
-            if (\is_string($key) && \in_array(\strtolower($key), $this->sensitiveKeys, \true)) {
+            if (\is_string($key) && \in_array(strtolower($key), $this->sensitiveKeys, \true)) {
                 $data[$key] = $this->mask;
             } elseif (\is_array($value)) {
                 $data[$key] = $this->redactKeys($value, $depth + 1);
@@ -133,7 +133,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
      * @param  iterable<LogRecord> $records
      * @return list<string>
      */
-    private function collectSecrets(iterable $records) : array
+    private function collectSecrets(iterable $records): array
     {
         $secrets = [];
         $seen = [];
@@ -148,28 +148,28 @@ final class RedactingFormatter implements WrappingFormatterInterface
         // so both forms have to be looked for
         $escapedSecrets = [];
         foreach ($secrets as $secret) {
-            $escaped = \substr(Utils::jsonEncode($secret, null, \true), 1, -1);
+            $escaped = substr(Utils::jsonEncode($secret, null, \true), 1, -1);
             if ($escaped !== $secret && $escaped !== '') {
                 $escapedSecrets[] = $escaped;
             }
         }
-        $secrets = \array_values(\array_unique(\array_merge($secrets, $escapedSecrets)));
+        $secrets = array_values(array_unique(array_merge($secrets, $escapedSecrets)));
         // longest first, so that overlapping secrets do not leave fragments behind
-        \usort($secrets, static fn(string $a, string $b) => \strlen($b) <=> \strlen($a));
+        usort($secrets, static fn(string $a, string $b) => \strlen($b) <=> \strlen($a));
         return $secrets;
     }
     /**
      * @param list<string>      $secrets
      * @param array<int, true>  $seen    Ids of the objects visited so far, to survive cyclic graphs
      */
-    private function collect(mixed $data, array &$secrets, array &$seen, int $depth) : void
+    private function collect(mixed $data, array &$secrets, array &$seen, int $depth): void
     {
         if ($depth > self::MAX_DEPTH) {
             return;
         }
         if (\is_array($data)) {
             foreach ($data as $key => $value) {
-                if (\is_string($key) && \in_array(\strtolower($key), $this->sensitiveKeys, \true)) {
+                if (\is_string($key) && \in_array(strtolower($key), $this->sensitiveKeys, \true)) {
                     // no need to recurse, the whole value is masked in the record anyway
                     $this->addSecret($value, $secrets);
                     continue;
@@ -182,7 +182,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
         if (!\is_object($data) || !$this->redactSensitiveParameters) {
             return;
         }
-        $id = \spl_object_id($data);
+        $id = spl_object_id($data);
         if (isset($seen[$id])) {
             return;
         }
@@ -194,7 +194,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
         }
         // public properties only, matching what formatters get to see, but enough to reach
         // objects nested inside this one
-        foreach (\get_object_vars($data) as $value) {
+        foreach (get_object_vars($data) as $value) {
             $this->collect($value, $secrets, $seen, $depth + 1);
         }
     }
@@ -206,7 +206,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
      *
      * @return array<string, \ReflectionProperty>
      */
-    private function getSensitiveProperties(object $data) : array
+    private function getSensitiveProperties(object $data): array
     {
         $class = $data::class;
         if (isset($this->sensitiveProperties[$class])) {
@@ -237,7 +237,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
     /**
      * @param list<string> $secrets
      */
-    private function addSecret(mixed $value, array &$secrets) : void
+    private function addSecret(mixed $value, array &$secrets): void
     {
         // a Stringable secret ends up in the output as its string form, so that is what
         // has to be looked for
@@ -260,7 +260,7 @@ final class RedactingFormatter implements WrappingFormatterInterface
      *
      * @param list<string> $secrets
      */
-    private function sweep(mixed $formatted, array $secrets, int $depth = 0) : mixed
+    private function sweep(mixed $formatted, array $secrets, int $depth = 0): mixed
     {
         if ([] === $this->patterns && [] === $secrets) {
             return $formatted;
@@ -272,15 +272,15 @@ final class RedactingFormatter implements WrappingFormatterInterface
         }
         if (\is_string($formatted)) {
             if ([] !== $secrets) {
-                $formatted = \str_replace($secrets, $this->mask, $formatted);
+                $formatted = str_replace($secrets, $this->mask, $formatted);
             }
             if ([] !== $this->patterns) {
-                $replaced = \preg_replace($this->patterns, $this->mask, $formatted);
+                $replaced = preg_replace($this->patterns, $this->mask, $formatted);
                 if (null === $replaced) {
                     // the patterns could not be applied so the output cannot be trusted, drop it
                     // entirely. Neither the patterns (which may embed a secret themselves) nor the
                     // mask are reported, preg_last_error_msg() is one of a fixed set of PCRE strings
-                    return '[RedactingFormatter dropped this record, pattern redaction failed with "' . \preg_last_error_msg() . '"]';
+                    return '[RedactingFormatter dropped this record, pattern redaction failed with "' . preg_last_error_msg() . '"]';
                 }
                 $formatted = $replaced;
             }

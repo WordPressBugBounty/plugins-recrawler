@@ -26,7 +26,7 @@ class HtmlFormatter extends NormalizerFormatter
     /**
      * Translates Monolog log levels to html color priorities.
      */
-    protected function getLevelColor(Level $level) : string
+    protected function getLevelColor(Level $level): string
     {
         return match ($level) {
             Level::Debug => '#CCCCCC',
@@ -53,11 +53,11 @@ class HtmlFormatter extends NormalizerFormatter
      * @param string $td       Row standard cell content
      * @param bool   $escapeTd false if td content must not be html escaped
      */
-    protected function addRow(string $th, string $td = ' ', bool $escapeTd = \true) : string
+    protected function addRow(string $th, string $td = ' ', bool $escapeTd = \true): string
     {
-        $th = \htmlspecialchars($th, \ENT_NOQUOTES, 'UTF-8');
+        $th = htmlspecialchars($th, \ENT_NOQUOTES, 'UTF-8');
         if ($escapeTd) {
-            $td = '<pre>' . \htmlspecialchars($td, \ENT_NOQUOTES, 'UTF-8') . '</pre>';
+            $td = '<pre>' . htmlspecialchars($td, \ENT_NOQUOTES, 'UTF-8') . '</pre>';
         }
         return "<tr style=\"padding: 4px;text-align: left;\">\n<th style=\"vertical-align: top;background: #ccc;color: #000\" width=\"100\">{$th}:</th>\n<td style=\"padding: 4px;text-align: left;vertical-align: top;background: #eee;color: #000\">" . $td . "</td>\n</tr>";
     }
@@ -66,9 +66,9 @@ class HtmlFormatter extends NormalizerFormatter
      *
      * @param string $title Text to be in the h1
      */
-    protected function addTitle(string $title, Level $level) : string
+    protected function addTitle(string $title, Level $level): string
     {
-        $title = \htmlspecialchars($title, \ENT_NOQUOTES, 'UTF-8');
+        $title = htmlspecialchars($title, \ENT_NOQUOTES, 'UTF-8');
         return '<h1 style="background: ' . $this->getLevelColor($level) . ';color: #ffffff;padding: 5px;" class="monolog-output">' . $title . '</h1>';
     }
     /**
@@ -76,7 +76,7 @@ class HtmlFormatter extends NormalizerFormatter
      *
      * @return string The formatted record
      */
-    public function format(LogRecord $record) : string
+    public function format(LogRecord $record): string
     {
         $output = $this->addTitle($record->level->getName(), $record->level);
         $output .= '<table cellspacing="1" width="100%" class="monolog-output">';
@@ -106,7 +106,7 @@ class HtmlFormatter extends NormalizerFormatter
      *
      * @return string The formatted set of records
      */
-    public function formatBatch(array $records) : string
+    public function formatBatch(array $records): string
     {
         $message = '';
         foreach ($records as $record) {
@@ -117,7 +117,7 @@ class HtmlFormatter extends NormalizerFormatter
     /**
      * @param mixed $data
      */
-    protected function convertToString($data) : string
+    protected function convertToString($data): string
     {
         if (null === $data || \is_scalar($data)) {
             return (string) $data;

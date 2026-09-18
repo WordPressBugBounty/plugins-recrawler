@@ -44,11 +44,11 @@ class FluentdFormatter implements FormatterInterface
     {
         $this->levelTag = $levelTag;
     }
-    public function isUsingLevelsInTag() : bool
+    public function isUsingLevelsInTag(): bool
     {
         return $this->levelTag;
     }
-    public function format(LogRecord $record) : string
+    public function format(LogRecord $record): string
     {
         $tag = $record->channel;
         if ($this->levelTag) {
@@ -61,7 +61,7 @@ class FluentdFormatter implements FormatterInterface
         }
         return Utils::jsonEncode([$tag, $record->datetime->getTimestamp(), $message]);
     }
-    public function formatBatch(array $records) : string
+    public function formatBatch(array $records): string
     {
         $message = '';
         foreach ($records as $record) {

@@ -31,7 +31,7 @@ class FrankenPhpHandler extends AbstractProcessingHandler
      */
     public function __construct(int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
-        if (!\function_exists('Mihdan\\ReCrawler\\Dependencies\\frankenphp_log')) {
+        if (!\function_exists('frankenphp_log') && !\function_exists('Mihdan\ReCrawler\Dependencies\frankenphp_log')) {
             throw new MissingExtensionException('You must run this handler under FrankenPHP, the frankenphp_log() function is not available');
         }
         parent::__construct($level, $bubble);
@@ -50,14 +50,14 @@ class FrankenPhpHandler extends AbstractProcessingHandler
      * @see https://pkg.go.dev/log/slog#hdr-Levels
      * @see https://opentelemetry.io/docs/specs/otel/logs/data-model-appendix/
      */
-    protected function toFrankenPhpLevel(Level $level) : int
+    protected function toFrankenPhpLevel(Level $level): int
     {
         return match ($level) {
-            Level::Debug => \Mihdan\ReCrawler\Dependencies\FRANKENPHP_LOG_LEVEL_DEBUG,
-            Level::Info => \Mihdan\ReCrawler\Dependencies\FRANKENPHP_LOG_LEVEL_INFO,
+            Level::Debug => \FRANKENPHP_LOG_LEVEL_DEBUG,
+            Level::Info => \FRANKENPHP_LOG_LEVEL_INFO,
             Level::Notice => 1,
-            Level::Warning => \Mihdan\ReCrawler\Dependencies\FRANKENPHP_LOG_LEVEL_WARN,
-            Level::Error => \Mihdan\ReCrawler\Dependencies\FRANKENPHP_LOG_LEVEL_ERROR,
+            Level::Warning => \FRANKENPHP_LOG_LEVEL_WARN,
+            Level::Error => \FRANKENPHP_LOG_LEVEL_ERROR,
             Level::Critical => 9,
             Level::Alert => 10,
             Level::Emergency => 12,
@@ -66,25 +66,25 @@ class FrankenPhpHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->writeFrankenPhpLog($record->message, $this->toFrankenPhpLevel($record->level), $record->formatted);
     }
     /**
      * @param array<mixed> $context Displayed as structured attributes alongside the message
      */
-    protected function writeFrankenPhpLog(string $message, int $level, array $context) : void
+    protected function writeFrankenPhpLog(string $message, int $level, array $context): void
     {
         // frankenphp_log() merges $context into the same JSON object it already fills with "msg",
         // "level" and "ts", so drop Monolog's duplicates of those three. level_name still carries
         // the Monolog level name, which slog's own severity cannot express.
         unset($context['message'], $context['level'], $context['datetime']);
-        \Mihdan\ReCrawler\Dependencies\frankenphp_log($message, $level, $context);
+        \frankenphp_log($message, $level, $context);
     }
     /**
      * @inheritDoc
      */
-    public function getDefaultFormatter() : FormatterInterface
+    public function getDefaultFormatter(): FormatterInterface
     {
         return new NormalizerFormatter();
     }

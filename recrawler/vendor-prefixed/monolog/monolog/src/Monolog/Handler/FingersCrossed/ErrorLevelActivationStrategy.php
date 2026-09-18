@@ -32,7 +32,7 @@ class ErrorLevelActivationStrategy implements ActivationStrategyInterface
     {
         $this->actionLevel = Logger::toMonologLevel($actionLevel);
     }
-    public function isHandlerActivated(LogRecord $record) : bool
+    public function isHandlerActivated(LogRecord $record): bool
     {
         return $record->level->value >= $this->actionLevel->value;
     }

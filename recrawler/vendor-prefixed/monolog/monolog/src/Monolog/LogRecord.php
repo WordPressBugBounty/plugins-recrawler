@@ -34,7 +34,7 @@ class LogRecord implements ArrayAccess
     )
     {
     }
-    public function offsetSet(mixed $offset, mixed $value) : void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === 'extra') {
             if (!\is_array($value)) {
@@ -49,18 +49,18 @@ class LogRecord implements ArrayAccess
         }
         throw new \LogicException('Unsupported operation: setting ' . $offset);
     }
-    public function offsetExists(mixed $offset) : bool
+    public function offsetExists(mixed $offset): bool
     {
         if ($offset === 'level_name') {
             return \true;
         }
         return isset($this->{$offset});
     }
-    public function offsetUnset(mixed $offset) : void
+    public function offsetUnset(mixed $offset): void
     {
         throw new \LogicException('Unsupported operation');
     }
-    public function &offsetGet(mixed $offset) : mixed
+    public function &offsetGet(mixed $offset): mixed
     {
         // handle special cases for the level enum
         if ($offset === 'level_name') {
@@ -83,11 +83,11 @@ class LogRecord implements ArrayAccess
     /**
      * @phpstan-return array{message: string, context: mixed[], level: value-of<Level::VALUES>, level_name: value-of<Level::NAMES>, channel: string, datetime: \DateTimeImmutable, extra: mixed[]}
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         return ['message' => $this->message, 'context' => $this->context, 'level' => $this->level->value, 'level_name' => $this->level->getName(), 'channel' => $this->channel, 'datetime' => $this->datetime, 'extra' => $this->extra];
     }
-    public function with(mixed ...$args) : self
+    public function with(mixed ...$args): self
     {
         foreach (['message', 'context', 'level', 'channel', 'datetime', 'extra'] as $prop) {
             $args[$prop] ??= $this->{$prop};

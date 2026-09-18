@@ -44,7 +44,7 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         foreach ($this->handlers as $handler) {
             if ($handler->isHandling($record)) {
@@ -56,7 +56,7 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (\count($this->processors) > 0) {
             $record = $this->processRecord($record);
@@ -69,7 +69,7 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         if (\count($this->processors) > 0) {
             $processed = [];
@@ -79,10 +79,10 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
             $records = $processed;
         }
         foreach ($this->handlers as $handler) {
-            $handler->handleBatch(\array_map(fn($record) => clone $record, $records));
+            $handler->handleBatch(array_map(fn($record) => clone $record, $records));
         }
     }
-    public function reset() : void
+    public function reset(): void
     {
         $this->resetProcessors();
         foreach ($this->handlers as $handler) {
@@ -91,7 +91,7 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
             }
         }
     }
-    public function close() : void
+    public function close(): void
     {
         parent::close();
         foreach ($this->handlers as $handler) {
@@ -101,7 +101,7 @@ class GroupHandler extends Handler implements ProcessableHandlerInterface, Reset
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         foreach ($this->handlers as $handler) {
             if ($handler instanceof FormattableHandlerInterface) {

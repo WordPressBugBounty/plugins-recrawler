@@ -78,7 +78,7 @@ class Guzzle6HttpHandler
         }
         $promise = $this->client->sendAsync($request, $options);
         if ($this->logger) {
-            $promise->then(function (ResponseInterface $response) use($requestEvent) {
+            $promise->then(function (ResponseInterface $response) use ($requestEvent) {
                 $this->responseLog($response, $requestEvent);
                 return $response;
             });
@@ -90,7 +90,7 @@ class Guzzle6HttpHandler
      * @param RequestInterface $request
      * @param array<mixed> $options
      */
-    public function requestLog(RequestInterface $request, array $options) : RpcLogEvent
+    public function requestLog(RequestInterface $request, array $options): RpcLogEvent
     {
         $requestEvent = new RpcLogEvent();
         $requestEvent->method = $request->getMethod();
@@ -99,15 +99,15 @@ class Guzzle6HttpHandler
         $requestEvent->payload = $request->getBody()->getContents();
         $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
         $requestEvent->serviceName = $options['serviceName'] ?? null;
-        $requestEvent->processId = (int) \getmypid();
-        $requestEvent->requestId = $options['requestId'] ?? \crc32((string) \spl_object_id($request) . \getmypid());
+        $requestEvent->processId = (int) getmypid();
+        $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
         $this->logRequest($requestEvent);
         return $requestEvent;
     }
     /**
      * @internal
      */
-    public function responseLog(ResponseInterface $response, RpcLogEvent $requestEvent) : void
+    public function responseLog(ResponseInterface $response, RpcLogEvent $requestEvent): void
     {
         $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
         $responseEvent->headers = $response->getHeaders();

@@ -59,7 +59,7 @@ class SyslogUdpHandler extends AbstractSyslogHandler
         $this->rfc = $rfc;
         $this->socket = new UdpSocket($host, $port, $maxLength);
     }
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $lines = $this->splitMessageIntoLines($record->formatted);
         $header = $this->makeCommonSyslogHeader($this->toSyslogPriority($record->level), $record->datetime);
@@ -67,7 +67,7 @@ class SyslogUdpHandler extends AbstractSyslogHandler
             $this->socket->write($line, $header);
         }
     }
-    public function close() : void
+    public function close(): void
     {
         $this->socket->close();
     }
@@ -75,29 +75,29 @@ class SyslogUdpHandler extends AbstractSyslogHandler
      * @param  string|string[] $message
      * @return string[]
      */
-    private function splitMessageIntoLines($message) : array
+    private function splitMessageIntoLines($message): array
     {
         if (\is_array($message)) {
-            $message = \implode("\n", $message);
+            $message = implode("\n", $message);
         }
-        $lines = \preg_split('/$\\R?^/m', (string) $message, -1, \PREG_SPLIT_NO_EMPTY);
+        $lines = preg_split('/$\R?^/m', (string) $message, -1, \PREG_SPLIT_NO_EMPTY);
         if (\false === $lines) {
-            $pcreErrorCode = \preg_last_error();
-            throw new \RuntimeException('Could not preg_split: ' . $pcreErrorCode . ' / ' . \preg_last_error_msg());
+            $pcreErrorCode = preg_last_error();
+            throw new \RuntimeException('Could not preg_split: ' . $pcreErrorCode . ' / ' . preg_last_error_msg());
         }
         return $lines;
     }
     /**
      * Make common syslog header (see rfc5424 or rfc3164)
      */
-    protected function makeCommonSyslogHeader(int $severity, DateTimeInterface $datetime) : string
+    protected function makeCommonSyslogHeader(int $severity, DateTimeInterface $datetime): string
     {
         $priority = $severity + $this->facility;
-        $pid = \getmypid();
+        $pid = getmypid();
         if (\false === $pid) {
             $pid = '-';
         }
-        $hostname = \gethostname();
+        $hostname = gethostname();
         if (\false === $hostname) {
             $hostname = '-';
         }
@@ -116,7 +116,7 @@ class SyslogUdpHandler extends AbstractSyslogHandler
      *
      * @return $this
      */
-    public function setSocket(UdpSocket $socket) : self
+    public function setSocket(UdpSocket $socket): self
     {
         $this->socket = $socket;
         return $this;

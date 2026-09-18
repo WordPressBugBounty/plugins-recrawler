@@ -23,9 +23,9 @@ class MemoryUsageProcessor extends MemoryProcessor
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
-        $usage = \memory_get_usage($this->realUsage);
+        $usage = memory_get_usage($this->realUsage);
         if ($this->useFormatting) {
             $usage = $this->formatBytes($usage);
         }

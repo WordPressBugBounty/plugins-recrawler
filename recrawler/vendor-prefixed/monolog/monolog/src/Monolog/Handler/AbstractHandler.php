@@ -39,7 +39,7 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return $record->level->value >= $this->level->value;
     }
@@ -51,7 +51,7 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
      *
      * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::* $level
      */
-    public function setLevel(int|string|Level $level) : self
+    public function setLevel(int|string|Level $level): self
     {
         $this->level = Logger::toMonologLevel($level);
         return $this;
@@ -59,7 +59,7 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
     /**
      * Gets minimum logging level at which this handler will be triggered.
      */
-    public function getLevel() : Level
+    public function getLevel(): Level
     {
         return $this->level;
     }
@@ -70,7 +70,7 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
      *                       false means that bubbling is not permitted.
      * @return $this
      */
-    public function setBubble(bool $bubble) : self
+    public function setBubble(bool $bubble): self
     {
         $this->bubble = $bubble;
         return $this;
@@ -81,14 +81,14 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
      * @return bool true means that this handler allows bubbling.
      *              false means that bubbling is not permitted.
      */
-    public function getBubble() : bool
+    public function getBubble(): bool
     {
         return $this->bubble;
     }
     /**
      * @inheritDoc
      */
-    public function reset() : void
+    public function reset(): void
     {
     }
 }

@@ -53,23 +53,23 @@ class NewRelicHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if (!$this->isNewRelicEnabled()) {
             throw new MissingExtensionException('The newrelic PHP extension is required to use the NewRelicHandler');
         }
-        if (null !== ($appName = $this->getAppName($record->context))) {
+        if (null !== $appName = $this->getAppName($record->context)) {
             $this->setNewRelicAppName($appName);
         }
-        if (null !== ($transactionName = $this->getTransactionName($record->context))) {
+        if (null !== $transactionName = $this->getTransactionName($record->context)) {
             $this->setNewRelicTransactionName($transactionName);
             unset($record->formatted['context']['transaction_name']);
         }
         if (isset($record->context['exception']) && $record->context['exception'] instanceof \Throwable) {
-            \newrelic_notice_error($record->message, $record->context['exception']);
+            newrelic_notice_error($record->message, $record->context['exception']);
             unset($record->formatted['context']['exception']);
         } else {
-            \newrelic_notice_error($record->message);
+            newrelic_notice_error($record->message);
         }
         if (isset($record->formatted['context']) && \is_array($record->formatted['context'])) {
             foreach ($record->formatted['context'] as $key => $parameter) {
@@ -97,7 +97,7 @@ class NewRelicHandler extends AbstractProcessingHandler
     /**
      * Checks whether the NewRelic extension is enabled in the system.
      */
-    protected function isNewRelicEnabled() : bool
+    protected function isNewRelicEnabled(): bool
     {
         return \extension_loaded('newrelic');
     }
@@ -107,7 +107,7 @@ class NewRelicHandler extends AbstractProcessingHandler
      *
      * @param mixed[] $context
      */
-    protected function getAppName(array $context) : ?string
+    protected function getAppName(array $context): ?string
     {
         if (isset($context['appname'])) {
             return $context['appname'];
@@ -120,7 +120,7 @@ class NewRelicHandler extends AbstractProcessingHandler
      *
      * @param mixed[] $context
      */
-    protected function getTransactionName(array $context) : ?string
+    protected function getTransactionName(array $context): ?string
     {
         if (isset($context['transaction_name'])) {
             return $context['transaction_name'];
@@ -130,32 +130,32 @@ class NewRelicHandler extends AbstractProcessingHandler
     /**
      * Sets the NewRelic application that should receive this log.
      */
-    protected function setNewRelicAppName(string $appName) : void
+    protected function setNewRelicAppName(string $appName): void
     {
-        \newrelic_set_appname($appName);
+        newrelic_set_appname($appName);
     }
     /**
      * Overwrites the name of the current transaction
      */
-    protected function setNewRelicTransactionName(string $transactionName) : void
+    protected function setNewRelicTransactionName(string $transactionName): void
     {
-        \newrelic_name_transaction($transactionName);
+        newrelic_name_transaction($transactionName);
     }
     /**
      * @param mixed $value
      */
-    protected function setNewRelicParameter(string $key, $value) : void
+    protected function setNewRelicParameter(string $key, $value): void
     {
         if (null === $value || \is_scalar($value)) {
-            \newrelic_add_custom_parameter($key, $value);
+            newrelic_add_custom_parameter($key, $value);
         } else {
-            \newrelic_add_custom_parameter($key, Utils::jsonEncode($value, null, \true));
+            newrelic_add_custom_parameter($key, Utils::jsonEncode($value, null, \true));
         }
     }
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new NormalizerFormatter();
     }

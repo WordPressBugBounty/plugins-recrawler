@@ -41,7 +41,7 @@ class InsightOpsHandler extends SocketHandler
     /**
      * @inheritDoc
      */
-    protected function generateDataStream(LogRecord $record) : string
+    protected function generateDataStream(LogRecord $record): string
     {
         return $this->logToken . ' ' . $record->formatted;
     }

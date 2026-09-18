@@ -45,11 +45,11 @@ class Curve25519 extends Montgomery
     public function multiplyPoint(array $p, BigInteger $d)
     {
         $d = $d->toBytes();
-        $d = \str_pad($d, 32, "\x00", \STR_PAD_LEFT);
+        $d = str_pad($d, 32, "\x00", \STR_PAD_LEFT);
         //$r = strrev(sodium_crypto_scalarmult($d, strrev($p[0]->toBytes())));
         //return [$this->factory->newInteger(new BigInteger($r, 256))];
-        $d &= "\xf8" . \str_repeat("\xff", 30) . "";
-        $d = \strrev($d);
+        $d &= "\xf8" . str_repeat("\xff", 30) . "";
+        $d = strrev($d);
         $d |= "@";
         $d = new BigInteger($d, -256);
         return parent::multiplyPoint($p, $d);

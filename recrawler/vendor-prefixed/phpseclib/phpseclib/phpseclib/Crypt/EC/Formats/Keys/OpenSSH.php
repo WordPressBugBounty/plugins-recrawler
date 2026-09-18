@@ -69,7 +69,7 @@ abstract class OpenSSH extends Progenitor
             $qa = self::extractPoint($parsed['publicKey'], $curve);
         } else {
             list($curveName, $publicKey) = Strings::unpackSSH2('ss', $parsed['publicKey']);
-            $curveName = '\\phpseclib3\\Crypt\\EC\\Curves\\' . $curveName;
+            $curveName = '\phpseclib3\Crypt\EC\Curves\\' . $curveName;
             $curve = new $curveName();
             $qa = self::extractPoint("\x00" . $publicKey, $curve);
         }
@@ -89,12 +89,12 @@ abstract class OpenSSH extends Progenitor
             throw new UnsupportedCurveException($name . ' is not a curve that the OpenSSH plugin supports');
         }
         $oid = self::$curveOIDs[$name];
-        $aliases = \array_filter(self::$curveOIDs, function ($v) use($oid) {
+        $aliases = array_filter(self::$curveOIDs, function ($v) use ($oid) {
             return $v == $oid;
         });
-        $aliases = \array_keys($aliases);
-        for ($i = 0; $i < \count($aliases); $i++) {
-            if (\in_array('ecdsa-sha2-' . $aliases[$i], self::$types)) {
+        $aliases = array_keys($aliases);
+        for ($i = 0; $i < count($aliases); $i++) {
+            if (in_array('ecdsa-sha2-' . $aliases[$i], self::$types)) {
                 $alias = $aliases[$i];
                 break;
             }
@@ -120,7 +120,7 @@ abstract class OpenSSH extends Progenitor
             if (isset($options['binary']) ? $options['binary'] : self::$binary) {
                 return $key;
             }
-            $key = 'ssh-ed25519 ' . \base64_encode($key) . ' ' . $comment;
+            $key = 'ssh-ed25519 ' . base64_encode($key) . ' ' . $comment;
             return $key;
         }
         $alias = self::getAlias($curve);
@@ -129,7 +129,7 @@ abstract class OpenSSH extends Progenitor
         if (isset($options['binary']) ? $options['binary'] : self::$binary) {
             return $key;
         }
-        $key = 'ecdsa-sha2-' . $alias . ' ' . \base64_encode($key) . ' ' . $comment;
+        $key = 'ecdsa-sha2-' . $alias . ' ' . base64_encode($key) . ' ' . $comment;
         return $key;
     }
     /**
@@ -149,7 +149,7 @@ abstract class OpenSSH extends Progenitor
             if (!isset($secret)) {
                 throw new \RuntimeException('Private Key does not have a secret set');
             }
-            if (\strlen($secret) != 32) {
+            if (strlen($secret) != 32) {
                 throw new \RuntimeException('Private Key secret is not of the correct length');
             }
             $pubKey = $curve->encodePoint($publicKey);

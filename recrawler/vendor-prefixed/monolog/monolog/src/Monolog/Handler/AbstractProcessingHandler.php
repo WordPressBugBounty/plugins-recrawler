@@ -27,7 +27,7 @@ abstract class AbstractProcessingHandler extends AbstractHandler implements Proc
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (!$this->isHandling($record)) {
             return \false;
@@ -42,8 +42,8 @@ abstract class AbstractProcessingHandler extends AbstractHandler implements Proc
     /**
      * Writes the (already formatted) record down to the log of the implementing handler
      */
-    protected abstract function write(LogRecord $record) : void;
-    public function reset() : void
+    abstract protected function write(LogRecord $record): void;
+    public function reset(): void
     {
         parent::reset();
         $this->resetProcessors();

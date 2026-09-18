@@ -24,7 +24,7 @@ abstract class MailHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         $messages = [];
         foreach ($records as $record) {
@@ -46,18 +46,18 @@ abstract class MailHandler extends AbstractProcessingHandler
      *
      * @phpstan-param non-empty-array<LogRecord> $records
      */
-    protected abstract function send(string $content, array $records) : void;
+    abstract protected function send(string $content, array $records): void;
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->send((string) $record->formatted, [$record]);
     }
     /**
      * @phpstan-param non-empty-array<LogRecord> $records
      */
-    protected function getHighestRecord(array $records) : LogRecord
+    protected function getHighestRecord(array $records): LogRecord
     {
         $highestRecord = null;
         foreach ($records as $record) {
@@ -67,14 +67,14 @@ abstract class MailHandler extends AbstractProcessingHandler
         }
         return $highestRecord;
     }
-    protected function isHtmlBody(string $body) : bool
+    protected function isHtmlBody(string $body): bool
     {
         return ($body[0] ?? null) === '<';
     }
     /**
      * Gets the default formatter.
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new HtmlFormatter();
     }

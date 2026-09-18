@@ -50,13 +50,13 @@ class SamplingHandler extends AbstractHandler implements ProcessableHandlerInter
         $this->handler = $handler;
         $this->factor = $factor;
     }
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return $this->getHandler($record)->isHandling($record);
     }
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
-        if ($this->isHandling($record) && \mt_rand(1, $this->factor) === 1) {
+        if ($this->isHandling($record) && mt_rand(1, $this->factor) === 1) {
             if (\count($this->processors) > 0) {
                 $record = $this->processRecord($record);
             }
@@ -69,7 +69,7 @@ class SamplingHandler extends AbstractHandler implements ProcessableHandlerInter
      *
      * If the handler was provided as a factory, this will trigger the handler's instantiation.
      */
-    public function getHandler(LogRecord|null $record = null) : HandlerInterface
+    public function getHandler(LogRecord|null $record = null): HandlerInterface
     {
         if (!$this->handler instanceof HandlerInterface) {
             $handler = ($this->handler)($record, $this);
@@ -83,7 +83,7 @@ class SamplingHandler extends AbstractHandler implements ProcessableHandlerInter
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {
@@ -95,7 +95,7 @@ class SamplingHandler extends AbstractHandler implements ProcessableHandlerInter
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {

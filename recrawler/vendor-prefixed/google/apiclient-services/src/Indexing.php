@@ -57,4 +57,4 @@ class Indexing extends \Mihdan\ReCrawler\Dependencies\Google\Service
     }
 }
 // Adding a class alias for backwards compatibility with the previous class name.
-\class_alias(Indexing::class, 'Mihdan\\ReCrawler\\Dependencies\\Google_Service_Indexing');
+class_alias(Indexing::class, 'Mihdan\ReCrawler\Dependencies\Google_Service_Indexing');

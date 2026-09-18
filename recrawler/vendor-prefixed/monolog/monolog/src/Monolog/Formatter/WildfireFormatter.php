@@ -36,7 +36,7 @@ class WildfireFormatter extends NormalizerFormatter
      *
      * @return 'LOG'|'INFO'|'WARN'|'ERROR'
      */
-    private function toWildfireLevel(Level $level) : string
+    private function toWildfireLevel(Level $level): string
     {
         return match ($level) {
             Level::Debug => 'LOG',
@@ -52,7 +52,7 @@ class WildfireFormatter extends NormalizerFormatter
     /**
      * @inheritDoc
      */
-    public function format(LogRecord $record) : string
+    public function format(LogRecord $record): string
     {
         // Retrieve the line and file if set and remove them from the formatted extra
         $file = $line = '';
@@ -75,9 +75,9 @@ class WildfireFormatter extends NormalizerFormatter
             $handleError = \true;
         }
         if (\count($message) === 1) {
-            $message = \reset($message);
+            $message = reset($message);
         }
-        if (\is_array($message) && isset($message['context']) && \is_array($message['context']) && isset($message['context']['table'])) {
+        if (is_array($message) && isset($message['context']) && \is_array($message['context']) && isset($message['context']['table'])) {
             $type = 'TABLE';
             $label = $record->channel . ': ' . $record->message;
             $message = $message['context']['table'];
@@ -88,7 +88,7 @@ class WildfireFormatter extends NormalizerFormatter
         // Create JSON object describing the appearance of the message in the console
         $json = $this->toJson([['Type' => $type, 'File' => $file, 'Line' => $line, 'Label' => $label], $message], $handleError);
         // The message itself is a serialization of the above JSON object + it's length
-        return \sprintf('%d|%s|', \strlen($json), $json);
+        return sprintf('%d|%s|', \strlen($json), $json);
     }
     /**
      * @inheritDoc
@@ -104,7 +104,7 @@ class WildfireFormatter extends NormalizerFormatter
      *
      * @return null|scalar|array<mixed[]|scalar|null>|object
      */
-    protected function normalize(mixed $data, int $depth = 0) : mixed
+    protected function normalize(mixed $data, int $depth = 0): mixed
     {
         if (\is_object($data) && !$data instanceof \DateTimeInterface) {
             return $data;

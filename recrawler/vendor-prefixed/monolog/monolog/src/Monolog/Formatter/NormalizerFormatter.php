@@ -48,7 +48,7 @@ class NormalizerFormatter implements FormatterInterface
      *
      * @return null|scalar|array<mixed[]|scalar|null>
      */
-    public function normalizeValue(mixed $data) : mixed
+    public function normalizeValue(mixed $data): mixed
     {
         return $this->normalize($data);
     }
@@ -62,14 +62,14 @@ class NormalizerFormatter implements FormatterInterface
         }
         return $records;
     }
-    public function getDateFormat() : string
+    public function getDateFormat(): string
     {
         return $this->dateFormat;
     }
     /**
      * @return $this
      */
-    public function setDateFormat(string $dateFormat) : self
+    public function setDateFormat(string $dateFormat): self
     {
         $this->dateFormat = $dateFormat;
         return $this;
@@ -77,14 +77,14 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * The maximum number of normalization levels to go through
      */
-    public function getMaxNormalizeDepth() : int
+    public function getMaxNormalizeDepth(): int
     {
         return $this->maxNormalizeDepth;
     }
     /**
      * @return $this
      */
-    public function setMaxNormalizeDepth(int $maxNormalizeDepth) : self
+    public function setMaxNormalizeDepth(int $maxNormalizeDepth): self
     {
         $this->maxNormalizeDepth = $maxNormalizeDepth;
         return $this;
@@ -92,14 +92,14 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * The maximum number of items to normalize per level
      */
-    public function getMaxNormalizeItemCount() : int
+    public function getMaxNormalizeItemCount(): int
     {
         return $this->maxNormalizeItemCount;
     }
     /**
      * @return $this
      */
-    public function setMaxNormalizeItemCount(int $maxNormalizeItemCount) : self
+    public function setMaxNormalizeItemCount(int $maxNormalizeItemCount): self
     {
         $this->maxNormalizeItemCount = $maxNormalizeItemCount;
         return $this;
@@ -107,14 +107,14 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * The maximum number of stack trace frames to include
      */
-    public function getMaxTraceLength() : ?int
+    public function getMaxTraceLength(): ?int
     {
         return $this->maxTraceLength;
     }
     /**
      * @return $this
      */
-    public function setMaxTraceLength(?int $maxTraceLength) : self
+    public function setMaxTraceLength(?int $maxTraceLength): self
     {
         $this->maxTraceLength = $maxTraceLength;
         return $this;
@@ -124,7 +124,7 @@ class NormalizerFormatter implements FormatterInterface
      *
      * @return $this
      */
-    public function setJsonPrettyPrint(bool $enable) : self
+    public function setJsonPrettyPrint(bool $enable): self
     {
         if ($enable) {
             $this->jsonEncodeOptions |= \JSON_PRETTY_PRINT;
@@ -137,10 +137,10 @@ class NormalizerFormatter implements FormatterInterface
      * Setting a base path will hide the base path from exception and stack trace file names to shorten them
      * @return $this
      */
-    public function setBasePath(string $path = '') : self
+    public function setBasePath(string $path = ''): self
     {
         if ($path !== '') {
-            $path = \rtrim($path, \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR;
+            $path = rtrim($path, \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR;
         }
         $this->basePath = $path;
         return $this;
@@ -153,7 +153,7 @@ class NormalizerFormatter implements FormatterInterface
      *
      * @return array<mixed[]|scalar|null>
      */
-    protected function normalizeRecord(LogRecord $record) : array
+    protected function normalizeRecord(LogRecord $record): array
     {
         /** @var array<mixed[]|scalar|null> $normalized */
         $normalized = $this->normalize($record->toArray());
@@ -162,14 +162,14 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * @return null|scalar|array<mixed[]|scalar|null>
      */
-    protected function normalize(mixed $data, int $depth = 0) : mixed
+    protected function normalize(mixed $data, int $depth = 0): mixed
     {
         if (null === $data || \is_scalar($data)) {
             if (\is_float($data)) {
-                if (\is_infinite($data)) {
+                if (is_infinite($data)) {
                     return ($data > 0 ? '' : '-') . 'INF';
                 }
-                if (\is_nan($data)) {
+                if (is_nan($data)) {
                     return 'NaN';
                 }
             }
@@ -203,24 +203,24 @@ class NormalizerFormatter implements FormatterInterface
             } elseif (\get_class($data) === '__PHP_Incomplete_Class') {
                 $accessor = new \ArrayObject($data);
                 $value = (string) $accessor['__PHP_Incomplete_Class_Name'];
-            } elseif (\method_exists($data, '__toString')) {
+            } elseif (method_exists($data, '__toString')) {
                 try {
                     /** @var string $value */
                     $value = $data->__toString();
                 } catch (\Throwable) {
                     // if the toString method is failing, use the default behavior
                     /** @var null|scalar|array<mixed[]|scalar|null> $value */
-                    $value = \json_decode($this->toJson($data, \true), \true);
+                    $value = json_decode($this->toJson($data, \true), \true);
                 }
             } else {
                 // the rest is normalized by json encoding and decoding it
                 /** @var null|scalar|array<mixed[]|scalar|null> $value */
-                $value = \json_decode($this->toJson($data, \true), \true);
+                $value = json_decode($this->toJson($data, \true), \true);
             }
             return [Utils::getClass($data) => $value];
         }
         if (\is_resource($data)) {
-            return \sprintf('[resource(%s)]', \get_resource_type($data));
+            return sprintf('[resource(%s)]', get_resource_type($data));
         }
         return '[unknown(' . \gettype($data) . ')]';
     }
@@ -237,7 +237,7 @@ class NormalizerFormatter implements FormatterInterface
         }
         $file = $e->getFile();
         if ($this->basePath !== '') {
-            $file = \preg_replace('{^' . \preg_quote($this->basePath) . '}', '', $file);
+            $file = preg_replace('{^' . preg_quote($this->basePath) . '}', '', $file);
         }
         $data = ['class' => Utils::getClass($e), 'message' => $e->getMessage(), 'code' => (int) $e->getCode(), 'file' => $file . ':' . $e->getLine()];
         if ($e instanceof \SoapFault) {
@@ -255,12 +255,12 @@ class NormalizerFormatter implements FormatterInterface
                 }
             }
         }
-        $trace = \array_slice($e->getTrace(), 0, $this->maxTraceLength);
+        $trace = array_slice($e->getTrace(), 0, $this->maxTraceLength);
         foreach ($trace as $frame) {
             if (isset($frame['file'])) {
                 $file = $frame['file'];
                 if ($this->basePath !== '') {
-                    $file = \preg_replace('{^' . \preg_quote($this->basePath) . '}', '', $file) ?? $file;
+                    $file = preg_replace('{^' . preg_quote($this->basePath) . '}', '', $file) ?? $file;
                 }
                 $data['trace'][] = $file . ':' . ($frame['line'] ?? 0);
             } else {
@@ -271,18 +271,18 @@ class NormalizerFormatter implements FormatterInterface
                 $call = $frame['function'];
                 // since PHP 8.4 a closure is named after its declaring scope, which already
                 // includes the class, so prefixing it again would just repeat it
-                if (isset($frame['class']) && !\str_starts_with($call, '{closure:')) {
+                if (isset($frame['class']) && !str_starts_with($call, '{closure:')) {
                     // before 8.4 the name is <namespace>\{closure}, and the class has the namespace
-                    $call = \str_ends_with($call, '\\{closure}') ? '{closure}' : $call;
+                    $call = str_ends_with($call, '\{closure}') ? '{closure}' : $call;
                     $call = Utils::getClassName($frame['class']) . ($frame['type'] ?? '::') . $call;
                 }
                 // anonymous classes carry their declaration site after a NUL byte, which truncates
                 // syslog lines and is not valid JSON; PHP 8.4 embeds it in closure names too
-                $call = \preg_replace('{@anonymous\\x00.*?\\$[0-9a-f]++(?=::|$)}s', '@anonymous', $call) ?? $call;
+                $call = preg_replace('{@anonymous\x00.*?\$[0-9a-f]++(?=::|$)}s', '@anonymous', $call) ?? $call;
                 if ($this->basePath !== '') {
                     // closure names embed the file they were declared in since PHP 8.4, so the
                     // pattern cannot be anchored; limit it or a recurring base path is stripped twice
-                    $call = \preg_replace('{' . \preg_quote($this->basePath) . '}', '', $call, 1) ?? $call;
+                    $call = preg_replace('{' . preg_quote($this->basePath) . '}', '', $call, 1) ?? $call;
                 }
                 $data['trace'][] = 'internal[' . $call . ']:0';
             }
@@ -299,11 +299,11 @@ class NormalizerFormatter implements FormatterInterface
      * @throws \RuntimeException if encoding fails and errors are not ignored
      * @return string            if encoding fails and ignoreErrors is true 'null' is returned
      */
-    protected function toJson($data, bool $ignoreErrors = \false) : string
+    protected function toJson($data, bool $ignoreErrors = \false): string
     {
         return Utils::jsonEncode($data, $this->jsonEncodeOptions, $ignoreErrors);
     }
-    protected function formatDate(\DateTimeInterface $date) : string
+    protected function formatDate(\DateTimeInterface $date): string
     {
         // in case the date format isn't custom then we defer to the custom JsonSerializableDateTimeImmutable
         // formatting logic, which will pick the right format based on whether useMicroseconds is on
@@ -315,7 +315,7 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * @return $this
      */
-    public function addJsonEncodeOption(int $option) : self
+    public function addJsonEncodeOption(int $option): self
     {
         $this->jsonEncodeOptions |= $option;
         return $this;
@@ -323,7 +323,7 @@ class NormalizerFormatter implements FormatterInterface
     /**
      * @return $this
      */
-    public function removeJsonEncodeOption(int $option) : self
+    public function removeJsonEncodeOption(int $option): self
     {
         $this->jsonEncodeOptions &= ~$option;
         return $this;

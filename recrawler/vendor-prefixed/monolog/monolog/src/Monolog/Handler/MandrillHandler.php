@@ -46,7 +46,7 @@ class MandrillHandler extends MailHandler
     /**
      * @inheritDoc
      */
-    protected function send(string $content, array $records) : void
+    protected function send(string $content, array $records): void
     {
         $mime = 'text/plain';
         if ($this->isHtmlBody($content)) {
@@ -55,17 +55,17 @@ class MandrillHandler extends MailHandler
         $message = clone $this->message;
         $message->setBody($content, $mime);
         /** @phpstan-ignore-next-line */
-        if (\version_compare(Swift::VERSION, '6.0.0', '>=')) {
+        if (version_compare(Swift::VERSION, '6.0.0', '>=')) {
             $message->setDate(new \DateTimeImmutable());
         } else {
             /** @phpstan-ignore-next-line */
-            $message->setDate(\time());
+            $message->setDate(time());
         }
-        $ch = \curl_init();
-        \curl_setopt($ch, \CURLOPT_URL, 'https://mandrillapp.com/api/1.0/messages/send-raw.json');
-        \curl_setopt($ch, \CURLOPT_POST, \true);
-        \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
-        \curl_setopt($ch, \CURLOPT_POSTFIELDS, \http_build_query(['key' => $this->apiKey, 'raw_message' => (string) $message, 'async' => \false]));
+        $ch = curl_init();
+        curl_setopt($ch, \CURLOPT_URL, 'https://mandrillapp.com/api/1.0/messages/send-raw.json');
+        curl_setopt($ch, \CURLOPT_POST, \true);
+        curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
+        curl_setopt($ch, \CURLOPT_POSTFIELDS, http_build_query(['key' => $this->apiKey, 'raw_message' => (string) $message, 'async' => \false]));
         Curl\Util::execute($ch);
     }
 }

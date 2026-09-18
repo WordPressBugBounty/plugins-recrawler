@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime;
 
-use Mihdan\ReCrawler\Dependencies\SensitiveParameter;
+use SensitiveParameter;
 /**
  *  Copyright (c) 2016 - 2022 Paragon Initiative Enterprises.
  *  Copyright (c) 2014 Steve "Sc00bz" Thomas (steve at tobtu dot com)
@@ -39,7 +39,10 @@ interface EncoderInterface
      * @param string $binString (raw binary)
      * @return string
      */
-    public static function encode(#[SensitiveParameter] string $binString) : string;
+    public static function encode(
+        #[SensitiveParameter]
+        string $binString
+    ): string;
     /**
      * Convert a binary string into a hexadecimal string without cache-timing
      * leaks
@@ -48,5 +51,9 @@ interface EncoderInterface
      * @param bool $strictPadding Error on invalid padding
      * @return string (raw binary)
      */
-    public static function decode(#[SensitiveParameter] string $encodedString, bool $strictPadding = \false) : string;
+    public static function decode(
+        #[SensitiveParameter]
+        string $encodedString,
+        bool $strictPadding = \false
+    ): string;
 }

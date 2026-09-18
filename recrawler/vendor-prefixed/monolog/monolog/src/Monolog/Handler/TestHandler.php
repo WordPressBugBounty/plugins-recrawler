@@ -15,7 +15,7 @@ use Mihdan\ReCrawler\Dependencies\Monolog\Level;
 use Mihdan\ReCrawler\Dependencies\Monolog\Logger;
 use Mihdan\ReCrawler\Dependencies\Psr\Log\LogLevel;
 use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
-use Mihdan\ReCrawler\Dependencies\NoDiscard;
+use NoDiscard;
 /**
  * Used for testing purposes.
  *
@@ -79,22 +79,22 @@ class TestHandler extends AbstractProcessingHandler
      * @return array<LogRecord>
      */
     #[NoDiscard]
-    public function getRecords() : array
+    public function getRecords(): array
     {
         return $this->records;
     }
-    public function clear() : void
+    public function clear(): void
     {
         $this->records = [];
         $this->recordsByLevel = [];
     }
-    public function reset() : void
+    public function reset(): void
     {
         if (!$this->skipReset) {
             $this->clear();
         }
     }
-    public function setSkipReset(bool $skipReset) : void
+    public function setSkipReset(bool $skipReset): void
     {
         $this->skipReset = $skipReset;
     }
@@ -104,7 +104,7 @@ class TestHandler extends AbstractProcessingHandler
      * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::* $level
      */
     #[NoDiscard]
-    public function hasRecords(int|string|Level $level) : bool
+    public function hasRecords(int|string|Level $level): bool
     {
         return isset($this->recordsByLevel[Logger::toMonologLevel($level)->value]);
     }
@@ -114,12 +114,12 @@ class TestHandler extends AbstractProcessingHandler
      * @phpstan-param array{message: string, context?: mixed[]}|string $recordAssertions
      */
     #[NoDiscard]
-    public function hasRecord(string|array $recordAssertions, Level $level) : bool
+    public function hasRecord(string|array $recordAssertions, Level $level): bool
     {
         if (\is_string($recordAssertions)) {
             $recordAssertions = ['message' => $recordAssertions];
         }
-        return $this->hasRecordThatPasses(function (LogRecord $rec) use($recordAssertions) {
+        return $this->hasRecordThatPasses(function (LogRecord $rec) use ($recordAssertions) {
             if ($rec->message !== $recordAssertions['message']) {
                 return \false;
             }
@@ -130,20 +130,20 @@ class TestHandler extends AbstractProcessingHandler
         }, $level);
     }
     #[NoDiscard]
-    public function hasRecordThatContains(string $message, Level $level) : bool
+    public function hasRecordThatContains(string $message, Level $level): bool
     {
-        return $this->hasRecordThatPasses(fn(LogRecord $rec) => \str_contains($rec->message, $message), $level);
+        return $this->hasRecordThatPasses(fn(LogRecord $rec) => str_contains($rec->message, $message), $level);
     }
     #[NoDiscard]
-    public function hasRecordThatMatches(string $regex, Level $level) : bool
+    public function hasRecordThatMatches(string $regex, Level $level): bool
     {
-        return $this->hasRecordThatPasses(fn(LogRecord $rec) => \preg_match($regex, $rec->message) > 0, $level);
+        return $this->hasRecordThatPasses(fn(LogRecord $rec) => preg_match($regex, $rec->message) > 0, $level);
     }
     /**
      * @phpstan-param callable(LogRecord, int): mixed $predicate
      */
     #[NoDiscard]
-    public function hasRecordThatPasses(callable $predicate, Level $level) : bool
+    public function hasRecordThatPasses(callable $predicate, Level $level): bool
     {
         $level = Logger::toMonologLevel($level);
         if (!isset($this->recordsByLevel[$level->value])) {
@@ -159,7 +159,7 @@ class TestHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->recordsByLevel[$record->level->value][] = $record;
         $this->records[] = $record;
@@ -168,9 +168,9 @@ class TestHandler extends AbstractProcessingHandler
      * @param mixed[] $args
      */
     #[NoDiscard]
-    public function __call(string $method, array $args) : bool
+    public function __call(string $method, array $args): bool
     {
-        if ((bool) \preg_match('/(.*)(Debug|Info|Notice|Warning|Error|Critical|Alert|Emergency)(.*)/', $method, $matches)) {
+        if ((bool) preg_match('/(.*)(Debug|Info|Notice|Warning|Error|Critical|Alert|Emergency)(.*)/', $method, $matches)) {
             $genericMethod = $matches[1] . ('Records' !== $matches[3] ? 'Record' : '') . $matches[3];
             $level = \constant(Level::class . '::' . $matches[2]);
             $callback = [$this, $genericMethod];

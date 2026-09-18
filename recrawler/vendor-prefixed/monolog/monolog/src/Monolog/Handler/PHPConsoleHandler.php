@@ -140,7 +140,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
      */
     public function __construct(array $options = [], ?Connector $connector = null, int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
-        if (!\class_exists('Mihdan\\ReCrawler\\Dependencies\\PhpConsole\\Connector')) {
+        if (!class_exists('Mihdan\ReCrawler\Dependencies\PhpConsole\Connector')) {
             throw new \RuntimeException('PHP Console library not found. See https://github.com/barbushin/php-console#installation');
         }
         parent::__construct($level, $bubble);
@@ -154,15 +154,15 @@ class PHPConsoleHandler extends AbstractProcessingHandler
      * @phpstan-param InputOptions $options
      * @phpstan-return Options
      */
-    private function initOptions(array $options) : array
+    private function initOptions(array $options): array
     {
-        $wrongOptions = \array_diff(\array_keys($options), \array_keys($this->options));
+        $wrongOptions = array_diff(array_keys($options), array_keys($this->options));
         if (\count($wrongOptions) > 0) {
-            throw new \RuntimeException('Unknown options: ' . \implode(', ', $wrongOptions));
+            throw new \RuntimeException('Unknown options: ' . implode(', ', $wrongOptions));
         }
-        return \array_replace($this->options, $options);
+        return array_replace($this->options, $options);
     }
-    private function initConnector(?Connector $connector = null) : Connector
+    private function initConnector(?Connector $connector = null): Connector
     {
         if (null === $connector) {
             if ($this->options['dataStorage'] instanceof Storage) {
@@ -213,18 +213,18 @@ class PHPConsoleHandler extends AbstractProcessingHandler
         }
         return $connector;
     }
-    public function getConnector() : Connector
+    public function getConnector(): Connector
     {
         return $this->connector;
     }
     /**
      * @return array<string, mixed>
      */
-    public function getOptions() : array
+    public function getOptions(): array
     {
         return $this->options;
     }
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if ($this->options['enabled'] && $this->connector->isActiveClient()) {
             return parent::handle($record);
@@ -234,7 +234,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
     /**
      * Writes the record down to the log of the implementing handler
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if ($record->level->isLowerThan(Level::Notice)) {
             $this->handleDebugRecord($record);
@@ -244,20 +244,20 @@ class PHPConsoleHandler extends AbstractProcessingHandler
             $this->handleErrorRecord($record);
         }
     }
-    private function handleDebugRecord(LogRecord $record) : void
+    private function handleDebugRecord(LogRecord $record): void
     {
         [$tags, $filteredContext] = $this->getRecordTags($record);
         $message = $record->message;
         if (\count($filteredContext) > 0) {
-            $message .= ' ' . Utils::jsonEncode($this->connector->getDumper()->dump(\array_filter($filteredContext)), null, \true);
+            $message .= ' ' . Utils::jsonEncode($this->connector->getDumper()->dump(array_filter($filteredContext)), null, \true);
         }
         $this->connector->getDebugDispatcher()->dispatchDebug($message, $tags, $this->options['classesPartialsTraceIgnore']);
     }
-    private function handleExceptionRecord(LogRecord $record) : void
+    private function handleExceptionRecord(LogRecord $record): void
     {
         $this->connector->getErrorsDispatcher()->dispatchException($record->context['exception']);
     }
-    private function handleErrorRecord(LogRecord $record) : void
+    private function handleErrorRecord(LogRecord $record): void
     {
         $context = $record->context;
         $this->connector->getErrorsDispatcher()->dispatchError($context['code'] ?? null, $context['message'] ?? $record->message, $context['file'] ?? null, $context['line'] ?? null, $this->options['classesPartialsTraceIgnore']);
@@ -265,7 +265,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
     /**
      * @return array{string, mixed[]}
      */
-    private function getRecordTags(LogRecord $record) : array
+    private function getRecordTags(LogRecord $record): array
     {
         $tags = null;
         $filteredContext = [];
@@ -275,7 +275,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
                 if (isset($filteredContext[$key])) {
                     $tags = $filteredContext[$key];
                     if ($key === 0) {
-                        \array_shift($filteredContext);
+                        array_shift($filteredContext);
                     } else {
                         unset($filteredContext[$key]);
                     }
@@ -288,7 +288,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new LineFormatter('%message%');
     }

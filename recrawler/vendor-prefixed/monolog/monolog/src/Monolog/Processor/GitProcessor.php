@@ -38,7 +38,7 @@ class GitProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         // return if the level is not high enough
         if ($record->level->isLowerThan($this->level)) {
@@ -50,13 +50,13 @@ class GitProcessor implements ProcessorInterface
     /**
      * @return array{branch: string, commit: string}|array<never>
      */
-    private static function getGitInfo() : array
+    private static function getGitInfo(): array
     {
         if (self::$cache !== null) {
             return self::$cache;
         }
-        $branches = \shell_exec('git branch -v --no-abbrev');
-        if (\is_string($branches) && 1 === \preg_match('{^\\* (.+?)\\s+([a-f0-9]{40})(?:\\s|$)}m', $branches, $matches)) {
+        $branches = shell_exec('git branch -v --no-abbrev');
+        if (\is_string($branches) && 1 === preg_match('{^\* (.+?)\s+([a-f0-9]{40})(?:\s|$)}m', $branches, $matches)) {
             return self::$cache = ['branch' => $matches[1], 'commit' => $matches[2]];
         }
         return self::$cache = [];

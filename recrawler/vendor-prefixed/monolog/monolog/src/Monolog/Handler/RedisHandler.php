@@ -49,7 +49,7 @@ class RedisHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if ($this->capSize > 0) {
             $this->writeCapped($record);
@@ -61,15 +61,15 @@ class RedisHandler extends AbstractProcessingHandler
      * Write and cap the collection
      * Writes the record to the redis list and caps its
      */
-    protected function writeCapped(LogRecord $record) : void
+    protected function writeCapped(LogRecord $record): void
     {
         if ($this->redisClient instanceof Redis) {
-            $mode = \defined('Redis::MULTI') ? Redis::MULTI : 1;
+            $mode = \defined('Mihdan\ReCrawler\Dependencies\Redis::MULTI') ? Redis::MULTI : 1;
             $this->redisClient->multi($mode)->rPush($this->redisKey, $record->formatted)->ltrim($this->redisKey, -$this->capSize, -1)->exec();
         } else {
             $redisKey = $this->redisKey;
             $capSize = $this->capSize;
-            $this->redisClient->transaction(function ($tx) use($record, $redisKey, $capSize) {
+            $this->redisClient->transaction(function ($tx) use ($record, $redisKey, $capSize) {
                 $tx->rpush($redisKey, $record->formatted);
                 $tx->ltrim($redisKey, -$capSize, -1);
             });
@@ -78,7 +78,7 @@ class RedisHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new LineFormatter();
     }

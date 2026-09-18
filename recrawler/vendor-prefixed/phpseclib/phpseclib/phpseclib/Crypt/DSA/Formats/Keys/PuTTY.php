@@ -32,7 +32,7 @@ abstract class PuTTY extends Progenitor
      *
      * @var string
      */
-    const PUBLIC_HANDLER = 'Mihdan\\ReCrawler\\Dependencies\\phpseclib3\\Crypt\\DSA\\Formats\\Keys\\OpenSSH';
+    const PUBLIC_HANDLER = 'Mihdan\ReCrawler\Dependencies\phpseclib3\Crypt\DSA\Formats\Keys\OpenSSH';
     /**
      * Algorithm Identifier
      *
@@ -59,7 +59,7 @@ abstract class PuTTY extends Progenitor
         unset($components['public'], $components['private']);
         list($p, $q, $g, $y) = Strings::unpackSSH2('iiii', $public);
         list($x) = Strings::unpackSSH2('i', $private);
-        return \compact('p', 'q', 'g', 'y', 'x', 'comment');
+        return compact('p', 'q', 'g', 'y', 'x', 'comment');
     }
     /**
      * Convert a private key to the appropriate format.

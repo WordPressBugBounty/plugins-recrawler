@@ -47,14 +47,14 @@ class MongoDBHandler extends AbstractProcessingHandler
     public function __construct(Client|Manager $mongodb, string $database, string $collection, int|string|Level $level = Level::Debug, bool $bubble = \true)
     {
         if ($mongodb instanceof Client) {
-            $this->collection = \method_exists($mongodb, 'getCollection') ? $mongodb->getCollection($database, $collection) : $mongodb->selectCollection($database, $collection);
+            $this->collection = method_exists($mongodb, 'getCollection') ? $mongodb->getCollection($database, $collection) : $mongodb->selectCollection($database, $collection);
         } else {
             $this->manager = $mongodb;
             $this->namespace = $database . '.' . $collection;
         }
         parent::__construct($level, $bubble);
     }
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if (isset($this->collection)) {
             $this->collection->insertOne($record->formatted);
@@ -68,7 +68,7 @@ class MongoDBHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new MongoDBFormatter();
     }

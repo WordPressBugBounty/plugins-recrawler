@@ -82,8 +82,8 @@ class BigInteger implements \JsonSerializable
     public static function setEngine($main, array $modexps = ['DefaultEngine'])
     {
         self::$engines = [];
-        $fqmain = 'phpseclib3\\Math\\BigInteger\\Engines\\' . $main;
-        if (!\class_exists($fqmain) || !\method_exists($fqmain, 'isValidEngine')) {
+        $fqmain = 'phpseclib3\Math\BigInteger\Engines\\' . $main;
+        if (!class_exists($fqmain) || !method_exists($fqmain, 'isValidEngine')) {
             throw new \InvalidArgumentException("{$main} is not a valid engine");
         }
         if (!$fqmain::isValidEngine()) {
@@ -123,7 +123,7 @@ class BigInteger implements \JsonSerializable
         if (!isset(self::$mainEngine)) {
             $engines = [['GMP', ['DefaultEngine']], ['PHP64', ['OpenSSL']], ['BCMath', ['OpenSSL']], ['PHP32', ['OpenSSL']], ['PHP64', ['DefaultEngine']], ['PHP32', ['DefaultEngine']]];
             // per https://phpseclib.com/docs/speed PHP 8.4.0+ _significantly_ sped up BCMath
-            if (\version_compare(\PHP_VERSION, '8.4.0') >= 0) {
+            if (version_compare(\PHP_VERSION, '8.4.0') >= 0) {
                 $engines[1][0] = 'BCMath';
                 $engines[2][0] = 'PHP64';
             }
@@ -714,7 +714,7 @@ class BigInteger implements \JsonSerializable
     public static function min(BigInteger ...$nums)
     {
         $class = self::$mainEngine;
-        $nums = \array_map(function ($num) {
+        $nums = array_map(function ($num) {
             return $num->value;
         }, $nums);
         return new static($class::min(...$nums));
@@ -728,7 +728,7 @@ class BigInteger implements \JsonSerializable
     public static function max(BigInteger ...$nums)
     {
         $class = self::$mainEngine;
-        $nums = \array_map(function ($num) {
+        $nums = array_map(function ($num) {
             return $num->value;
         }, $nums);
         return new static($class::max(...$nums));
@@ -814,7 +814,7 @@ class BigInteger implements \JsonSerializable
     public function createRecurringModuloFunction()
     {
         $func = $this->value->createRecurringModuloFunction();
-        return function (BigInteger $x) use($func) {
+        return function (BigInteger $x) use ($func) {
             return new static($func($x->value));
         };
     }
@@ -828,7 +828,7 @@ class BigInteger implements \JsonSerializable
      */
     public function bitwise_split($split)
     {
-        return \array_map(function ($val) {
+        return array_map(function ($val) {
             return new static($val);
         }, $this->value->bitwise_split($split));
     }

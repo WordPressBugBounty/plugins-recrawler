@@ -43,7 +43,7 @@ class GelfMessageFormatter extends NormalizerFormatter
     /**
      * Translates Monolog log levels to Graylog2 log priorities.
      */
-    private function getGraylog2Priority(Level $level) : int
+    private function getGraylog2Priority(Level $level): int
     {
         return match ($level) {
             Level::Debug => 7,
@@ -61,11 +61,11 @@ class GelfMessageFormatter extends NormalizerFormatter
      */
     public function __construct(?string $systemName = null, ?string $extraPrefix = null, string $contextPrefix = 'ctxt_', ?int $maxLength = null)
     {
-        if (!\class_exists(Message::class)) {
+        if (!class_exists(Message::class)) {
             throw new \RuntimeException('Composer package graylog2/gelf-php is required to use Monolog\'s GelfMessageFormatter');
         }
         parent::__construct('U.u');
-        $this->systemName = null === $systemName || $systemName === '' ? (string) \gethostname() : $systemName;
+        $this->systemName = null === $systemName || $systemName === '' ? (string) gethostname() : $systemName;
         $this->extraPrefix = null === $extraPrefix ? '' : $extraPrefix;
         $this->contextPrefix = $contextPrefix;
         $this->maxLength = null === $maxLength ? self::DEFAULT_MAX_LENGTH : $maxLength;
@@ -73,7 +73,7 @@ class GelfMessageFormatter extends NormalizerFormatter
     /**
      * @inheritDoc
      */
-    public function format(LogRecord $record) : Message
+    public function format(LogRecord $record): Message
     {
         $context = $extra = [];
         if ($record->context !== []) {
@@ -95,7 +95,7 @@ class GelfMessageFormatter extends NormalizerFormatter
             $message->setAdditional('facility', $record->channel);
         }
         foreach ($extra as $key => $val) {
-            $key = (string) \preg_replace('#[^\\w.-]#', '-', (string) $key);
+            $key = (string) preg_replace('#[^\w.-]#', '-', (string) $key);
             $val = \is_bool($val) ? $val ? 1 : 0 : $val;
             $val = \is_scalar($val) || null === $val ? $val : $this->toJson($val);
             $len = \strlen($this->extraPrefix . $key . $val);
@@ -106,7 +106,7 @@ class GelfMessageFormatter extends NormalizerFormatter
             $message->setAdditional($this->extraPrefix . $key, $val);
         }
         foreach ($context as $key => $val) {
-            $key = (string) \preg_replace('#[^\\w.-]#', '-', (string) $key);
+            $key = (string) preg_replace('#[^\w.-]#', '-', (string) $key);
             $val = \is_bool($val) ? $val ? 1 : 0 : $val;
             $val = \is_scalar($val) || null === $val ? $val : $this->toJson($val);
             $len = \strlen($this->contextPrefix . $key . $val);
@@ -117,7 +117,7 @@ class GelfMessageFormatter extends NormalizerFormatter
             $message->setAdditional($this->contextPrefix . $key, $val);
         }
         if (!$message->hasAdditional('file') && isset($context['exception']['file'])) {
-            if (1 === \preg_match("/^(.+):([0-9]+)\$/", $context['exception']['file'], $matches)) {
+            if (1 === preg_match("/^(.+):([0-9]+)\$/", $context['exception']['file'], $matches)) {
                 $message->setAdditional('file', $matches[1]);
                 $message->setAdditional('line', $matches[2]);
             }

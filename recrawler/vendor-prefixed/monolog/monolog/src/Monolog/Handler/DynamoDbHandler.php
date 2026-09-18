@@ -26,7 +26,7 @@ use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
  */
 class DynamoDbHandler extends AbstractProcessingHandler
 {
-    public const DATE_FORMAT = 'Y-m-d\\TH:i:s.uO';
+    public const DATE_FORMAT = 'Y-m-d\TH:i:s.uO';
     protected DynamoDbClient $client;
     protected string $table;
     protected Marshaler $marshaler;
@@ -40,7 +40,7 @@ class DynamoDbHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $filtered = $this->filterEmptyFields($record->formatted);
         $formatted = $this->marshaler->marshalItem($filtered);
@@ -50,16 +50,16 @@ class DynamoDbHandler extends AbstractProcessingHandler
      * @param  mixed[] $record
      * @return mixed[]
      */
-    protected function filterEmptyFields(array $record) : array
+    protected function filterEmptyFields(array $record): array
     {
-        return \array_filter($record, function ($value) {
+        return array_filter($record, function ($value) {
             return [] !== $value;
         });
     }
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new ScalarFormatter(self::DATE_FORMAT);
     }

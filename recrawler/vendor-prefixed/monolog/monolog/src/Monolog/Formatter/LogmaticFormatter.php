@@ -25,7 +25,7 @@ class LogmaticFormatter extends JsonFormatter
     /**
      * @return $this
      */
-    public function setHostname(string $hostname) : self
+    public function setHostname(string $hostname): self
     {
         $this->hostname = $hostname;
         return $this;
@@ -33,7 +33,7 @@ class LogmaticFormatter extends JsonFormatter
     /**
      * @return $this
      */
-    public function setAppName(string $appName) : self
+    public function setAppName(string $appName): self
     {
         $this->appName = $appName;
         return $this;
@@ -44,7 +44,7 @@ class LogmaticFormatter extends JsonFormatter
      * @see http://doc.logmatic.io/docs/basics-to-send-data
      * @see \Monolog\Formatter\JsonFormatter::format()
      */
-    public function normalizeRecord(LogRecord $record) : array
+    public function normalizeRecord(LogRecord $record): array
     {
         $record = parent::normalizeRecord($record);
         if ($this->hostname !== '') {

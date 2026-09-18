@@ -36,10 +36,10 @@ class Composer
             return;
         }
         $vendorDir = $composer->getConfig()->get('vendor-dir');
-        $serviceDir = \sprintf('%s/google/apiclient-services/src/Google/Service', $vendorDir);
-        if (!\is_dir($serviceDir)) {
+        $serviceDir = sprintf('%s/google/apiclient-services/src/Google/Service', $vendorDir);
+        if (!is_dir($serviceDir)) {
             // path for google/apiclient-services >= 0.200.0
-            $serviceDir = \sprintf('%s/google/apiclient-services/src', $vendorDir);
+            $serviceDir = sprintf('%s/google/apiclient-services/src', $vendorDir);
         }
         self::verifyServicesToKeep($serviceDir, $servicesToKeep);
         $finder = self::getServicesToRemove($serviceDir, $servicesToKeep);
@@ -48,8 +48,8 @@ class Composer
         if (0 === $servicesToRemoveCount) {
             return;
         }
-        $event->getIO()->write(\sprintf('Removing %d google services', $servicesToRemoveCount));
-        $pathsToRemove = \iterator_to_array($finder);
+        $event->getIO()->write(sprintf('Removing %d google services', $servicesToRemoveCount));
+        $pathsToRemove = iterator_to_array($finder);
         foreach ($pathsToRemove as $pathToRemove) {
             $realpath = $pathToRemove->getRealPath();
             $filesystem->remove($realpath);
@@ -63,13 +63,13 @@ class Composer
     {
         $finder = (new Finder())->directories()->depth('== 0');
         foreach ($servicesToKeep as $service) {
-            if (!\preg_match('/^[a-zA-Z0-9]*$/', $service)) {
-                throw new InvalidArgumentException(\sprintf('Invalid Google service name "%s"', $service));
+            if (!preg_match('/^[a-zA-Z0-9]*$/', $service)) {
+                throw new InvalidArgumentException(sprintf('Invalid Google service name "%s"', $service));
             }
             try {
                 $finder->in($serviceDir . '/' . $service);
             } catch (InvalidArgumentException $e) {
-                throw new InvalidArgumentException(\sprintf('Google service "%s" does not exist or was removed previously', $service));
+                throw new InvalidArgumentException(sprintf('Google service "%s" does not exist or was removed previously', $service));
             }
         }
     }

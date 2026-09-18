@@ -32,16 +32,16 @@ class TagProcessor implements ProcessorInterface
      * @param  string[] $tags
      * @return $this
      */
-    public function addTags(array $tags = []) : self
+    public function addTags(array $tags = []): self
     {
-        $this->tags = \array_merge($this->tags, $tags);
+        $this->tags = array_merge($this->tags, $tags);
         return $this;
     }
     /**
      * @param  string[] $tags
      * @return $this
      */
-    public function setTags(array $tags = []) : self
+    public function setTags(array $tags = []): self
     {
         $this->tags = $tags;
         return $this;
@@ -49,7 +49,7 @@ class TagProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         $record->extra['tags'] = $this->tags;
         return $record;

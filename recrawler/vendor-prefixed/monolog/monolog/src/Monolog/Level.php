@@ -76,9 +76,9 @@ enum Level : int
      * @param  value-of<self::NAMES>|LogLevel::*|'Debug'|'Info'|'Notice'|'Warning'|'Error'|'Critical'|'Alert'|'Emergency' $name
      * @return static
      */
-    public static function fromName(string $name) : self
+    public static function fromName(string $name): self
     {
-        return match (\strtolower($name)) {
+        return match (strtolower($name)) {
             'debug' => self::Debug,
             'info' => self::Info,
             'notice' => self::Notice,
@@ -93,22 +93,22 @@ enum Level : int
      * @param  value-of<self::VALUES> $value
      * @return static
      */
-    public static function fromValue(int $value) : self
+    public static function fromValue(int $value): self
     {
         return self::from($value);
     }
     /**
      * Returns true if the passed $level is higher or equal to $this
      */
-    public function includes(Level $level) : bool
+    public function includes(Level $level): bool
     {
         return $this->value <= $level->value;
     }
-    public function isHigherThan(Level $level) : bool
+    public function isHigherThan(Level $level): bool
     {
         return $this->value > $level->value;
     }
-    public function isLowerThan(Level $level) : bool
+    public function isLowerThan(Level $level): bool
     {
         return $this->value < $level->value;
     }
@@ -119,7 +119,7 @@ enum Level : int
      *
      * @return value-of<self::NAMES>
      */
-    public function getName() : string
+    public function getName(): string
     {
         return match ($this) {
             self::Debug => 'DEBUG',
@@ -137,7 +137,7 @@ enum Level : int
      *
      * @phpstan-return \Psr\Log\LogLevel::*
      */
-    public function toPsrLogLevel() : string
+    public function toPsrLogLevel(): string
     {
         return match ($this) {
             self::Debug => LogLevel::DEBUG,
@@ -155,7 +155,7 @@ enum Level : int
      *
      * @phpstan-return int<0, 7>
      */
-    public function toRFC5424Level() : int
+    public function toRFC5424Level(): int
     {
         return match ($this) {
             self::Debug => 7,

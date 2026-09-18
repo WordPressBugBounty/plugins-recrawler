@@ -25,7 +25,7 @@ use Mihdan\ReCrawler\Dependencies\Monolog\LogRecord;
  */
 class ClosureContextProcessor implements ProcessorInterface
 {
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         $context = $record->context;
         if (isset($context[0]) && 1 === \count($context) && $context[0] instanceof \Closure) {

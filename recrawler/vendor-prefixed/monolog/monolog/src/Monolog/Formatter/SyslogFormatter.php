@@ -28,11 +28,11 @@ class SyslogFormatter extends LineFormatter
     private int $procid;
     public function __construct(private string $applicationName = self::NILVALUE)
     {
-        parent::__construct(self::FORMAT, 'Y-m-d\\TH:i:s.uP', \true, \true);
-        $this->hostname = (string) \gethostname();
-        $this->procid = (int) \getmypid();
+        parent::__construct(self::FORMAT, 'Y-m-d\TH:i:s.uP', \true, \true);
+        $this->hostname = (string) gethostname();
+        $this->procid = (int) getmypid();
     }
-    public function format(LogRecord $record) : string
+    public function format(LogRecord $record): string
     {
         $record->extra = $this->formatExtra($record);
         return parent::format($record);
@@ -40,7 +40,7 @@ class SyslogFormatter extends LineFormatter
     /**
      * @return array<string, mixed>
      */
-    private function formatExtra(LogRecord $record) : array
+    private function formatExtra(LogRecord $record): array
     {
         $extra = $record->extra;
         $extra['app-name'] = $this->applicationName;
@@ -50,7 +50,7 @@ class SyslogFormatter extends LineFormatter
         $extra['structured-data'] = self::NILVALUE;
         return $extra;
     }
-    private static function calculatePriority(Level $level) : int
+    private static function calculatePriority(Level $level): int
     {
         return self::SYSLOG_FACILITY_USER * 8 + $level->toRFC5424Level();
     }

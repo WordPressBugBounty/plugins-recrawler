@@ -30,10 +30,10 @@ class AuthHandlerFactory
     public static function build($cache = null, array $cacheConfig = [])
     {
         $guzzleVersion = null;
-        if (\defined('\\Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\ClientInterface::MAJOR_VERSION')) {
+        if (defined('Mihdan\ReCrawler\Dependencies\GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
             $guzzleVersion = ClientInterface::MAJOR_VERSION;
-        } elseif (\defined('\\Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\ClientInterface::VERSION')) {
-            $guzzleVersion = (int) \substr(ClientInterface::VERSION, 0, 1);
+        } elseif (defined('Mihdan\ReCrawler\Dependencies\GuzzleHttp\ClientInterface::VERSION')) {
+            $guzzleVersion = (int) substr(ClientInterface::VERSION, 0, 1);
         }
         switch ($guzzleVersion) {
             case 6:

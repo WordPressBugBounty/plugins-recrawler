@@ -45,24 +45,24 @@ class FlowdockHandler extends SocketHandler
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         if (!Utils::unwrapFormatter($formatter) instanceof FlowdockFormatter) {
-            throw new \InvalidArgumentException('The FlowdockHandler requires an instance of Monolog\\Formatter\\FlowdockFormatter to function correctly');
+            throw new \InvalidArgumentException('The FlowdockHandler requires an instance of Monolog\Formatter\FlowdockFormatter to function correctly');
         }
         return parent::setFormatter($formatter);
     }
     /**
      * Gets the default formatter.
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
-        throw new \InvalidArgumentException('The FlowdockHandler must be configured (via setFormatter) with an instance of Monolog\\Formatter\\FlowdockFormatter to function correctly');
+        throw new \InvalidArgumentException('The FlowdockHandler must be configured (via setFormatter) with an instance of Monolog\Formatter\FlowdockFormatter to function correctly');
     }
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         parent::write($record);
         $this->closeSocket();
@@ -70,7 +70,7 @@ class FlowdockHandler extends SocketHandler
     /**
      * @inheritDoc
      */
-    protected function generateDataStream(LogRecord $record) : string
+    protected function generateDataStream(LogRecord $record): string
     {
         $content = $this->buildContent($record);
         return $this->buildHeader($content) . $content;
@@ -78,14 +78,14 @@ class FlowdockHandler extends SocketHandler
     /**
      * Builds the body of API call
      */
-    private function buildContent(LogRecord $record) : string
+    private function buildContent(LogRecord $record): string
     {
         return Utils::jsonEncode($record->formatted);
     }
     /**
      * Builds the header of the API Call
      */
-    private function buildHeader(string $content) : string
+    private function buildHeader(string $content): string
     {
         $header = "POST /v1/messages/team_inbox/" . $this->apiToken . " HTTP/1.1\r\n";
         $header .= "Host: api.flowdock.com\r\n";

@@ -28,7 +28,7 @@ abstract class AbstractSyslogHandler extends AbstractProcessingHandler
     /**
      * Translates Monolog log levels to syslog log priorities.
      */
-    protected function toSyslogPriority(Level $level) : int
+    protected function toSyslogPriority(Level $level): int
     {
         return $level->toRFC5424Level();
     }
@@ -66,9 +66,9 @@ abstract class AbstractSyslogHandler extends AbstractProcessingHandler
             // LOG_LOCAL7
         }
         // convert textual description of facility to syslog constant
-        if (\is_string($facility) && \array_key_exists(\strtolower($facility), $this->facilities)) {
-            $facility = $this->facilities[\strtolower($facility)];
-        } elseif (!\in_array($facility, \array_values($this->facilities), \true)) {
+        if (\is_string($facility) && \array_key_exists(strtolower($facility), $this->facilities)) {
+            $facility = $this->facilities[strtolower($facility)];
+        } elseif (!\in_array($facility, array_values($this->facilities), \true)) {
             throw new \UnexpectedValueException('Unknown facility value "' . $facility . '" given');
         }
         $this->facility = $facility;
@@ -76,7 +76,7 @@ abstract class AbstractSyslogHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new LineFormatter('%channel%.%level_name%: %message% %context% %extra%');
     }

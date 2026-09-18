@@ -32,13 +32,13 @@ class FlowdockFormatter implements FormatterInterface
      *
      * @return mixed[]
      */
-    public function format(LogRecord $record) : array
+    public function format(LogRecord $record): array
     {
         $tags = ['#logs', '#' . $record->level->toPsrLogLevel(), '#' . $record->channel];
         foreach ($record->extra as $value) {
             $tags[] = '#' . $value;
         }
-        $subject = \sprintf('in %s: %s - %s', $this->source, $record->level->getName(), $this->getShortMessage($record->message));
+        $subject = sprintf('in %s: %s - %s', $this->source, $record->level->getName(), $this->getShortMessage($record->message));
         return ['source' => $this->source, 'from_address' => $this->sourceEmail, 'subject' => $subject, 'content' => $record->message, 'tags' => $tags, 'project' => $this->source];
     }
     /**
@@ -46,7 +46,7 @@ class FlowdockFormatter implements FormatterInterface
      *
      * @return mixed[][]
      */
-    public function formatBatch(array $records) : array
+    public function formatBatch(array $records): array
     {
         $formatted = [];
         foreach ($records as $record) {
@@ -54,7 +54,7 @@ class FlowdockFormatter implements FormatterInterface
         }
         return $formatted;
     }
-    public function getShortMessage(string $message) : string
+    public function getShortMessage(string $message): string
     {
         static $hasMbString;
         if (null === $hasMbString) {
@@ -62,13 +62,11 @@ class FlowdockFormatter implements FormatterInterface
         }
         $maxLength = 45;
         if ($hasMbString) {
-            if (\mb_strlen($message, 'UTF-8') > $maxLength) {
-                $message = \mb_substr($message, 0, $maxLength - 4, 'UTF-8') . ' ...';
+            if (mb_strlen($message, 'UTF-8') > $maxLength) {
+                $message = mb_substr($message, 0, $maxLength - 4, 'UTF-8') . ' ...';
             }
-        } else {
-            if (\strlen($message) > $maxLength) {
-                $message = \substr($message, 0, $maxLength - 4) . ' ...';
-            }
+        } else if (\strlen($message) > $maxLength) {
+            $message = substr($message, 0, $maxLength - 4) . ' ...';
         }
         return $message;
     }

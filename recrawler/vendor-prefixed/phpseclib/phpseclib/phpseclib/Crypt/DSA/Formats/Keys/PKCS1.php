@@ -53,11 +53,11 @@ abstract class PKCS1 extends Progenitor
             throw new \RuntimeException('Unable to decode BER');
         }
         $key = ASN1::asn1map($decoded[0], Maps\DSAParams::MAP);
-        if (\is_array($key)) {
+        if (is_array($key)) {
             return $key;
         }
         $key = ASN1::asn1map($decoded[0], Maps\DSAPrivateKey::MAP);
-        if (\is_array($key)) {
+        if (is_array($key)) {
             if ($key['version']->toString() !== '0') {
                 throw new \UnexpectedValueException('Version number is not valid');
             }
@@ -92,7 +92,7 @@ abstract class PKCS1 extends Progenitor
     {
         $key = ['p' => $p, 'q' => $q, 'g' => $g];
         $key = ASN1::encodeDER($key, Maps\DSAParams::MAP);
-        return "-----BEGIN DSA PARAMETERS-----\r\n" . \chunk_split(Strings::base64_encode($key), 64) . "-----END DSA PARAMETERS-----\r\n";
+        return "-----BEGIN DSA PARAMETERS-----\r\n" . chunk_split(Strings::base64_encode($key), 64) . "-----END DSA PARAMETERS-----\r\n";
     }
     /**
      * Convert a private key to the appropriate format.

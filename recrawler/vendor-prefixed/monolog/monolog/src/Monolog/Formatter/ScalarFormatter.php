@@ -25,7 +25,7 @@ class ScalarFormatter extends NormalizerFormatter
      *
      * @phpstan-return array<string, scalar|null> $record
      */
-    public function format(LogRecord $record) : array
+    public function format(LogRecord $record): array
     {
         $result = [];
         foreach ($record->toArray() as $key => $value) {
@@ -33,7 +33,7 @@ class ScalarFormatter extends NormalizerFormatter
         }
         return $result;
     }
-    protected function toScalar(mixed $value) : string|int|float|bool|null
+    protected function toScalar(mixed $value): string|int|float|bool|null
     {
         $normalized = $this->normalize($value);
         if (\is_array($normalized)) {

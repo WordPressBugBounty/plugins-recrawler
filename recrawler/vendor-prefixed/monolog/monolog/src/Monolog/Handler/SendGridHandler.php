@@ -56,7 +56,7 @@ class SendGridHandler extends MailHandler
         $this->apiUser = $apiUser ?? '';
         parent::__construct($level, $bubble);
     }
-    protected function send(string $content, array $records) : void
+    protected function send(string $content, array $records): void
     {
         $body = [];
         $body['personalizations'] = [];
@@ -70,12 +70,12 @@ class SendGridHandler extends MailHandler
         } else {
             $body['content'][] = ['type' => 'text/plain', 'value' => $content];
         }
-        $ch = \curl_init();
-        \curl_setopt($ch, \CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $this->apiKey]);
-        \curl_setopt($ch, \CURLOPT_URL, 'https://' . $this->apiHost . '/v3/mail/send');
-        \curl_setopt($ch, \CURLOPT_POST, \true);
-        \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
-        \curl_setopt($ch, \CURLOPT_POSTFIELDS, Utils::jsonEncode($body));
+        $ch = curl_init();
+        curl_setopt($ch, \CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $this->apiKey]);
+        curl_setopt($ch, \CURLOPT_URL, 'https://' . $this->apiHost . '/v3/mail/send');
+        curl_setopt($ch, \CURLOPT_POST, \true);
+        curl_setopt($ch, \CURLOPT_RETURNTRANSFER, \true);
+        curl_setopt($ch, \CURLOPT_POSTFIELDS, Utils::jsonEncode($body));
         Curl\Util::execute($ch, 2);
     }
 }

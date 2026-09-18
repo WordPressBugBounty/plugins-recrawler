@@ -34,7 +34,7 @@ class AmqpHandler extends AbstractProcessingHandler
         if ($exchange instanceof AMQPChannel) {
             $this->exchangeName = (string) $exchangeName;
         } elseif ($exchangeName !== null) {
-            @\trigger_error('The $exchangeName parameter can only be passed when using PhpAmqpLib, if using an AMQPExchange instance configure it beforehand', \E_USER_DEPRECATED);
+            @trigger_error('The $exchangeName parameter can only be passed when using PhpAmqpLib, if using an AMQPExchange instance configure it beforehand', \E_USER_DEPRECATED);
         }
         $this->exchange = $exchange;
         parent::__construct($level, $bubble);
@@ -42,7 +42,7 @@ class AmqpHandler extends AbstractProcessingHandler
     /**
      * @return array<string, mixed>
      */
-    public function getExtraAttributes() : array
+    public function getExtraAttributes(): array
     {
         return $this->extraAttributes;
     }
@@ -55,7 +55,7 @@ class AmqpHandler extends AbstractProcessingHandler
      *                                               or reply_to, headers.
      * @return $this
      */
-    public function setExtraAttributes(array $extraAttributes) : self
+    public function setExtraAttributes(array $extraAttributes): self
     {
         $this->extraAttributes = $extraAttributes;
         return $this;
@@ -63,17 +63,17 @@ class AmqpHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $data = $record->formatted;
         $routingKey = $this->getRoutingKey($record);
         if ($data instanceof GelfMessage) {
-            $data = \json_encode($data->toArray());
+            $data = json_encode($data->toArray());
         }
         if ($this->exchange instanceof AMQPExchange) {
             $attributes = ['delivery_mode' => 2, 'content_type' => 'application/json'];
             if (\count($this->extraAttributes) > 0) {
-                $attributes = \array_merge($attributes, $this->extraAttributes);
+                $attributes = array_merge($attributes, $this->extraAttributes);
             }
             $this->exchange->publish($data, $routingKey, 0, $attributes);
         } else {
@@ -83,7 +83,7 @@ class AmqpHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         if ($this->exchange instanceof AMQPExchange) {
             parent::handleBatch($records);
@@ -96,7 +96,7 @@ class AmqpHandler extends AbstractProcessingHandler
             $record = $this->processRecord($record);
             $data = $this->getFormatter()->format($record);
             if ($data instanceof GelfMessage) {
-                $data = \json_encode($data->toArray());
+                $data = json_encode($data->toArray());
             }
             $this->exchange->batch_basic_publish($this->createAmqpMessage($data), $this->exchangeName, $this->getRoutingKey($record));
         }
@@ -105,23 +105,23 @@ class AmqpHandler extends AbstractProcessingHandler
     /**
      * Gets the routing key for the AMQP exchange
      */
-    protected function getRoutingKey(LogRecord $record) : string
+    protected function getRoutingKey(LogRecord $record): string
     {
-        $routingKey = \sprintf('%s.%s', $record->level->name, $record->channel);
-        return \strtolower($routingKey);
+        $routingKey = sprintf('%s.%s', $record->level->name, $record->channel);
+        return strtolower($routingKey);
     }
-    private function createAmqpMessage(string $data) : AMQPMessage
+    private function createAmqpMessage(string $data): AMQPMessage
     {
         $attributes = ['delivery_mode' => 2, 'content_type' => 'application/json'];
         if (\count($this->extraAttributes) > 0) {
-            $attributes = \array_merge($attributes, $this->extraAttributes);
+            $attributes = array_merge($attributes, $this->extraAttributes);
         }
         return new AMQPMessage($data, $attributes);
     }
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new JsonFormatter(JsonFormatter::BATCH_MODE_JSON, \false);
     }

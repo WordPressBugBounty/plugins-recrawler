@@ -22,9 +22,9 @@ class ProcessIdProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
-        $record->extra['process_id'] = \getmypid();
+        $record->extra['process_id'] = getmypid();
         return $record;
     }
 }

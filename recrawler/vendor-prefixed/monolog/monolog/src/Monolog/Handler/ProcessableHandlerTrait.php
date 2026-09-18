@@ -29,29 +29,29 @@ trait ProcessableHandlerTrait
     /**
      * @inheritDoc
      */
-    public function pushProcessor(callable $callback) : HandlerInterface
+    public function pushProcessor(callable $callback): HandlerInterface
     {
-        \array_unshift($this->processors, $callback);
+        array_unshift($this->processors, $callback);
         return $this;
     }
     /**
      * @inheritDoc
      */
-    public function popProcessor() : callable
+    public function popProcessor(): callable
     {
         if (\count($this->processors) === 0) {
             throw new \LogicException('You tried to pop from an empty processor stack.');
         }
-        return \array_shift($this->processors);
+        return array_shift($this->processors);
     }
-    protected function processRecord(LogRecord $record) : LogRecord
+    protected function processRecord(LogRecord $record): LogRecord
     {
         foreach ($this->processors as $processor) {
             $record = $processor($record);
         }
         return $record;
     }
-    protected function resetProcessors() : void
+    protected function resetProcessors(): void
     {
         foreach ($this->processors as $processor) {
             if ($processor instanceof ResettableInterface) {

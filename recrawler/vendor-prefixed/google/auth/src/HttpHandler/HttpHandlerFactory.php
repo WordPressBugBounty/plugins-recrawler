@@ -36,9 +36,9 @@ class HttpHandlerFactory
      */
     public static function build(?ClientInterface $client = null, null|false|LoggerInterface $logger = null)
     {
-        if (\is_null($client)) {
+        if (is_null($client)) {
             $stack = null;
-            if (\class_exists(BodySummarizer::class)) {
+            if (class_exists(BodySummarizer::class)) {
                 // double the # of characters before truncation by default
                 $bodySummarizer = new BodySummarizer(240);
                 $stack = HandlerStack::create();
@@ -49,10 +49,10 @@ class HttpHandlerFactory
         }
         $logger = $logger === \false ? null : $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
         $version = null;
-        if (\defined('Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\ClientInterface::MAJOR_VERSION')) {
+        if (defined('Mihdan\ReCrawler\Dependencies\GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
             $version = ClientInterface::MAJOR_VERSION;
-        } elseif (\defined('Mihdan\\ReCrawler\\Dependencies\\GuzzleHttp\\ClientInterface::VERSION')) {
-            $version = (int) \substr(ClientInterface::VERSION, 0, 1);
+        } elseif (defined('Mihdan\ReCrawler\Dependencies\GuzzleHttp\ClientInterface::VERSION')) {
+            $version = (int) substr(ClientInterface::VERSION, 0, 1);
         }
         switch ($version) {
             case 6:

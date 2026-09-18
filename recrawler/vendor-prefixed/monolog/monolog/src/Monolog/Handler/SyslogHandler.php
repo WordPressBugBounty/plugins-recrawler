@@ -43,16 +43,16 @@ class SyslogHandler extends AbstractSyslogHandler
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
-        \closelog();
+        closelog();
     }
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
-        \openlog($this->ident, $this->logopts, $this->facility);
-        \syslog($this->toSyslogPriority($record->level), (string) $record->formatted);
+        openlog($this->ident, $this->logopts, $this->facility);
+        syslog($this->toSyslogPriority($record->level), (string) $record->formatted);
     }
 }

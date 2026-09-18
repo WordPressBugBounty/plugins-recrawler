@@ -46,14 +46,14 @@ class LogmaticHandler extends SocketHandler
     /**
      * @inheritDoc
      */
-    protected function generateDataStream(LogRecord $record) : string
+    protected function generateDataStream(LogRecord $record): string
     {
         return $this->logToken . ' ' . $record->formatted;
     }
     /**
      * @inheritDoc
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         $formatter = new LogmaticFormatter();
         if ($this->hostname !== '') {

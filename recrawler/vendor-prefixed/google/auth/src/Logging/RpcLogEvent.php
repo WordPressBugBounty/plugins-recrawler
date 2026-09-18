@@ -111,11 +111,11 @@ class RpcLogEvent
      */
     public function __construct(null|float $startTime = null)
     {
-        $this->timestamp = \date(\DATE_RFC3339);
+        $this->timestamp = date(\DATE_RFC3339);
         // Takes the micro time and convets it to millis
-        $this->milliseconds = \round(\microtime(\true) * 1000);
+        $this->milliseconds = round(microtime(\true) * 1000);
         if ($startTime) {
-            $this->latency = (int) \round($this->milliseconds - $startTime);
+            $this->latency = (int) round($this->milliseconds - $startTime);
         }
     }
 }

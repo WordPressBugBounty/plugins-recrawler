@@ -39,4 +39,4 @@ class PublishUrlNotificationResponse extends \Mihdan\ReCrawler\Dependencies\Goog
     }
 }
 // Adding a class alias for backwards compatibility with the previous class name.
-\class_alias(PublishUrlNotificationResponse::class, 'Mihdan\\ReCrawler\\Dependencies\\Google_Service_Indexing_PublishUrlNotificationResponse');
+class_alias(PublishUrlNotificationResponse::class, 'Mihdan\ReCrawler\Dependencies\Google_Service_Indexing_PublishUrlNotificationResponse');

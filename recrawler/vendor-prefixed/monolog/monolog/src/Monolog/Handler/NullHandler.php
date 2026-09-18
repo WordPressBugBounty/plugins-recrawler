@@ -38,14 +38,14 @@ class NullHandler extends Handler
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return $record->level->value >= $this->level->value;
     }
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         return $record->level->value >= $this->level->value;
     }

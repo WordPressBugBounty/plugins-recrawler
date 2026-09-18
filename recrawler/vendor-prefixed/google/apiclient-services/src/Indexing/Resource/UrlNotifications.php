@@ -45,7 +45,7 @@ class UrlNotifications extends \Mihdan\ReCrawler\Dependencies\Google\Service\Res
     public function getMetadata($optParams = [])
     {
         $params = [];
-        $params = \array_merge($params, $optParams);
+        $params = array_merge($params, $optParams);
         return $this->call('getMetadata', [$params], UrlNotificationMetadata::class);
     }
     /**
@@ -59,9 +59,9 @@ class UrlNotifications extends \Mihdan\ReCrawler\Dependencies\Google\Service\Res
     public function publish(UrlNotification $postBody, $optParams = [])
     {
         $params = ['postBody' => $postBody];
-        $params = \array_merge($params, $optParams);
+        $params = array_merge($params, $optParams);
         return $this->call('publish', [$params], PublishUrlNotificationResponse::class);
     }
 }
 // Adding a class alias for backwards compatibility with the previous class name.
-\class_alias(UrlNotifications::class, 'Mihdan\\ReCrawler\\Dependencies\\Google_Service_Indexing_Resource_UrlNotifications');
+class_alias(UrlNotifications::class, 'Mihdan\ReCrawler\Dependencies\Google_Service_Indexing_Resource_UrlNotifications');

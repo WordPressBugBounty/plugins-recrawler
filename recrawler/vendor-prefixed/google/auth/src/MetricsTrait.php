@@ -42,9 +42,9 @@ trait MetricsTrait
      *        Should be one of `'at'`, `'it'`, `'mds'`.
      * @return string The header value for the observability metrics.
      */
-    protected static function getMetricsHeader($credType = '', $authRequestType = '') : string
+    protected static function getMetricsHeader($credType = '', $authRequestType = ''): string
     {
-        $value = \sprintf('gl-php/%s auth/%s', \PHP_VERSION, self::getVersion());
+        $value = sprintf('gl-php/%s auth/%s', \PHP_VERSION, self::getVersion());
         if (!empty($authRequestType)) {
             $value .= ' auth-request-type/' . $authRequestType;
         }
@@ -67,7 +67,7 @@ trait MetricsTrait
                 // This case will happen only when someone invokes the updateMetadata
                 // method on the credentials fetcher themselves.
                 $metadata[self::$metricMetadataKey] = [$value];
-            } elseif (\is_array($metadata[self::$metricMetadataKey])) {
+            } elseif (is_array($metadata[self::$metricMetadataKey])) {
                 $metadata[self::$metricMetadataKey][0] .= ' ' . $value;
             } else {
                 $metadata[self::$metricMetadataKey] .= ' ' . $value;
@@ -89,15 +89,15 @@ trait MetricsTrait
         }
         return $metadata;
     }
-    protected static function getVersion() : string
+    protected static function getVersion(): string
     {
-        if (\is_null(self::$version)) {
+        if (is_null(self::$version)) {
             $versionFilePath = __DIR__ . '/../VERSION';
-            self::$version = \trim((string) \file_get_contents($versionFilePath));
+            self::$version = trim((string) file_get_contents($versionFilePath));
         }
         return self::$version;
     }
-    protected function getCredType() : string
+    protected function getCredType(): string
     {
         return '';
     }

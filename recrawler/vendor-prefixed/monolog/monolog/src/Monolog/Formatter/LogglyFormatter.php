@@ -33,7 +33,7 @@ class LogglyFormatter extends JsonFormatter
      * @see https://www.loggly.com/docs/automated-parsing/#json
      * @see \Monolog\Formatter\JsonFormatter::format()
      */
-    protected function normalizeRecord(LogRecord $record) : array
+    protected function normalizeRecord(LogRecord $record): array
     {
         $recordData = parent::normalizeRecord($record);
         $recordData["timestamp"] = $record->datetime->format("Y-m-d\\TH:i:s.uO");

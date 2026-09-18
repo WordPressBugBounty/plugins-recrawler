@@ -56,14 +56,14 @@ class FleepHookHandler extends SocketHandler
      *
      * @return LineFormatter
      */
-    protected function getDefaultFormatter() : FormatterInterface
+    protected function getDefaultFormatter(): FormatterInterface
     {
         return new LineFormatter(null, null, \true, \true);
     }
     /**
      * Handles a log record
      */
-    public function write(LogRecord $record) : void
+    public function write(LogRecord $record): void
     {
         parent::write($record);
         $this->closeSocket();
@@ -71,7 +71,7 @@ class FleepHookHandler extends SocketHandler
     /**
      * @inheritDoc
      */
-    protected function generateDataStream(LogRecord $record) : string
+    protected function generateDataStream(LogRecord $record): string
     {
         $content = $this->buildContent($record);
         return $this->buildHeader($content) . $content;
@@ -79,7 +79,7 @@ class FleepHookHandler extends SocketHandler
     /**
      * Builds the header of the API Call
      */
-    private function buildHeader(string $content) : string
+    private function buildHeader(string $content): string
     {
         $header = "POST " . static::FLEEP_HOOK_URI . $this->token . " HTTP/1.1\r\n";
         $header .= "Host: " . static::FLEEP_HOST . "\r\n";
@@ -91,9 +91,9 @@ class FleepHookHandler extends SocketHandler
     /**
      * Builds the body of API call
      */
-    private function buildContent(LogRecord $record) : string
+    private function buildContent(LogRecord $record): string
     {
         $dataArray = ['message' => $record->formatted];
-        return \http_build_query($dataArray);
+        return http_build_query($dataArray);
     }
 }

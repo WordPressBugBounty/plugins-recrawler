@@ -83,19 +83,19 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function __construct(string|array|null $scope, string|array $jsonKey, private ?string $targetAudience = null, string|array|null $defaultScope = null)
     {
-        if (\is_string($jsonKey)) {
-            if (!\file_exists($jsonKey)) {
+        if (is_string($jsonKey)) {
+            if (!file_exists($jsonKey)) {
                 throw new InvalidArgumentException('file does not exist');
             }
-            $json = \file_get_contents($jsonKey);
-            if (!($jsonKey = \json_decode((string) $json, \true))) {
+            $json = file_get_contents($jsonKey);
+            if (!$jsonKey = json_decode((string) $json, \true)) {
                 throw new LogicException('invalid json for auth config');
             }
         }
-        if (!\array_key_exists('service_account_impersonation_url', $jsonKey)) {
+        if (!array_key_exists('service_account_impersonation_url', $jsonKey)) {
             throw new LogicException('json key is missing the service_account_impersonation_url field');
         }
-        if (!\array_key_exists('source_credentials', $jsonKey)) {
+        if (!array_key_exists('source_credentials', $jsonKey)) {
             throw new LogicException('json key is missing the source_credentials field');
         }
         $jsonKeyScope = $jsonKey['scopes'] ?? null;
@@ -103,8 +103,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException('Scope and targetAudience cannot both be supplied');
         }
-        if (\is_array($jsonKey['source_credentials'])) {
-            if (!\array_key_exists('type', $jsonKey['source_credentials'])) {
+        if (is_array($jsonKey['source_credentials'])) {
+            if (!array_key_exists('type', $jsonKey['source_credentials'])) {
                 throw new InvalidArgumentException('json key source credentials are missing the type field');
             }
             if ($targetAudience !== null && $jsonKey['source_credentials']['type'] === 'service_account') {
@@ -134,11 +134,11 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @param $serviceAccountImpersonationUrl string URL from "service_account_impersonation_url"
      * @return string Service account email or ID.
      */
-    private function getImpersonatedServiceAccountNameFromUrl(string $serviceAccountImpersonationUrl) : string
+    private function getImpersonatedServiceAccountNameFromUrl(string $serviceAccountImpersonationUrl): string
     {
-        $fields = \explode('/', $serviceAccountImpersonationUrl);
-        $lastField = \end($fields);
-        $splitter = \explode(':', $lastField);
+        $fields = explode('/', $serviceAccountImpersonationUrl);
+        $lastField = end($fields);
+        $splitter = explode(':', $lastField);
         return $splitter[0];
     }
     /**
@@ -174,25 +174,25 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         // defined is allowed in PHP. So we'll just ignore the phpstan error here.
         // @phpstan-ignore-next-line
         $authToken = $this->sourceCredentials->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], 'at'));
-        $headers = $this->applyTokenEndpointMetrics(['Content-Type' => 'application/json', 'Cache-Control' => 'no-store', 'Authorization' => \sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token'])], $this->isIdTokenRequest() ? 'it' : 'at');
+        $headers = $this->applyTokenEndpointMetrics(['Content-Type' => 'application/json', 'Cache-Control' => 'no-store', 'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token'])], $this->isIdTokenRequest() ? 'it' : 'at');
         $body = match ($this->isIdTokenRequest()) {
             \true => ['audience' => $this->targetAudience, 'includeEmail' => \true],
-            \false => ['scope' => $this->targetScope, 'delegates' => $this->delegates, 'lifetime' => \sprintf('%ss', $this->lifetime)],
+            \false => ['scope' => $this->targetScope, 'delegates' => $this->delegates, 'lifetime' => sprintf('%ss', $this->lifetime)],
         };
         $url = $this->serviceAccountImpersonationUrl;
         if ($this->isIdTokenRequest()) {
-            $regex = '/serviceAccounts\\/(?<email>[^:]+):generateAccessToken$/';
-            if (!\preg_match($regex, $url, $matches)) {
+            $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
+            if (!preg_match($regex, $url, $matches)) {
                 throw new InvalidArgumentException('Invalid service account impersonation URL - unable to parse service account email');
             }
-            $url = \str_replace('UNIVERSE_DOMAIN', $this->getUniverseDomain(), \sprintf(self::ID_TOKEN_IMPERSONATION_URL, $matches['email']));
+            $url = str_replace('UNIVERSE_DOMAIN', $this->getUniverseDomain(), sprintf(self::ID_TOKEN_IMPERSONATION_URL, $matches['email']));
         }
-        $request = new Request('POST', $url, $headers, (string) \json_encode($body));
+        $request = new Request('POST', $url, $headers, (string) json_encode($body));
         $response = $httpHandler($request);
-        $body = \json_decode((string) $response->getBody(), \true);
+        $body = json_decode((string) $response->getBody(), \true);
         return $this->lastReceivedToken = match ($this->isIdTokenRequest()) {
             \true => ['id_token' => $body['token']],
-            \false => ['access_token' => $body['accessToken'], 'expires_at' => \strtotime($body['expireTime'])],
+            \false => ['access_token' => $body['accessToken'], 'expires_at' => strtotime($body['expireTime'])],
         };
     }
     /**
@@ -212,15 +212,15 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     {
         return $this->lastReceivedToken;
     }
-    protected function getCredType() : string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }
-    private function isIdTokenRequest() : bool
+    private function isIdTokenRequest(): bool
     {
-        return !\is_null($this->targetAudience);
+        return !is_null($this->targetAudience);
     }
-    public function getUniverseDomain() : string
+    public function getUniverseDomain(): string
     {
         return $this->sourceCredentials instanceof GetUniverseDomainInterface ? $this->sourceCredentials->getUniverseDomain() : self::DEFAULT_UNIVERSE_DOMAIN;
     }

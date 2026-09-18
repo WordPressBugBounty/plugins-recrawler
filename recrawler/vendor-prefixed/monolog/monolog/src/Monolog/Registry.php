@@ -50,7 +50,7 @@ class Registry
      * @param  bool                      $overwrite Overwrite instance in the registry if the given name already exists?
      * @throws \InvalidArgumentException If $overwrite set to false and named Logger instance already exists
      */
-    public static function addLogger(Logger $logger, ?string $name = null, bool $overwrite = \false) : void
+    public static function addLogger(Logger $logger, ?string $name = null, bool $overwrite = \false): void
     {
         $name = $name ?? $logger->getName();
         if (isset(self::$loggers[$name]) && !$overwrite) {
@@ -63,10 +63,10 @@ class Registry
      *
      * @param string|Logger $logger Name or logger instance
      */
-    public static function hasLogger($logger) : bool
+    public static function hasLogger($logger): bool
     {
         if ($logger instanceof Logger) {
-            $index = \array_search($logger, self::$loggers, \true);
+            $index = array_search($logger, self::$loggers, \true);
             return \false !== $index;
         }
         return isset(self::$loggers[$logger]);
@@ -76,10 +76,10 @@ class Registry
      *
      * @param string|Logger $logger Name or logger instance
      */
-    public static function removeLogger($logger) : void
+    public static function removeLogger($logger): void
     {
         if ($logger instanceof Logger) {
-            if (\false !== ($idx = \array_search($logger, self::$loggers, \true))) {
+            if (\false !== $idx = array_search($logger, self::$loggers, \true)) {
                 unset(self::$loggers[$idx]);
             }
         } else {
@@ -89,7 +89,7 @@ class Registry
     /**
      * Clears the registry
      */
-    public static function clear() : void
+    public static function clear(): void
     {
         self::$loggers = [];
     }
@@ -99,10 +99,10 @@ class Registry
      * @param  string                    $name Name of the requested Logger instance
      * @throws \InvalidArgumentException If named Logger instance is not in the registry
      */
-    public static function getInstance(string $name) : Logger
+    public static function getInstance(string $name): Logger
     {
         if (!isset(self::$loggers[$name])) {
-            throw new InvalidArgumentException(\sprintf('Requested "%s" logger instance is not in the registry', $name));
+            throw new InvalidArgumentException(sprintf('Requested "%s" logger instance is not in the registry', $name));
         }
         return self::$loggers[$name];
     }
@@ -114,7 +114,7 @@ class Registry
      * @throws \InvalidArgumentException If named Logger instance is not in the registry
      * @return Logger                    Requested instance of Logger
      */
-    public static function __callStatic(string $name, array $arguments) : Logger
+    public static function __callStatic(string $name, array $arguments): Logger
     {
         return self::getInstance($name);
     }

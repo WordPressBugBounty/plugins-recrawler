@@ -74,20 +74,20 @@ class ProcessHandler extends AbstractProcessingHandler
      *
      * @throws \UnexpectedValueException
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $this->ensureProcessIsStarted();
         $this->writeProcessInput($record->formatted);
         $errors = $this->readProcessErrors();
         if ($errors !== '') {
-            throw new \UnexpectedValueException(\sprintf('Errors while writing to process: %s', $errors));
+            throw new \UnexpectedValueException(sprintf('Errors while writing to process: %s', $errors));
         }
     }
     /**
      * Makes sure that the process is actually started, and if not, starts it,
      * assigns the stream pipes, and handles startup errors, if any.
      */
-    private function ensureProcessIsStarted() : void
+    private function ensureProcessIsStarted(): void
     {
         if (\is_resource($this->process) === \false) {
             $this->startProcess();
@@ -97,11 +97,11 @@ class ProcessHandler extends AbstractProcessingHandler
     /**
      * Starts the actual process and sets all streams to non-blocking.
      */
-    private function startProcess() : void
+    private function startProcess(): void
     {
-        $this->process = \proc_open($this->command, static::DESCRIPTOR_SPEC, $this->pipes, $this->cwd);
+        $this->process = proc_open($this->command, static::DESCRIPTOR_SPEC, $this->pipes, $this->cwd);
         foreach ($this->pipes as $pipe) {
-            \stream_set_blocking($pipe, \false);
+            stream_set_blocking($pipe, \false);
         }
     }
     /**
@@ -109,7 +109,7 @@ class ProcessHandler extends AbstractProcessingHandler
      *
      * @throws \UnexpectedValueException
      */
-    private function handleStartupErrors() : void
+    private function handleStartupErrors(): void
     {
         $selected = $this->selectErrorStream();
         if (\false === $selected) {
@@ -117,7 +117,7 @@ class ProcessHandler extends AbstractProcessingHandler
         }
         $errors = $this->readProcessErrors();
         if (\is_resource($this->process) === \false || $errors !== '') {
-            throw new \UnexpectedValueException(\sprintf('The process "%s" could not be opened: ' . $errors, $this->command));
+            throw new \UnexpectedValueException(sprintf('The process "%s" could not be opened: ' . $errors, $this->command));
         }
     }
     /**
@@ -130,7 +130,7 @@ class ProcessHandler extends AbstractProcessingHandler
         $empty = [];
         $errorPipes = [$this->pipes[2]];
         $seconds = (int) $this->timeout;
-        return \stream_select($errorPipes, $empty, $empty, $seconds, (int) (($this->timeout - $seconds) * 1000000));
+        return stream_select($errorPipes, $empty, $empty, $seconds, (int) (($this->timeout - $seconds) * 1000000));
     }
     /**
      * Reads the errors of the process, if there are any.
@@ -138,29 +138,29 @@ class ProcessHandler extends AbstractProcessingHandler
      * @codeCoverageIgnore
      * @return string Empty string if there are no errors.
      */
-    protected function readProcessErrors() : string
+    protected function readProcessErrors(): string
     {
-        return (string) \stream_get_contents($this->pipes[2]);
+        return (string) stream_get_contents($this->pipes[2]);
     }
     /**
      * Writes to the input stream of the opened process.
      *
      * @codeCoverageIgnore
      */
-    protected function writeProcessInput(string $string) : void
+    protected function writeProcessInput(string $string): void
     {
-        \fwrite($this->pipes[0], $string);
+        fwrite($this->pipes[0], $string);
     }
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         if (\is_resource($this->process)) {
             foreach ($this->pipes as $pipe) {
-                \fclose($pipe);
+                fclose($pipe);
             }
-            \proc_close($this->process);
+            proc_close($this->process);
             $this->process = null;
         }
     }

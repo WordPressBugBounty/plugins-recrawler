@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Mihdan\ReCrawler\Dependencies\ParagonIE\ConstantTime;
 
-use Mihdan\ReCrawler\Dependencies\Override;
+use Override;
 use function pack;
 /**
  *  Copyright (c) 2016 - 2022 Paragon Initiative Enterprises.
@@ -43,7 +43,7 @@ abstract class Base32Hex extends Base32
      * @return int
      */
     #[Override]
-    protected static function decode5Bits(int $src) : int
+    protected static function decode5Bits(int $src): int
     {
         $ret = -1;
         // if ($src > 0x30 && $src < 0x3a) ret += $src - 0x2e + 1; // -47
@@ -60,7 +60,7 @@ abstract class Base32Hex extends Base32
      * @return int
      */
     #[Override]
-    protected static function decode5BitsUpper(int $src) : int
+    protected static function decode5BitsUpper(int $src): int
     {
         $ret = -1;
         // if ($src > 0x30 && $src < 0x3a) ret += $src - 0x2e + 1; // -47
@@ -77,7 +77,7 @@ abstract class Base32Hex extends Base32
      * @return string
      */
     #[Override]
-    protected static function encode5Bits(int $src) : string
+    protected static function encode5Bits(int $src): string
     {
         $src += 0x30;
         // if ($src > 0x39) $src += 0x61 - 0x3a; // 39
@@ -94,7 +94,7 @@ abstract class Base32Hex extends Base32
      * @return string
      */
     #[Override]
-    protected static function encode5BitsUpper(int $src) : string
+    protected static function encode5BitsUpper(int $src): string
     {
         $src += 0x30;
         // if ($src > 0x39) $src += 0x41 - 0x3a; // 7

@@ -25,7 +25,7 @@ class ChromePHPFormatter implements FormatterInterface
      *
      * @return 'log'|'info'|'warn'|'error'
      */
-    private function toWildfireLevel(Level $level) : string
+    private function toWildfireLevel(Level $level): string
     {
         return match ($level) {
             Level::Debug => 'log',
@@ -57,7 +57,7 @@ class ChromePHPFormatter implements FormatterInterface
             $message['extra'] = $record->extra;
         }
         if (\count($message) === 1) {
-            $message = \reset($message);
+            $message = reset($message);
         }
         return [$record->channel, $message, $backtrace, $this->toWildfireLevel($record->level)];
     }

@@ -87,25 +87,25 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
     /**
      * @inheritDoc
      */
-    public function isHandling(LogRecord $record) : bool
+    public function isHandling(LogRecord $record): bool
     {
         return \true;
     }
     /**
      * Manually activate this logger regardless of the activation strategy
      */
-    public function activate() : void
+    public function activate(): void
     {
         if ($this->stopBuffering) {
             $this->buffering = \false;
         }
-        $this->getHandler(\end($this->buffer) ?: null)->handleBatch($this->buffer);
+        $this->getHandler(end($this->buffer) ?: null)->handleBatch($this->buffer);
         $this->buffer = [];
     }
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (\count($this->processors) > 0) {
             $record = $this->processRecord($record);
@@ -113,7 +113,7 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
         if ($this->buffering) {
             $this->buffer[] = $record;
             if ($this->bufferSize > 0 && \count($this->buffer) > $this->bufferSize) {
-                \array_shift($this->buffer);
+                array_shift($this->buffer);
             }
             if ($this->activationStrategy->isHandlerActivated($record)) {
                 $this->activate();
@@ -126,12 +126,12 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         $this->flushBuffer();
         $this->getHandler()->close();
     }
-    public function reset() : void
+    public function reset(): void
     {
         $this->flushBuffer();
         $this->resetProcessors();
@@ -144,7 +144,7 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
      *
      * It also resets the handler to its initial buffering state.
      */
-    public function clear() : void
+    public function clear(): void
     {
         $this->buffer = [];
         $this->reset();
@@ -152,15 +152,15 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
     /**
      * Resets the state of the handler. Stops forwarding records to the wrapped handler.
      */
-    private function flushBuffer() : void
+    private function flushBuffer(): void
     {
         if (null !== $this->passthruLevel) {
             $passthruLevel = $this->passthruLevel;
-            $this->buffer = \array_filter($this->buffer, static function ($record) use($passthruLevel) {
+            $this->buffer = array_filter($this->buffer, static function ($record) use ($passthruLevel) {
                 return $passthruLevel->includes($record->level);
             });
             if (\count($this->buffer) > 0) {
-                $this->getHandler(\end($this->buffer))->handleBatch($this->buffer);
+                $this->getHandler(end($this->buffer))->handleBatch($this->buffer);
             }
         }
         $this->buffer = [];
@@ -171,7 +171,7 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
      *
      * If the handler was provided as a factory, this will trigger the handler's instantiation.
      */
-    public function getHandler(LogRecord|null $record = null) : HandlerInterface
+    public function getHandler(LogRecord|null $record = null): HandlerInterface
     {
         if (!$this->handler instanceof HandlerInterface) {
             $handler = ($this->handler)($record, $this);
@@ -185,7 +185,7 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
     /**
      * @inheritDoc
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {
@@ -197,7 +197,7 @@ class FingersCrossedHandler extends Handler implements ProcessableHandlerInterfa
     /**
      * @inheritDoc
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         $handler = $this->getHandler();
         if ($handler instanceof FormattableHandlerInterface) {

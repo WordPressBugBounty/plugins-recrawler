@@ -116,9 +116,9 @@ class Montgomery extends Base
     {
         switch (\true) {
             case !$x instanceof BigInteger && !$x instanceof PrimeInteger:
-                throw new \UnexpectedValueException('Mihdan\\ReCrawler\\Dependencies\\Argument 1 passed to Prime::setBasePoint() must be an instance of either BigInteger or PrimeField\\Integer');
+                throw new \UnexpectedValueException('Argument 1 passed to Prime::setBasePoint() must be an instance of either BigInteger or PrimeField\Integer');
             case !$y instanceof BigInteger && !$y instanceof PrimeInteger:
-                throw new \UnexpectedValueException('Mihdan\\ReCrawler\\Dependencies\\Argument 2 passed to Prime::setBasePoint() must be an instance of either BigInteger or PrimeField\\Integer');
+                throw new \UnexpectedValueException('Argument 2 passed to Prime::setBasePoint() must be an instance of either BigInteger or PrimeField\Integer');
         }
         if (!isset($this->factory)) {
             throw new \RuntimeException('setModulo needs to be called before this method');
@@ -154,7 +154,7 @@ class Montgomery extends Base
         if (!isset($this->factory)) {
             throw new \RuntimeException('setModulo needs to be called before this method');
         }
-        if (!\count($p) || !\count($q)) {
+        if (!count($p) || !count($q)) {
             return [];
         }
         if (!isset($p[1])) {
@@ -199,8 +199,8 @@ class Montgomery extends Base
         $r = $this->randomInteger();
         $p2 = [$p2[0]->multiply($r), $p2[1]->multiply($r)];
         $b = $d->toBits();
-        $b = \str_pad($b, 256, '0', \STR_PAD_LEFT);
-        for ($i = 0; $i < \strlen($b); $i++) {
+        $b = str_pad($b, 256, '0', \STR_PAD_LEFT);
+        for ($i = 0; $i < strlen($b); $i++) {
             $b_i = (int) $b[$i];
             if ($b_i) {
                 list($p2, $p1) = $this->doubleAndAddPoint($p2, $p1, $x);

@@ -44,7 +44,7 @@ class PsrHandler extends AbstractHandler implements FormattableHandlerInterface
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (!$this->isHandling($record)) {
             return \false;
@@ -57,7 +57,7 @@ class PsrHandler extends AbstractHandler implements FormattableHandlerInterface
     /**
      * Sets the formatter.
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         $this->formatter = $formatter;
         return $this;
@@ -65,7 +65,7 @@ class PsrHandler extends AbstractHandler implements FormattableHandlerInterface
     /**
      * Gets the formatter.
      */
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         if ($this->formatter === null) {
             throw new \LogicException('No formatter has been set and this handler does not have a default formatter');

@@ -55,33 +55,33 @@ class SlackWebhookHandler extends AbstractProcessingHandler
         $this->webhookUrl = $webhookUrl;
         $this->slackRecord = new SlackRecord($channel, $username, $useAttachment, $iconEmoji, $useShortAttachment, $includeContextAndExtra, $excludeFields);
     }
-    public function getSlackRecord() : SlackRecord
+    public function getSlackRecord(): SlackRecord
     {
         return $this->slackRecord;
     }
-    public function getWebhookUrl() : string
+    public function getWebhookUrl(): string
     {
         return $this->webhookUrl;
     }
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         $postData = $this->slackRecord->getSlackData($record);
         $postString = Utils::jsonEncode($postData);
-        $ch = \curl_init();
+        $ch = curl_init();
         $options = [\CURLOPT_URL => $this->webhookUrl, \CURLOPT_POST => \true, \CURLOPT_RETURNTRANSFER => \true, \CURLOPT_HTTPHEADER => ['Content-type: application/json'], \CURLOPT_POSTFIELDS => $postString];
-        \curl_setopt_array($ch, $options);
+        curl_setopt_array($ch, $options);
         Curl\Util::execute($ch);
     }
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface
     {
         parent::setFormatter($formatter);
         $this->slackRecord->setFormatter($formatter);
         return $this;
     }
-    public function getFormatter() : FormatterInterface
+    public function getFormatter(): FormatterInterface
     {
         $formatter = parent::getFormatter();
         $this->slackRecord->setFormatter($formatter);

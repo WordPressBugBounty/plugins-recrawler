@@ -11,7 +11,7 @@ declare (strict_types=1);
  */
 namespace Mihdan\ReCrawler\Dependencies\Monolog;
 
-\class_alias(JsonSerializableDateTimeImmutable::class, 'Mihdan\\ReCrawler\\Dependencies\\Monolog\\DateTimeImmutable');
+class_alias(JsonSerializableDateTimeImmutable::class, 'Mihdan\ReCrawler\Dependencies\Monolog\DateTimeImmutable');
 // @phpstan-ignore-next-line
 if (\false) {
     /**

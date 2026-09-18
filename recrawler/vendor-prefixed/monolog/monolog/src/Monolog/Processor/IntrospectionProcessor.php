@@ -43,28 +43,28 @@ class IntrospectionProcessor implements ProcessorInterface
     public function __construct(int|string|Level $level = Level::Debug, array $skipClassesPartials = [], int $skipStackFramesCount = 0)
     {
         $this->level = Logger::toMonologLevel($level);
-        $this->skipClassesPartials = \array_merge(static::SKIP_CLASSES, $skipClassesPartials);
+        $this->skipClassesPartials = array_merge(static::SKIP_CLASSES, $skipClassesPartials);
         $this->skipStackFramesCount = $skipStackFramesCount;
     }
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         // return if the level is not high enough
         if ($record->level->isLowerThan($this->level)) {
             return $record;
         }
-        $trace = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS);
+        $trace = debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS);
         // skip first since it's always the current method
-        \array_shift($trace);
+        array_shift($trace);
         // the call_user_func call is also skipped
-        \array_shift($trace);
+        array_shift($trace);
         $i = 0;
         while ($this->isTraceClassOrSkippedFunction($trace, $i)) {
             if (isset($trace[$i]['class'])) {
                 foreach ($this->skipClassesPartials as $part) {
-                    if (\strpos($trace[$i]['class'], $part) !== \false) {
+                    if (strpos($trace[$i]['class'], $part) !== \false) {
                         $i++;
                         continue 2;
                     }
@@ -77,13 +77,13 @@ class IntrospectionProcessor implements ProcessorInterface
         }
         $i += $this->skipStackFramesCount;
         // we should have the call source now
-        $record->extra = \array_merge($record->extra, ['file' => $trace[$i - 1]['file'] ?? null, 'line' => $trace[$i - 1]['line'] ?? null, 'class' => $trace[$i]['class'] ?? null, 'callType' => $trace[$i]['type'] ?? null, 'function' => $trace[$i]['function'] ?? null]);
+        $record->extra = array_merge($record->extra, ['file' => $trace[$i - 1]['file'] ?? null, 'line' => $trace[$i - 1]['line'] ?? null, 'class' => $trace[$i]['class'] ?? null, 'callType' => $trace[$i]['type'] ?? null, 'function' => $trace[$i]['function'] ?? null]);
         return $record;
     }
     /**
      * @param array<mixed> $trace
      */
-    private function isTraceClassOrSkippedFunction(array $trace, int $index) : bool
+    private function isTraceClassOrSkippedFunction(array $trace, int $index): bool
     {
         if (!isset($trace[$index])) {
             return \false;

@@ -48,11 +48,11 @@ class Curve448 extends Montgomery
     public function multiplyPoint(array $p, BigInteger $d)
     {
         $d = $d->toBytes();
-        $d = \str_pad($d, 56, "\x00", \STR_PAD_LEFT);
+        $d = str_pad($d, 56, "\x00", \STR_PAD_LEFT);
         //$r = strrev(sodium_crypto_scalarmult($d, strrev($p[0]->toBytes())));
         //return [$this->factory->newInteger(new BigInteger($r, 256))];
         $d[0] = $d[0] & "\xfc";
-        $d = \strrev($d);
+        $d = strrev($d);
         $d |= "\x80";
         $d = new BigInteger($d, 256);
         return parent::multiplyPoint($p, $d);

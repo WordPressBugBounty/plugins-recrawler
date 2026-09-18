@@ -136,40 +136,40 @@ abstract class EC extends AsymmetricKey
             throw new \RuntimeException('createKey() should not be called from final classes (' . static::class . ')');
         }
         $curveName = self::getCurveCase($curve);
-        $curve = '\\phpseclib3\\Crypt\\EC\\Curves\\' . $curveName;
-        if (!\class_exists($curve)) {
+        $curve = '\phpseclib3\Crypt\EC\Curves\\' . $curveName;
+        if (!class_exists($curve)) {
             throw new UnsupportedCurveException('Named Curve of ' . $curveName . ' is not supported');
         }
         $reflect = new \ReflectionClass($curve);
         $curveName = $reflect->isFinal() ? $reflect->getParentClass()->getShortName() : $reflect->getShortName();
-        $curveEngineName = self::getOpenSSLCurveName(\strtolower($curveName));
+        $curveEngineName = self::getOpenSSLCurveName(strtolower($curveName));
         switch ($curveName) {
             case 'Ed25519':
                 $providers = [
-                    'libsodium' => \function_exists('sodium_crypto_sign_keypair'),
+                    'libsodium' => function_exists('sodium_crypto_sign_keypair'),
                     // OPENSSL_KEYTYPE_ED25519 introduced in PHP 8.4.0
-                    'OpenSSL' => \defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_KEYTYPE_ED25519'),
+                    'OpenSSL' => defined('OPENSSL_KEYTYPE_ED25519'),
                 ];
                 break;
             case 'Ed448':
                 // OPENSSL_KEYTYPE_ED448 introduced in PHP 8.4.0
-                $providers = ['OpenSSL' => \defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_KEYTYPE_ED448')];
+                $providers = ['OpenSSL' => defined('OPENSSL_KEYTYPE_ED448')];
                 break;
             case 'Curve25519':
                 $providers = [
-                    'libsodium' => \function_exists('sodium_crypto_box_publickey_from_secretkey'),
+                    'libsodium' => function_exists('sodium_crypto_box_publickey_from_secretkey'),
                     // OPENSSL_KEYTYPE_X25519 introduced in PHP 8.4.0
-                    'OpenSSL' => \defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_KEYTYPE_X25519'),
+                    'OpenSSL' => defined('OPENSSL_KEYTYPE_X25519'),
                 ];
                 break;
             // OPENSSL_KEYTYPE_X448 introduced in PHP 8.4.0
             case 'Curve448':
-                $providers = ['OpenSSL' => \defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_KEYTYPE_X448')];
+                $providers = ['OpenSSL' => defined('OPENSSL_KEYTYPE_X448')];
                 break;
             default:
                 // openssl_get_curve_names() was introduced in PHP 7.1.0
                 // exclude curve25519 and curve448 from testing
-                $providers = ['OpenSSL' => \function_exists('openssl_get_curve_names') && \substr($curveEngineName, 0, 5) != 'curve' && \in_array($curveEngineName, \openssl_get_curve_names())];
+                $providers = ['OpenSSL' => function_exists('openssl_get_curve_names') && substr($curveEngineName, 0, 5) != 'curve' && in_array($curveEngineName, openssl_get_curve_names())];
         }
         foreach ($providers as $engine => $isSupported) {
             // if an engine is being forced and the forced engine doesn't match $engine, skip it
@@ -217,12 +217,12 @@ abstract class EC extends AsymmetricKey
      */
     private static function getCurveCase($curveName)
     {
-        $curveName = \strtolower($curveName);
-        if (\preg_match('#(?:^curve|^ed)\\d+$#', $curveName)) {
-            return \ucfirst($curveName);
+        $curveName = strtolower($curveName);
+        if (preg_match('#(?:^curve|^ed)\d+$#', $curveName)) {
+            return ucfirst($curveName);
         }
-        if (\substr($curveName, 0, 10) == 'brainpoolp') {
-            return 'brainpoolP' . \substr($curveName, 10);
+        if (substr($curveName, 0, 10) == 'brainpoolp') {
+            return 'brainpoolP' . substr($curveName, 10);
         }
         return $curveName;
     }
@@ -253,8 +253,8 @@ abstract class EC extends AsymmetricKey
     {
         if ($engine == 'libsodium') {
             if ($curve == 'ed25519') {
-                $kp = \sodium_crypto_sign_keypair();
-                $privatekey = EC::loadFormat('libsodium', \sodium_crypto_sign_secretkey($kp));
+                $kp = sodium_crypto_sign_keypair();
+                $privatekey = EC::loadFormat('libsodium', sodium_crypto_sign_secretkey($kp));
                 //$publickey = EC::loadFormat('libsodium', sodium_crypto_sign_publickey($kp));
                 $privatekey->curveName = 'Ed25519';
                 //$publickey->curveName = $curve;
@@ -265,11 +265,11 @@ abstract class EC extends AsymmetricKey
                 $privatekey->curve = new Curve25519();
                 $privatekey->curveName = 'Curve25519';
                 $privatekey->dA = $privatekey->curve->createRandomMultiplier();
-                $dA = \str_pad($privatekey->dA->toBytes(), 32, "\x00", \STR_PAD_LEFT);
+                $dA = str_pad($privatekey->dA->toBytes(), 32, "\x00", \STR_PAD_LEFT);
                 //$r = pack('H*', '0900000000000000000000000000000000000000000000000000000000000000');
                 //$QA = sodium_crypto_scalarmult($dA, $r);
-                $QA = \sodium_crypto_box_publickey_from_secretkey($dA);
-                $privatekey->QA = [$privatekey->curve->convertInteger(new BigInteger(\strrev($QA), 256))];
+                $QA = sodium_crypto_box_publickey_from_secretkey($dA);
+                $privatekey->QA = [$privatekey->curve->convertInteger(new BigInteger(strrev($QA), 256))];
                 return $privatekey;
             }
         }
@@ -282,31 +282,31 @@ abstract class EC extends AsymmetricKey
         $params = $config;
         switch ($curve) {
             case 'ed25519':
-                $params['private_key_type'] = OPENSSL_KEYTYPE_ED25519;
+                $params['private_key_type'] = \OPENSSL_KEYTYPE_ED25519;
                 break;
             case 'ed448':
-                $params['private_key_type'] = OPENSSL_KEYTYPE_ED448;
+                $params['private_key_type'] = \OPENSSL_KEYTYPE_ED448;
                 break;
             case 'curve25519':
-                $params['private_key_type'] = OPENSSL_KEYTYPE_X25519;
+                $params['private_key_type'] = \OPENSSL_KEYTYPE_X25519;
                 break;
             case 'curve448':
-                $params['private_key_type'] = OPENSSL_KEYTYPE_X448;
+                $params['private_key_type'] = \OPENSSL_KEYTYPE_X448;
                 break;
             default:
                 $params['private_key_type'] = \OPENSSL_KEYTYPE_EC;
                 $params['curve_name'] = $curveName;
         }
-        $key = \openssl_pkey_new($params);
+        $key = openssl_pkey_new($params);
         if (!$key) {
             return null;
         }
         $privateKeyStr = '';
-        if (!\openssl_pkey_export($key, $privateKeyStr, null, $config)) {
+        if (!openssl_pkey_export($key, $privateKeyStr, null, $config)) {
             return null;
         }
         // clear the buffer of error strings
-        while (\openssl_error_string() !== \false) {
+        while (openssl_error_string() !== \false) {
         }
         // some versions of OpenSSL / PHP return PKCS1 keys, others return PKCS8 keys
         $privatekey = EC::load($privateKeyStr);
@@ -419,7 +419,7 @@ abstract class EC extends AsymmetricKey
     public function getEncodedCoordinates()
     {
         if ($this->curve instanceof MontgomeryCurve) {
-            return \strrev($this->QA[0]->toBytes(\true));
+            return strrev($this->QA[0]->toBytes(\true));
         }
         if ($this->curve instanceof TwistedEdwardsCurve) {
             return $this->curve->encodePoint($this->QA);
@@ -443,15 +443,15 @@ abstract class EC extends AsymmetricKey
     public static function convertPointToPublicKey($curveName, $secret, $toPublicKey = \true)
     {
         $curveName = self::getCurveCase($curveName);
-        $curve = '\\phpseclib3\\Crypt\\EC\\Curves\\' . $curveName;
-        if (!\class_exists($curve)) {
+        $curve = '\phpseclib3\Crypt\EC\Curves\\' . $curveName;
+        if (!class_exists($curve)) {
             throw new UnsupportedCurveException('Named Curve of ' . $curveName . ' is not supported');
         }
         $curve = new $curve();
         if (!$curve instanceof TwistedEdwardsCurve) {
             if ($curve instanceof MontgomeryCurve) {
-                $secret = \strrev($secret);
-            } elseif ($curve->getLengthInBytes() == \strlen($secret)) {
+                $secret = strrev($secret);
+            } elseif ($curve->getLengthInBytes() == strlen($secret)) {
                 $secret = "\x03{$secret}";
             }
             if (!$toPublicKey) {
@@ -522,10 +522,10 @@ abstract class EC extends AsymmetricKey
             $new->context = null;
             return $new;
         }
-        if (!\is_string($context)) {
+        if (!is_string($context)) {
             throw new \InvalidArgumentException('setContext expects a string');
         }
-        if (\strlen($context) > 255) {
+        if (strlen($context) > 255) {
             throw new \LengthException('The context is supposed to be, at most, 255 bytes long');
         }
         $new->context = $context;

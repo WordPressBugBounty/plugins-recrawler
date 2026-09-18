@@ -24,5 +24,5 @@ interface WrappingFormatterInterface extends FormatterInterface
     /**
      * Returns the formatter this one delegates the actual formatting to
      */
-    public function getWrappedFormatter() : FormatterInterface;
+    public function getWrappedFormatter(): FormatterInterface;
 }

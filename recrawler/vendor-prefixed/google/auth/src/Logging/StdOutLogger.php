@@ -47,7 +47,7 @@ class StdOutLogger implements LoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function log($level, string|Stringable $message, array $context = []) : void
+    public function log($level, string|Stringable $message, array $context = []): void
     {
         if ($this->getLevelFromName($level) < $this->level) {
             return;
@@ -59,9 +59,9 @@ class StdOutLogger implements LoggerInterface
      * @return int
      * @throws InvalidArgumentException
      */
-    private function getLevelFromName(string $levelName) : int
+    private function getLevelFromName(string $levelName): int
     {
-        if (!\array_key_exists($levelName, $this->levelMapping)) {
+        if (!array_key_exists($levelName, $this->levelMapping)) {
             throw new InvalidArgumentException('The level supplied to the Logger is not valid');
         }
         return $this->levelMapping[$levelName];

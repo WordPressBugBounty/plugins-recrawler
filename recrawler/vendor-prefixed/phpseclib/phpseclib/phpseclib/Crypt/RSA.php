@@ -276,13 +276,13 @@ abstract class RSA extends AsymmetricKey
         if ($class->isFinal()) {
             throw new \RuntimeException('createKey() should not be called from final classes (' . static::class . ')');
         }
-        if (self::$forcedEngine == 'libsodium' || self::$forcedEngine == 'OpenSSL' && !\function_exists('openssl_pkey_new')) {
+        if (self::$forcedEngine == 'libsodium' || self::$forcedEngine == 'OpenSSL' && !function_exists('openssl_pkey_new')) {
             throw new BadConfigurationException('Engine ' . self::$forcedEngine . ' is forced but unsupported for RSA');
         }
         $regSize = $bits >> 1;
         // divide by two to see how many bits P and Q would be
         if ($regSize > self::$smallestPrime) {
-            $num_primes = \floor($bits / self::$smallestPrime);
+            $num_primes = floor($bits / self::$smallestPrime);
             $regSize = self::$smallestPrime;
         } else {
             $num_primes = 2;
@@ -290,21 +290,21 @@ abstract class RSA extends AsymmetricKey
         if ($num_primes == 2 && $bits >= 384 && self::$defaultExponent == 65537) {
             // at this point the only two supported values for self::$forcedEngine are OpenSSL, PHP and null
             // if it's either OpenSSL or null we'll use OpenSSL (if it's available)
-            if (self::$forcedEngine !== 'PHP' && \function_exists('openssl_pkey_new')) {
+            if (self::$forcedEngine !== 'PHP' && function_exists('openssl_pkey_new')) {
                 $config = [];
                 if (self::$configFile) {
                     $config['config'] = self::$configFile;
                 }
                 // OpenSSL uses 65537 as the exponent and requires RSA keys be 384 bits minimum
-                $rsa = \openssl_pkey_new(['private_key_bits' => $bits] + $config);
-                if (!$rsa || !\openssl_pkey_export($rsa, $privatekeystr, null, $config)) {
+                $rsa = openssl_pkey_new(['private_key_bits' => $bits] + $config);
+                if (!$rsa || !openssl_pkey_export($rsa, $privatekeystr, null, $config)) {
                     if (isset(self::$forcedEngine)) {
-                        throw new BadConfigurationException('Engine OpenSSL is forced but produced an error - ' . \openssl_error_string());
+                        throw new BadConfigurationException('Engine OpenSSL is forced but produced an error - ' . openssl_error_string());
                     }
                 } else {
                     // clear the buffer of error strings stemming from a minimalistic openssl.cnf
                     // https://github.com/php/php-src/issues/11054 talks about other errors this'll pick up
-                    while (\openssl_error_string() !== \false) {
+                    while (openssl_error_string() !== \false) {
                     }
                     return RSA::load($privatekeystr);
                 }
@@ -451,10 +451,10 @@ abstract class RSA extends AsymmetricKey
             return \false;
         }
         $x = $x->toBytes();
-        if (\strlen($x) > $xLen) {
+        if (strlen($x) > $xLen) {
             throw new \OutOfRangeException('Resultant string length out of range');
         }
-        return \str_pad($x, $xLen, \chr(0), \STR_PAD_LEFT);
+        return str_pad($x, $xLen, chr(0), \STR_PAD_LEFT);
     }
     /**
      * Octet-String-to-Integer primitive
@@ -528,11 +528,11 @@ abstract class RSA extends AsymmetricKey
                 $t = "0-0\r\x06\t`\x86H\x01e\x03\x04\x02\n\x05\x00\x04@";
         }
         $t .= $h;
-        $tLen = \strlen($t);
+        $tLen = strlen($t);
         if ($emLen < $tLen + 11) {
             throw new \LengthException('Intended encoded message length too short');
         }
-        $ps = \str_repeat(\chr(0xff), $emLen - $tLen - 3);
+        $ps = str_repeat(chr(0xff), $emLen - $tLen - 3);
         $em = "\x00\x01{$ps}\x00{$t}";
         return $em;
     }
@@ -597,11 +597,11 @@ abstract class RSA extends AsymmetricKey
                 throw new UnsupportedAlgorithmException('md2 and md5 require NULLs');
         }
         $t .= $h;
-        $tLen = \strlen($t);
+        $tLen = strlen($t);
         if ($emLen < $tLen + 11) {
             throw new \LengthException('Intended encoded message length too short');
         }
-        $ps = \str_repeat(\chr(0xff), $emLen - $tLen - 3);
+        $ps = str_repeat(chr(0xff), $emLen - $tLen - 3);
         $em = "\x00\x01{$ps}\x00{$t}";
         return $em;
     }
@@ -618,12 +618,12 @@ abstract class RSA extends AsymmetricKey
     {
         // if $maskLen would yield strings larger than 4GB, PKCS#1 suggests a "Mask too long" error be output.
         $t = '';
-        $count = \ceil($maskLen / $this->mgfHLen);
+        $count = ceil($maskLen / $this->mgfHLen);
         for ($i = 0; $i < $count; $i++) {
-            $c = \pack('N', $i);
+            $c = pack('N', $i);
             $t .= $this->mgfHash->hash($mgfSeed . $c);
         }
-        return \substr($t, 0, $maskLen);
+        return substr($t, 0, $maskLen);
     }
     /**
      * Returns the key size
@@ -648,7 +648,7 @@ abstract class RSA extends AsymmetricKey
     {
         $new = clone $this;
         // Crypt\Hash supports algorithms that PKCS#1 doesn't support.  md5-96 and sha1-96, for example.
-        switch (\strtolower($hash)) {
+        switch (strtolower($hash)) {
             case 'md2':
             case 'md5':
             case 'sha1':
@@ -682,7 +682,7 @@ abstract class RSA extends AsymmetricKey
     {
         $new = clone $this;
         // Crypt\Hash supports algorithms that PKCS#1 doesn't support.  md5-96 and sha1-96, for example.
-        switch (\strtolower($hash)) {
+        switch (strtolower($hash)) {
             case 'md2':
             case 'md5':
             case 'sha1':
@@ -867,13 +867,13 @@ abstract class RSA extends AsymmetricKey
             throw new BadConfigurationException('Only the PHP engine can be used with relaxed PKCS1 padding');
         }
         if (self::$forcedEngine !== 'PHP') {
-            if (self::$forcedEngine === 'OpenSSL' && !\function_exists($func)) {
+            if (self::$forcedEngine === 'OpenSSL' && !function_exists($func)) {
                 throw new BadConfigurationException('Engine OpenSSL is forced but unavailable for RSA');
             }
             if ($this->{$paddingType} === self::SIGNATURE_PSS) {
                 $create = $func === 'openssl_sign';
                 switch (\true) {
-                    case !\defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_PKCS1_PSS_PADDING'):
+                    case !defined('OPENSSL_PKCS1_PSS_PADDING'):
                         $error = 'Engine OpenSSL is forced but PSS encryption requires PHP >= 8.5.0';
                         break;
                     case $this->hash->getHash() !== $this->mgfHash->getHash():
@@ -938,7 +938,7 @@ abstract class RSA extends AsymmetricKey
                     case $this->hash->getHash() !== 'sha1' && \PHP_VERSION_ID < 80500:
                         $error = 'Engine OpenSSL is forced but non-sha1 hashes are only supported on PHP 8.5.0+';
                         break;
-                    case \strlen($this->label):
+                    case strlen($this->label):
                         $error = 'Engine OpenSSL is forced but can\'t be used because the label is not the empty string';
                 }
             }
@@ -948,10 +948,10 @@ abstract class RSA extends AsymmetricKey
                 }
             } elseif ($paddingType === 'signaturePadding') {
                 switch (\true) {
-                    case $this->signaturePadding === self::SIGNATURE_PSS && \defined('Mihdan\\ReCrawler\\Dependencies\\OPENSSL_PKCS1_PSS_PADDING'):
-                    case $this->signaturePadding !== self::SIGNATURE_PSS && \function_exists($func):
+                    case $this->signaturePadding === self::SIGNATURE_PSS && defined('OPENSSL_PKCS1_PSS_PADDING'):
+                    case $this->signaturePadding !== self::SIGNATURE_PSS && function_exists($func):
                         $key = $this instanceof PrivateKey ? $this->withPassword()->toString('PKCS8') : $this->toString('PKCS8');
-                        if ($func === 'openssl_sign' && \strpos($key, 'PUBLIC') !== \false) {
+                        if ($func === 'openssl_sign' && strpos($key, 'PUBLIC') !== \false) {
                             if (self::$forcedEngine === 'OpenSSL') {
                                 throw new BadConfigurationException('Engine OpenSSL is forced but cannot be used because the private key does not have the prime components within it');
                             }
@@ -960,22 +960,22 @@ abstract class RSA extends AsymmetricKey
                         $hash = $this->hash->getHash();
                         // on github actions, php 7.0 and 7.1 on windows emit the following warning:
                         // openssl_sign(): supplied key param cannot be coerced into a private key
-                        \set_error_handler(function ($errno, $errstr) {
+                        set_error_handler(function ($errno, $errstr) {
                             throw new BadConfigurationException("Engine OpenSSL is forced but got error: {$errstr}");
                         });
                         try {
-                            $result = $this->signaturePadding === self::SIGNATURE_PSS ? $func($message, $signature, $key, $hash, OPENSSL_PKCS1_PSS_PADDING) : $func($message, $signature, $key, $hash);
+                            $result = $this->signaturePadding === self::SIGNATURE_PSS ? $func($message, $signature, $key, $hash, \OPENSSL_PKCS1_PSS_PADDING) : $func($message, $signature, $key, $hash);
                         } catch (BadConfigurationException $e) {
                             if (self::$forcedEngine === 'OpenSSL') {
                                 throw $e;
                             }
                             $result = \false;
                         } finally {
-                            \restore_error_handler();
+                            restore_error_handler();
                         }
                         if ($func === 'openssl_verify') {
                             if ($result === -1 || $result === \false) {
-                                throw new BadConfigurationException('Engine OpenSSL is forced but was unable to verify signature because of ' . \openssl_error_string());
+                                throw new BadConfigurationException('Engine OpenSSL is forced but was unable to verify signature because of ' . openssl_error_string());
                             }
                             return (bool) $result;
                         }
@@ -983,74 +983,72 @@ abstract class RSA extends AsymmetricKey
                             return $signature;
                         }
                         if (self::$forcedEngine === 'OpenSSL') {
-                            throw new BadConfigurationException('Engine OpenSSL is forced but was unable to create signature because of ' . \openssl_error_string());
+                            throw new BadConfigurationException('Engine OpenSSL is forced but was unable to create signature because of ' . openssl_error_string());
                         }
                 }
-            } else {
-                if ($this->encryptionPadding !== self::ENCRYPTION_OAEP || \PHP_VERSION_ID >= 80500) {
-                    $key = $this instanceof PrivateKey ? $this->withPassword()->toString('PKCS8') : $this->toString('PKCS8');
-                    if ($func === 'openssl_private_decrypt' && \strpos($key, 'PUBLIC') !== \false) {
-                        if ($this->encryptionPadding === self::ENCRYPTION_OAEP) {
-                            if (self::$forcedEngine === 'OpenSSL') {
-                                throw new BadConfigurationException('Engine OpenSSL is forced but cannot be used because openssl_public_decrypt() doesn\'t have a hash parameter like openssl_private_decrypt() does');
-                            }
-                            return null;
-                        }
-                        $func = 'openssl_public_decrypt';
-                    }
-                    if ($this->encryptionPadding === self::ENCRYPTION_PKCS1 && \OPENSSL_VERSION_NUMBER >= 0x30200000) {
-                        // quoting https://docs.openssl.org/3.4/man3/RSA_public_encrypt/#return-values :
-                        //
-                        // "Since version 3.2.0, the default provider in OpenSSL does not return an error when padding checks fail.
-                        //  Instead it generates a random message"
-                        //
-                        // the idea is that even a perfect implementation of PKCS1 padding can be used to conduct a Bleichenbacher
-                        // padding oracle attack.
-                        //
-                        // so like if $rsa->decrypt() doesn't throw an exception it's liable to run additional code that'll take
-                        // longer to run than it'd take if an exception would be thrown and in theory, with PKCS1, in particular,
-                        // you can use that fact to guess at successive bits of the private key until you've figured it out. it's
-                        // why you should use OAEP padding vs PKCS1 padding BUT if you need PKCS1 padding for interoperability then
-                        // you're stuck with it.
-                        //
-                        // with the OpenSSL 3.2.0+ behavior they're making it harder to do the attack by making it harder to use PKCS1
-                        // in the real world. this isn't a design philosophy i agree with. like phpseclib lets you DES encryption. you
-                        // shouldn't use DES encryption but if you need to you need to and phpseclib isn't here to judge. that's a big
-                        // difference between phpseclib and stuff like libsodium.
+            } else if ($this->encryptionPadding !== self::ENCRYPTION_OAEP || \PHP_VERSION_ID >= 80500) {
+                $key = $this instanceof PrivateKey ? $this->withPassword()->toString('PKCS8') : $this->toString('PKCS8');
+                if ($func === 'openssl_private_decrypt' && strpos($key, 'PUBLIC') !== \false) {
+                    if ($this->encryptionPadding === self::ENCRYPTION_OAEP) {
                         if (self::$forcedEngine === 'OpenSSL') {
-                            throw new BadConfigurationException('Engine OpenSSL is forced but cannot be used to decrypt PKCS1 encrypted strings with OpenSSL 3.2.0+');
+                            throw new BadConfigurationException('Engine OpenSSL is forced but cannot be used because openssl_public_decrypt() doesn\'t have a hash parameter like openssl_private_decrypt() does');
                         }
                         return null;
                     }
-                    $hash = $this->hash->getHash();
-                    $output = '';
-                    switch ($this->encryptionPadding) {
-                        case self::ENCRYPTION_NONE:
-                        case self::ENCRYPTION_PKCS1:
-                            $padding = $this->encryptionPadding === self::ENCRYPTION_NONE ? \OPENSSL_NO_PADDING : \OPENSSL_PKCS1_PADDING;
-                            // on github actions, php 7.0 and 7.1 on windows emit the following warning:
-                            // openssl_private_decrypt(): key parameter is not a valid private key
-                            \set_error_handler(function ($errno, $errstr) {
-                                throw new BadConfigurationException("Engine OpenSSL is forced but got error: {$errstr}");
-                            });
-                            try {
-                                $result = $func($message, $output, $key, $padding);
-                            } catch (BadConfigurationException $e) {
-                                if (self::$forcedEngine === 'OpenSSL') {
-                                    throw $e;
-                                }
-                                $result = \false;
-                            } finally {
-                                \restore_error_handler();
+                    $func = 'openssl_public_decrypt';
+                }
+                if ($this->encryptionPadding === self::ENCRYPTION_PKCS1 && \OPENSSL_VERSION_NUMBER >= 0x30200000) {
+                    // quoting https://docs.openssl.org/3.4/man3/RSA_public_encrypt/#return-values :
+                    //
+                    // "Since version 3.2.0, the default provider in OpenSSL does not return an error when padding checks fail.
+                    //  Instead it generates a random message"
+                    //
+                    // the idea is that even a perfect implementation of PKCS1 padding can be used to conduct a Bleichenbacher
+                    // padding oracle attack.
+                    //
+                    // so like if $rsa->decrypt() doesn't throw an exception it's liable to run additional code that'll take
+                    // longer to run than it'd take if an exception would be thrown and in theory, with PKCS1, in particular,
+                    // you can use that fact to guess at successive bits of the private key until you've figured it out. it's
+                    // why you should use OAEP padding vs PKCS1 padding BUT if you need PKCS1 padding for interoperability then
+                    // you're stuck with it.
+                    //
+                    // with the OpenSSL 3.2.0+ behavior they're making it harder to do the attack by making it harder to use PKCS1
+                    // in the real world. this isn't a design philosophy i agree with. like phpseclib lets you DES encryption. you
+                    // shouldn't use DES encryption but if you need to you need to and phpseclib isn't here to judge. that's a big
+                    // difference between phpseclib and stuff like libsodium.
+                    if (self::$forcedEngine === 'OpenSSL') {
+                        throw new BadConfigurationException('Engine OpenSSL is forced but cannot be used to decrypt PKCS1 encrypted strings with OpenSSL 3.2.0+');
+                    }
+                    return null;
+                }
+                $hash = $this->hash->getHash();
+                $output = '';
+                switch ($this->encryptionPadding) {
+                    case self::ENCRYPTION_NONE:
+                    case self::ENCRYPTION_PKCS1:
+                        $padding = $this->encryptionPadding === self::ENCRYPTION_NONE ? \OPENSSL_NO_PADDING : \OPENSSL_PKCS1_PADDING;
+                        // on github actions, php 7.0 and 7.1 on windows emit the following warning:
+                        // openssl_private_decrypt(): key parameter is not a valid private key
+                        set_error_handler(function ($errno, $errstr) {
+                            throw new BadConfigurationException("Engine OpenSSL is forced but got error: {$errstr}");
+                        });
+                        try {
+                            $result = $func($message, $output, $key, $padding);
+                        } catch (BadConfigurationException $e) {
+                            if (self::$forcedEngine === 'OpenSSL') {
+                                throw $e;
                             }
-                            break;
-                        //case self::ENCRYPTION_OAEP:
-                        default:
-                            $result = $func($message, $output, $key, \OPENSSL_PKCS1_OAEP_PADDING, $hash);
-                    }
-                    if ($result) {
-                        return $output;
-                    }
+                            $result = \false;
+                        } finally {
+                            restore_error_handler();
+                        }
+                        break;
+                    //case self::ENCRYPTION_OAEP:
+                    default:
+                        $result = $func($message, $output, $key, \OPENSSL_PKCS1_OAEP_PADDING, $hash);
+                }
+                if ($result) {
+                    return $output;
                 }
             }
             return null;

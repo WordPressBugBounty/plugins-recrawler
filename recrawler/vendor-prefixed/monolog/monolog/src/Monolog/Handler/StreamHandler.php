@@ -52,7 +52,7 @@ class StreamHandler extends AbstractProcessingHandler
         if (($phpMemoryLimit = Utils::expandIniShorthandBytes(\ini_get('memory_limit'))) !== \false) {
             if ($phpMemoryLimit > 0) {
                 // use max 10% of allowed memory for the chunk size, and at least 100KB
-                $this->streamChunkSize = \min(static::MAX_CHUNK_SIZE, \max((int) ($phpMemoryLimit / 10), 100 * 1024));
+                $this->streamChunkSize = min(static::MAX_CHUNK_SIZE, max((int) ($phpMemoryLimit / 10), 100 * 1024));
             } else {
                 // memory is unlimited, set to the default 10MB
                 $this->streamChunkSize = static::DEFAULT_CHUNK_SIZE;
@@ -63,7 +63,7 @@ class StreamHandler extends AbstractProcessingHandler
         }
         if (\is_resource($stream)) {
             $this->stream = $stream;
-            \stream_set_chunk_size($this->stream, $this->streamChunkSize);
+            stream_set_chunk_size($this->stream, $this->streamChunkSize);
         } elseif (\is_string($stream)) {
             $this->url = Utils::canonicalizePath($stream);
         } else {
@@ -76,7 +76,7 @@ class StreamHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    public function reset() : void
+    public function reset(): void
     {
         parent::reset();
         // auto-close on reset to make sure we periodically close the file in long running processes
@@ -88,10 +88,10 @@ class StreamHandler extends AbstractProcessingHandler
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close(): void
     {
         if (null !== $this->url && \is_resource($this->stream)) {
-            \fclose($this->stream);
+            fclose($this->stream);
         }
         $this->stream = null;
         $this->dirCreated = null;
@@ -108,18 +108,18 @@ class StreamHandler extends AbstractProcessingHandler
     /**
      * Return the stream URL if it was configured with a URL and not an active resource
      */
-    public function getUrl() : ?string
+    public function getUrl(): ?string
     {
         return $this->url;
     }
-    public function getStreamChunkSize() : int
+    public function getStreamChunkSize(): int
     {
         return $this->streamChunkSize;
     }
     /**
      * @inheritDoc
      */
-    protected function write(LogRecord $record) : void
+    protected function write(LogRecord $record): void
     {
         if ($this->hasUrlInodeWasChanged()) {
             $this->close();
@@ -135,40 +135,40 @@ class StreamHandler extends AbstractProcessingHandler
             $this->errorMessage = null;
             // forwarding to $this->customErrorHandler using a closure to make the
             // private method accessible, see https://github.com/Seldaek/monolog/issues/1866
-            \set_error_handler(function (int $code, string $msg) {
+            set_error_handler(function (int $code, string $msg) {
                 return $this->customErrorHandler($code, $msg);
             });
             try {
-                $stream = \fopen($url, $this->fileOpenMode);
+                $stream = fopen($url, $this->fileOpenMode);
                 if ($this->filePermission !== null) {
-                    @\chmod($url, $this->filePermission);
+                    @chmod($url, $this->filePermission);
                 }
             } finally {
-                \restore_error_handler();
+                restore_error_handler();
             }
             if (!\is_resource($stream)) {
                 $this->stream = null;
-                throw new \UnexpectedValueException(\sprintf('The stream or file "%s" could not be opened in append mode: ' . $this->errorMessage, $url) . Utils::getRecordMessageForException($record));
+                throw new \UnexpectedValueException(sprintf('The stream or file "%s" could not be opened in append mode: ' . $this->errorMessage, $url) . Utils::getRecordMessageForException($record));
             }
-            \stream_set_chunk_size($stream, $this->streamChunkSize);
+            stream_set_chunk_size($stream, $this->streamChunkSize);
             $this->stream = $stream;
             $this->inodeUrl = $this->getInodeFromUrl();
         }
         $stream = $this->stream;
         if ($this->useLocking) {
             // ignoring errors here, there's not much we can do about them
-            \flock($stream, \LOCK_EX);
+            flock($stream, \LOCK_EX);
         }
         $this->errorMessage = null;
         // forwarding to $this->customErrorHandler using a closure to make the
         // private method accessible, see https://github.com/Seldaek/monolog/issues/1866
-        \set_error_handler(function (int $code, string $msg) {
+        set_error_handler(function (int $code, string $msg) {
             return $this->customErrorHandler($code, $msg);
         });
         try {
             $this->streamWrite($stream, $record);
         } finally {
-            \restore_error_handler();
+            restore_error_handler();
         }
         if ($this->errorMessage !== null) {
             $error = $this->errorMessage;
@@ -183,21 +183,21 @@ class StreamHandler extends AbstractProcessingHandler
         }
         $this->retrying = \false;
         if ($this->useLocking) {
-            \flock($stream, \LOCK_UN);
+            flock($stream, \LOCK_UN);
         }
     }
     /**
      * Write to stream
      * @param resource $stream
      */
-    protected function streamWrite($stream, LogRecord $record) : void
+    protected function streamWrite($stream, LogRecord $record): void
     {
         $data = (string) $record->formatted;
         $length = \strlen($data);
         $written = 0;
         // fwrite() may write only part of the data on non-blocking streams, so loop until it is all written, see https://github.com/Seldaek/monolog/issues/2011
         while ($written < $length) {
-            $result = \fwrite($stream, \substr($data, $written));
+            $result = fwrite($stream, substr($data, $written));
             if ($result === \false) {
                 // write failed, let the customErrorHandler/errorMessage logic in write() report and retry it
                 break;
@@ -206,7 +206,7 @@ class StreamHandler extends AbstractProcessingHandler
                 // the non-blocking stream's buffer is full, wait until it can be written to again instead of busy-looping or dropping the rest of the record
                 $write = [$stream];
                 $read = $except = [];
-                \stream_select($read, $write, $except, null);
+                stream_select($read, $write, $except, null);
                 continue;
             }
             $written += $result;
@@ -215,53 +215,53 @@ class StreamHandler extends AbstractProcessingHandler
     /**
      * @return true
      */
-    private function customErrorHandler(int $code, string $msg) : bool
+    private function customErrorHandler(int $code, string $msg): bool
     {
-        $this->errorMessage = \preg_replace('{^(fopen|mkdir|fwrite)\\(.*?\\): }', '', $msg);
+        $this->errorMessage = preg_replace('{^(fopen|mkdir|fwrite)\(.*?\): }', '', $msg);
         return \true;
     }
-    private function getDirFromStream(string $stream) : ?string
+    private function getDirFromStream(string $stream): ?string
     {
-        $pos = \strpos($stream, '://');
+        $pos = strpos($stream, '://');
         if ($pos === \false) {
             return \dirname($stream);
         }
-        if ('file://' === \substr($stream, 0, 7)) {
-            return \dirname(\substr($stream, 7));
+        if ('file://' === substr($stream, 0, 7)) {
+            return \dirname(substr($stream, 7));
         }
         return null;
     }
-    private function createDir(string $url) : void
+    private function createDir(string $url): void
     {
         // Do not try to create dir if it has already been tried.
         if (\true === $this->dirCreated) {
             return;
         }
         $dir = $this->getDirFromStream($url);
-        if (null !== $dir && !\is_dir($dir)) {
+        if (null !== $dir && !is_dir($dir)) {
             $this->errorMessage = null;
             // forwarding to $this->customErrorHandler using a closure to make the
             // private method accessible, see https://github.com/Seldaek/monolog/issues/1866
-            \set_error_handler(function (int $code, string $msg) {
+            set_error_handler(function (int $code, string $msg) {
                 return $this->customErrorHandler($code, $msg);
             });
-            $status = \mkdir($dir, 0777, \true);
-            \restore_error_handler();
-            if (\false === $status && !\is_dir($dir) && \strpos((string) $this->errorMessage, 'File exists') === \false) {
-                throw new \UnexpectedValueException(\sprintf('There is no existing directory at "%s" and it could not be created: ' . $this->errorMessage, $dir));
+            $status = mkdir($dir, 0777, \true);
+            restore_error_handler();
+            if (\false === $status && !is_dir($dir) && strpos((string) $this->errorMessage, 'File exists') === \false) {
+                throw new \UnexpectedValueException(sprintf('There is no existing directory at "%s" and it could not be created: ' . $this->errorMessage, $dir));
             }
         }
         $this->dirCreated = \true;
     }
-    private function getInodeFromUrl() : ?int
+    private function getInodeFromUrl(): ?int
     {
-        if ($this->url === null || \str_starts_with($this->url, 'php://')) {
+        if ($this->url === null || str_starts_with($this->url, 'php://')) {
             return null;
         }
-        $inode = @\fileinode($this->url);
+        $inode = @fileinode($this->url);
         return $inode === \false ? null : $inode;
     }
-    private function hasUrlInodeWasChanged() : bool
+    private function hasUrlInodeWasChanged(): bool
     {
         if ($this->inodeUrl === null || $this->retrying || $this->inodeUrl === $this->getInodeFromUrl()) {
             return \false;

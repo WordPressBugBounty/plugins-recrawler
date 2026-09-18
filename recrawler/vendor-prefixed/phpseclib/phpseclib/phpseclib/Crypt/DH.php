@@ -81,18 +81,18 @@ abstract class DH extends AsymmetricKey
             throw new \RuntimeException('createParameters() should not be called from final classes (' . static::class . ')');
         }
         $params = new Parameters();
-        if (\count($args) == 2 && $args[0] instanceof BigInteger && $args[1] instanceof BigInteger) {
+        if (count($args) == 2 && $args[0] instanceof BigInteger && $args[1] instanceof BigInteger) {
             //if (!$args[0]->isPrime()) {
             //    throw new \InvalidArgumentException('The first parameter should be a prime number');
             //}
             $params->prime = $args[0];
             $params->base = $args[1];
             return $params;
-        } elseif (\count($args) == 1 && \is_numeric($args[0])) {
+        } elseif (count($args) == 1 && is_numeric($args[0])) {
             $params->prime = BigInteger::randomPrime($args[0]);
             $params->base = new BigInteger(2);
             return $params;
-        } elseif (\count($args) != 1 || !\is_string($args[0])) {
+        } elseif (count($args) != 1 || !is_string($args[0])) {
             throw new \InvalidArgumentException('Valid parameters are either: two BigInteger\'s (prime and base), a single integer (the length of the prime; base is assumed to be 2) or a string');
         }
         switch ($args[0]) {
@@ -188,13 +188,13 @@ abstract class DH extends AsymmetricKey
                         throw new \InvalidArgumentException('The public and private key do not share the same prime and / or base numbers');
                     }
                     return $public->publicKey->powMod($private->privateKey, $private->prime)->toBytes(\true);
-                case \is_string($public):
+                case is_string($public):
                     $public = new BigInteger($public, -256);
                 // fall-through
                 case $public instanceof BigInteger:
                     return $public->powMod($private->privateKey, $private->prime)->toBytes(\true);
                 default:
-                    throw new \InvalidArgumentException('$public needs to be an instance of DH\\PublicKey, a BigInteger or a string');
+                    throw new \InvalidArgumentException('$public needs to be an instance of DH\PublicKey, a BigInteger or a string');
             }
         }
         if ($private instanceof EC\PrivateKey) {
@@ -207,7 +207,7 @@ abstract class DH extends AsymmetricKey
                     $orig = $public;
                     $public = $public->getEncodedCoordinates();
                 // fall-through
-                case \is_string($public):
+                case is_string($public):
                     $forcedEngine = EC::getForcedEngine();
                     if ($forcedEngine === 'libsodium' && $privateCurve !== 'Curve25519') {
                         throw new BadConfigurationException('Engine libsodium is forced but can only used with Curve25519 for ECDH');
@@ -216,13 +216,13 @@ abstract class DH extends AsymmetricKey
                         // PHP 7.3.0 introduced the openssl_pkey_derive() function
                         // openssl_dh_computee_key() has been around since PHP 5.3.0+ BUT it did not support ECDH
                         // until PHP 8.1.0 / OpenSSL 3.0.0
-                        if ($forcedEngine === 'OpenSSL' && !\function_exists('openssl_pkey_derive')) {
+                        if ($forcedEngine === 'OpenSSL' && !function_exists('openssl_pkey_derive')) {
                             throw new BadConfigurationException('Engine OpenSSL is forced but unsupported for ECDH');
                         }
-                        if (\function_exists('openssl_pkey_derive')) {
+                        if (function_exists('openssl_pkey_derive')) {
                             $privateStr = (string) $private->withPassword();
                             $publicStr = (string) (isset($orig) ? $orig : EC::convertPointToPublicKey($private->getCurve(), $public));
-                            $result = \openssl_pkey_derive($publicStr, $privateStr);
+                            $result = openssl_pkey_derive($publicStr, $privateStr);
                             if ($result) {
                                 return $result;
                             }
@@ -231,7 +231,7 @@ abstract class DH extends AsymmetricKey
                                 // quoting https://www.php.net/openssl-dh-compute-key "ECDH is only supported as of PHP 8.1.0 and OpenSSL 3.0.0". ie.
                                 // PHP_VERSION_ID >= 80100 && OPENSSL_VERSION_NUMBER >= 0x3000000f
                                 // but i think that's overkill. if openssl_pkey_derive() doesn't work it seems doubtful to me that openssl_dh_compute_key() would
-                                throw new BadConfigurationException('Engine OpenSSL is forced but was unable to perform ECDH because of ' . \openssl_error_string());
+                                throw new BadConfigurationException('Engine OpenSSL is forced but was unable to perform ECDH because of ' . openssl_error_string());
                             }
                         }
                     }
@@ -249,13 +249,13 @@ abstract class DH extends AsymmetricKey
                         */
                         $size = $curveName == 'Curve25519' ? 32 : 56;
                         // throw exception if hash_equals is false, otherwise, return $point
-                        if (\hash_equals(\str_repeat("\x00", $size), $point)) {
+                        if (hash_equals(str_repeat("\x00", $size), $point)) {
                             throw new \UnexpectedValueException('All-zero shared secret detected (points order is too small)');
                         }
                         return $point;
                     }
                     // according to https://www.secg.org/sec1-v2.pdf#page=33 only X is returned
-                    $secret = \substr($point, 1, \strlen($point) - 1 >> 1);
+                    $secret = substr($point, 1, strlen($point) - 1 >> 1);
                     /*
                     if (($secret[0] & "\x80") === "\x80") {
                         $secret = "\0$secret";
@@ -263,7 +263,7 @@ abstract class DH extends AsymmetricKey
                     */
                     return $secret;
                 default:
-                    throw new \InvalidArgumentException('$public needs to be an instance of EC\\PublicKey or a string (an encoded coordinate)');
+                    throw new \InvalidArgumentException('$public needs to be an instance of EC\PublicKey or a string (an encoded coordinate)');
             }
         }
     }

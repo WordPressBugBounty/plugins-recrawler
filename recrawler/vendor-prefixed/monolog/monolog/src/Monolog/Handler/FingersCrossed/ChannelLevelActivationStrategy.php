@@ -52,9 +52,9 @@ class ChannelLevelActivationStrategy implements ActivationStrategyInterface
     public function __construct(int|string|Level $defaultActionLevel, array $channelToActionLevel = [])
     {
         $this->defaultActionLevel = Logger::toMonologLevel($defaultActionLevel);
-        $this->channelToActionLevel = \array_map(Logger::toMonologLevel(...), $channelToActionLevel);
+        $this->channelToActionLevel = array_map(Logger::toMonologLevel(...), $channelToActionLevel);
     }
-    public function isHandlerActivated(LogRecord $record) : bool
+    public function isHandlerActivated(LogRecord $record): bool
     {
         if (isset($this->channelToActionLevel[$record->channel])) {
             return $record->level->value >= $this->channelToActionLevel[$record->channel]->value;

@@ -32,8 +32,8 @@ class ExecutableHandler
      */
     public function __construct(array $env = [], int $timeoutMs = self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS)
     {
-        if (!\class_exists(Process::class)) {
-            throw new RuntimeException(\sprintf('The "symfony/process" package is required to use %s.', self::class));
+        if (!class_exists(Process::class)) {
+            throw new RuntimeException(sprintf('The "symfony/process" package is required to use %s.', self::class));
         }
         $this->env = $env;
         $this->timeoutMs = $timeoutMs;
@@ -42,7 +42,7 @@ class ExecutableHandler
      * @param string $command
      * @return int
      */
-    public function __invoke(string $command) : int
+    public function __invoke(string $command): int
     {
         $process = Process::fromShellCommandline($command, null, $this->env, null, $this->timeoutMs / 1000);
         try {
@@ -53,7 +53,7 @@ class ExecutableHandler
         $this->output = $process->getOutput() . $process->getErrorOutput();
         return $process->getExitCode();
     }
-    public function getOutput() : ?string
+    public function getOutput(): ?string
     {
         return $this->output;
     }

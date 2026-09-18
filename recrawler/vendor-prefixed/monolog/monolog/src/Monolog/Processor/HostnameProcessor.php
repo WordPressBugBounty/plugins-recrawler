@@ -20,12 +20,12 @@ class HostnameProcessor implements ProcessorInterface
     private static string $host;
     public function __construct()
     {
-        self::$host = (string) \gethostname();
+        self::$host = (string) gethostname();
     }
     /**
      * @inheritDoc
      */
-    public function __invoke(LogRecord $record) : LogRecord
+    public function __invoke(LogRecord $record): LogRecord
     {
         $record->extra['hostname'] = self::$host;
         return $record;

@@ -24,9 +24,9 @@ interface FormattableHandlerInterface
      *
      * @return HandlerInterface self
      */
-    public function setFormatter(FormatterInterface $formatter) : HandlerInterface;
+    public function setFormatter(FormatterInterface $formatter): HandlerInterface;
     /**
      * Gets the formatter.
      */
-    public function getFormatter() : FormatterInterface;
+    public function getFormatter(): FormatterInterface;
 }

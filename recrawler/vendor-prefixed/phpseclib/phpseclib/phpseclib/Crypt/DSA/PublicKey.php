@@ -35,20 +35,20 @@ final class PublicKey extends DSA implements Common\PublicKey
         if (self::$forcedEngine === 'libsodium') {
             throw new BadConfigurationException('Engine libsodium is forced but unsupported for DSA');
         }
-        if (self::$forcedEngine === 'OpenSSL' && !\function_exists('openssl_get_md_methods')) {
+        if (self::$forcedEngine === 'OpenSSL' && !function_exists('openssl_get_md_methods')) {
             throw new BadConfigurationException('Engine OpenSSL is forced but unsupported for DSA');
         }
         $format = $this->sigFormat;
         $params = $format::load($signature);
-        if ($params === \false || \count($params) != 2) {
+        if ($params === \false || count($params) != 2) {
             return \false;
         }
         $r = $params['r'];
         $s = $params['s'];
-        if (\function_exists('openssl_get_md_methods') && self::$forcedEngine !== 'PHP') {
-            if (\in_array($this->hash->getHash(), \openssl_get_md_methods())) {
+        if (function_exists('openssl_get_md_methods') && self::$forcedEngine !== 'PHP') {
+            if (in_array($this->hash->getHash(), openssl_get_md_methods())) {
                 $sig = $format != 'ASN1' ? ASN1Signature::save($r, $s) : $signature;
-                $result = \openssl_verify($message, $sig, $this->toString('PKCS8'), $this->hash->getHash());
+                $result = openssl_verify($message, $sig, $this->toString('PKCS8'), $this->hash->getHash());
                 if ($result != -1) {
                     return (bool) $result;
                 }

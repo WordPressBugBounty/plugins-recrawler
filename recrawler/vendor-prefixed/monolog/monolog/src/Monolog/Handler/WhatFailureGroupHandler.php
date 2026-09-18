@@ -24,7 +24,7 @@ class WhatFailureGroupHandler extends GroupHandler
     /**
      * @inheritDoc
      */
-    public function handle(LogRecord $record) : bool
+    public function handle(LogRecord $record): bool
     {
         if (\count($this->processors) > 0) {
             $record = $this->processRecord($record);
@@ -41,7 +41,7 @@ class WhatFailureGroupHandler extends GroupHandler
     /**
      * @inheritDoc
      */
-    public function handleBatch(array $records) : void
+    public function handleBatch(array $records): void
     {
         if (\count($this->processors) > 0) {
             $processed = [];
@@ -52,7 +52,7 @@ class WhatFailureGroupHandler extends GroupHandler
         }
         foreach ($this->handlers as $handler) {
             try {
-                $handler->handleBatch(\array_map(fn($record) => clone $record, $records));
+                $handler->handleBatch(array_map(fn($record) => clone $record, $records));
             } catch (Throwable) {
                 // What failure?
             }
@@ -61,7 +61,7 @@ class WhatFailureGroupHandler extends GroupHandler
     /**
      * {@inheritDoc}
      */
-    public function close() : void
+    public function close(): void
     {
         foreach ($this->handlers as $handler) {
             try {

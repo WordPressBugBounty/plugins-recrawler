@@ -38,33 +38,33 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     public function __construct(string $path)
     {
         $this->cachePath = $path;
-        if (\is_dir($this->cachePath)) {
+        if (is_dir($this->cachePath)) {
             return;
         }
         // Suppress the error for when the directory already exists because of a
         // race condition
-        if (!@\mkdir($this->cachePath, 0777, \true) && !\is_dir($this->cachePath)) {
+        if (!@mkdir($this->cachePath, 0777, \true) && !is_dir($this->cachePath)) {
             throw new ErrorException("Cache folder couldn't be created.");
         }
     }
     /**
      * {@inheritdoc}
      */
-    public function getItem(string $key) : CacheItemInterface
+    public function getItem(string $key): CacheItemInterface
     {
         if (!$this->validKey($key)) {
             throw new InvalidArgumentException("The key '{$key}' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\\.! ]+\$|");
         }
         $item = new TypedItem($key);
         $itemPath = $this->cacheFilePath($key);
-        if (!\file_exists($itemPath)) {
+        if (!file_exists($itemPath)) {
             return $item;
         }
-        $serializedItem = \file_get_contents($itemPath);
+        $serializedItem = file_get_contents($itemPath);
         if ($serializedItem === \false) {
             return $item;
         }
-        $item->set(\unserialize($serializedItem));
+        $item->set(unserialize($serializedItem));
         return $item;
     }
     /**
@@ -76,7 +76,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
      *   key is not found. However, if no keys are specified then an empty
      *   traversable MUST be returned instead.
      */
-    public function getItems(array $keys = []) : iterable
+    public function getItems(array $keys = []): iterable
     {
         $result = [];
         foreach ($keys as $key) {
@@ -87,14 +87,14 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function save(CacheItemInterface $item) : bool
+    public function save(CacheItemInterface $item): bool
     {
         if (!$this->validKey($item->getKey())) {
             return \false;
         }
         $itemPath = $this->cacheFilePath($item->getKey());
-        $serializedItem = \serialize($item->get());
-        $result = \file_put_contents($itemPath, $serializedItem, \LOCK_EX);
+        $serializedItem = serialize($item->get());
+        $result = file_put_contents($itemPath, $serializedItem, \LOCK_EX);
         // 0 bytes write is considered a successful operation
         if ($result === \false) {
             return \false;
@@ -104,20 +104,20 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function hasItem(string $key) : bool
+    public function hasItem(string $key): bool
     {
         return $this->getItem($key)->isHit();
     }
     /**
      * {@inheritdoc}
      */
-    public function clear() : bool
+    public function clear(): bool
     {
         $this->buffer = [];
-        if (!\is_dir($this->cachePath)) {
+        if (!is_dir($this->cachePath)) {
             return \false;
         }
-        $files = \scandir($this->cachePath);
+        $files = scandir($this->cachePath);
         if (!$files) {
             return \false;
         }
@@ -125,7 +125,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             if ($fileName === '.' || $fileName === '..') {
                 continue;
             }
-            if (!\unlink($this->cachePath . '/' . $fileName)) {
+            if (!unlink($this->cachePath . '/' . $fileName)) {
                 return \false;
             }
         }
@@ -134,21 +134,21 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function deleteItem(string $key) : bool
+    public function deleteItem(string $key): bool
     {
         if (!$this->validKey($key)) {
             throw new InvalidArgumentException("The key '{$key}' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\\.! ]+\$|");
         }
         $itemPath = $this->cacheFilePath($key);
-        if (!\file_exists($itemPath)) {
+        if (!file_exists($itemPath)) {
             return \true;
         }
-        return \unlink($itemPath);
+        return unlink($itemPath);
     }
     /**
      * {@inheritdoc}
      */
-    public function deleteItems(array $keys) : bool
+    public function deleteItems(array $keys): bool
     {
         $result = \true;
         foreach ($keys as $key) {
@@ -161,15 +161,15 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function saveDeferred(CacheItemInterface $item) : bool
+    public function saveDeferred(CacheItemInterface $item): bool
     {
-        \array_push($this->buffer, $item);
+        array_push($this->buffer, $item);
         return \true;
     }
     /**
      * {@inheritdoc}
      */
-    public function commit() : bool
+    public function commit(): bool
     {
         $result = \true;
         foreach ($this->buffer as $item) {
@@ -179,12 +179,12 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         }
         return $result;
     }
-    private function cacheFilePath(string $key) : string
+    private function cacheFilePath(string $key): string
     {
         return $this->cachePath . '/' . $key;
     }
-    private function validKey(string $key) : bool
+    private function validKey(string $key): bool
     {
-        return (bool) \preg_match('|^[a-zA-Z0-9_\\.]+$|', $key);
+        return (bool) preg_match('|^[a-zA-Z0-9_\.]+$|', $key);
     }
 }

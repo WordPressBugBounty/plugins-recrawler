@@ -30,7 +30,7 @@ interface HandlerInterface
      *
      * @param LogRecord $record Partial log record having only a level initialized
      */
-    public function isHandling(LogRecord $record) : bool;
+    public function isHandling(LogRecord $record): bool;
     /**
      * Handles a record.
      *
@@ -45,13 +45,13 @@ interface HandlerInterface
      * @return bool      true means that this handler handled the record, and that bubbling is not permitted.
      *                   false means the record was either not processed or that this handler allows bubbling.
      */
-    public function handle(LogRecord $record) : bool;
+    public function handle(LogRecord $record): bool;
     /**
      * Handles a set of records at once.
      *
      * @param array<LogRecord> $records The records to handle
      */
-    public function handleBatch(array $records) : void;
+    public function handleBatch(array $records): void;
     /**
      * Closes the handler.
      *
@@ -68,5 +68,5 @@ interface HandlerInterface
      * If you are thinking of calling this method yourself, most likely you should be
      * calling ResettableInterface::reset instead. Have a look.
      */
-    public function close() : void;
+    public function close(): void;
 }
